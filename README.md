@@ -1,120 +1,190 @@
-# Laurel en Lienzo - Catálogo Visual
+# Laurel en Lienzo
 
-Catálogo visual frontend moderno, minimalista y accesible para mostrar obras de arte, ilustraciones, camisetas personalizadas y talleres. La aplicación funciona como un portafolio interactivo con panel de administración: el catálogo se gestiona desde Supabase y el proceso de compra se redirige a plataformas externas como [Etsy](https://www.etsy.com/es/shop/Laurelenlienzo) o Vinted.
+**English** · [Español](README.es.md)
 
-## 🚀 Características Principales
+An art catalog and workshop-booking website for an independent illustrator. Visitors browse original artwork, T-shirts and custom pieces, register for workshops with real capacity control, and add events to their calendar. The owner runs the whole catalog and registration flow from a protected admin panel.
 
-*   **Catálogo dinámico:** Obras y talleres se cargan desde Supabase (PostgreSQL + Storage), no del código.
-*   **Talleres con inscripciones:** Cupo opcional por taller, contador público de plazas («Quedan N de M» / «Completo»), formulario de inscripción con nombre y email, control de duplicados y bloqueo de sobreventa en la base de datos.
-*   **Añadir al calendario:** Tras inscribirse (y al publicar un taller en el panel) se puede añadir el evento a Google Calendar u Outlook, o descargar un archivo `.ics` compatible con Apple Calendar y otras apps.
-*   **Panel de administración:** Acceso con email y contraseña (Supabase Auth) en `/admin`. Permite crear, editar y eliminar productos (con subida de imágenes a Supabase Storage), destacar piezas y gestionar las inscripciones a talleres (confirmar, cancelar —libera plaza— o borrar). Las políticas RLS restringen la escritura a usuarios autenticados.
-*   **Diseño Minimalista y Moderno:** Interfaz limpia con paleta de negro, blancos, grises y acentos naranja.
-*   **Animaciones Dinámicas:** Transiciones fluidas y efectos hover con Framer Motion.
-*   **Totalmente Responsivo:** Cuadrícula y navegación adaptadas a móvil, tablet y escritorio.
-*   **Accesibilidad (WCAG):** Navegación por teclado, semántica HTML5 y atributos ARIA.
+[![CI](https://github.com/Ana-Alonso/Catalogo-Web/actions/workflows/ci.yml/badge.svg)](https://github.com/Ana-Alonso/Catalogo-Web/actions/workflows/ci.yml)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 
-## 🛠️ Tecnologías Utilizadas
+> **Live demo:** _coming soon_ (Vercel deployment).
+> <!-- TODO: replace the block below with the production URL once deployed -->
+> <!-- [your-project.vercel.app](https://your-project.vercel.app) -->
 
-*   **[React](https://reactjs.org/)** (v19) + **[React Router](https://reactrouter.com/)** - UI y enrutado (`/` catálogo, `/admin` panel).
-*   **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático estricto.
-*   **[Tailwind CSS](https://tailwindcss.com/)** (v4) - Estilos utilitarios.
-*   **[Framer Motion](https://www.framer.com/motion/)** - Animaciones.
-*   **[Lucide React](https://lucide.dev/)** - Iconos.
-*   **[Supabase](https://supabase.com/)** (`@supabase/supabase-js`) - Base de datos, Storage de imágenes y políticas RLS.
-*   **[Vite](https://vitejs.dev/)** - Desarrollo y empaquetado.
+<!--
+SCREENSHOTS
+Add your own images under docs/screenshots/ and uncomment this block:
 
-## 📦 Instalación y Configuración Local
+## Screenshots
 
-1.  **Clonar e instalar dependencias:**
-    ```bash
-    git clone [url-del-repositorio] laura-web
-    cd laura-web
-    npm install
-    ```
+| Home | Workshop signup | Admin panel |
+| --- | --- | --- |
+| ![Home](docs/screenshots/home.png) | ![Workshop signup](docs/screenshots/workshop.png) | ![Admin panel](docs/screenshots/admin.png) |
+-->
 
-2.  **Configurar variables de entorno:**
-    ```bash
-    cp .env.example .env
-    ```
-    Rellena el `.env` (ver tabla siguiente).
+## Overview
 
-3.  **Preparar la base de datos (Supabase):**
-    En el proyecto de [Supabase](https://supabase.com), abre el **SQL Editor** y ejecuta, en este orden:
-    1.  `supabase-migration.sql` — estructura de tablas, disparador de cupo e inscripciones, políticas base y bucket `products`. Es **idempotente**: puede re-ejecutarse sin errores.
-    2.  `supabase-hardening.sql` — endurece las políticas RLS (escritura solo para usuarios autenticados; el INSERT público de inscripciones valida que el status sea `pendiente`) y añade CHECKs de formato de email y longitudes. También es idempotente.
-    3.  Crea el usuario administrador en **Authentication → Users → Add user** (email y contraseña). Ese usuario será el único que pueda entrar en `/admin` y escribir en el catálogo.
+The site replaces a static portfolio with a small product: a public catalog backed by Supabase, and a workshop system with real capacity limits enforced in the database. Purchases are intentionally outsourced to Etsy and Vinted — the app focuses on showcasing the work and managing workshop signups.
 
-4.  **Iniciar el servidor de desarrollo:**
-    ```bash
-    npm run dev
-    ```
-    Visita `http://localhost:5173`. El panel de administración está en `http://localhost:5173/admin`.
+## Features
 
-    En modo desarrollo (`npm run dev`) la app usa **datos mock** locales (`VITE_USE_MOCKS=true` en `.env.development`): no toca Supabase y funciona sin conexión. Para desarrollar contra Supabase real: `VITE_USE_MOCKS=false npm run dev`. Cualquier build de producción (`npm run build`, Vercel) usa Supabase (`VITE_USE_MOCKS=false` en `.env.production`).
+### Public site
 
-## 🔐 Variables de Entorno
+- **Dynamic catalog** served from Supabase (PostgreSQL + Storage): publishing a piece does not require a redeploy.
+- **Category filters** and featured items pinned to the top.
+- **Workshops with live capacity**: "N of M spots left" or "Full", computed from real registrations.
+- **Signup form** with name and email, duplicate protection per workshop, and no overbooking even under concurrent requests.
+- **Add to calendar** after signing up: Google Calendar, Outlook, or a downloadable `.ics` file for Apple Calendar and other apps.
+- **Responsive and accessible**: keyboard navigation, semantic HTML, ARIA labels and visible focus states.
+- **Purchase links** to Etsy / Vinted — no payment data is handled by this app.
 
-| Variable | Descripción |
+### Admin panel (`/admin`)
+
+- **Email + password authentication** with Supabase Auth. Database policies restrict every write to authenticated users.
+- **Product management**: create, edit and delete items, upload images to Supabase Storage (MIME type and 5 MB limit validated), mark items as featured and set availability.
+- **Workshop capacity** configured per event (optional, unlimited if empty).
+- **Registration management** grouped by workshop: confirm, cancel (frees the spot and the email) or delete.
+- **Calendar shortcuts** for newly published workshops.
+
+### Engineering
+
+- Strict TypeScript with no `any`; UI, hooks, services and utilities kept separate.
+- Versioned, idempotent SQL migrations for schema, policies and constraints.
+- Row Level Security hardened for production (public reads, authenticated writes, guarded anonymous inserts).
+- Automated tests and a real SQL assertion suite running on PostgreSQL 15.
+- CI on every push and pull request; continuous deployment through Vercel.
+- Security headers and a Content Security Policy defined in `vercel.json`.
+
+## Engineering highlights
+
+- **No overbooking, guaranteed by the database.** A `BEFORE INSERT/UPDATE` trigger locks the workshop row (`SELECT ... FOR UPDATE`) and rejects registrations once the capacity is reached. A partial unique index on `(product_id, lower(email))` blocks duplicate signups while still allowing a cancelled user to register again.
+- **Anonymous users can only do one thing**: create a registration with `status = 'pendiente'`. Everything else (catalog and registration writes, Storage uploads) requires an authenticated session.
+- **Idempotent migrations**: both SQL scripts can be re-run safely against an existing database.
+- **Data integrity in the schema**: CHECK constraints for email format, name/title lengths and valid status values.
+- **43 automated tests** covering calendar/ICS generation, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **Offline development mode**: the app runs with local mock data and `localStorage`, with no database credentials required.
+
+## Tech stack
+
+| Layer | Technology |
 | --- | --- |
-| `VITE_SUPABASE_URL` | URL del proyecto Supabase. |
-| `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase. |
-| `VITE_USE_MOCKS` | `true` usa datos mock y almacenamiento local; `false` usa Supabase. |
-| `VITE_ETSY_SHOP_URL` | URL de la tienda Etsy (pie de página). |
-| `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Enlaces de redes sociales. |
-| `VITE_CONTACT_EMAIL` | Email de contacto mostrado en el pie. |
+| UI | React 19, React Router 7 |
+| Language | TypeScript 6 (strict) |
+| Styling | Tailwind CSS 4, Framer Motion 14, lucide-react |
+| Backend | Supabase (PostgreSQL, Storage, Auth, RLS) |
+| Build | Vite 8 |
+| Testing | Vitest 5, Testing Library, jsdom |
+| Quality | ESLint 10, GitHub Actions |
+| Hosting | Vercel |
 
-## 🎓 Talleres e Inscripciones
+## Quick start
 
-*   **Público:** Los talleres muestran fecha, lugar y plazas restantes. «Apuntarse al taller» abre un modal con nombre y email; la base de datos impide duplicados (mismo email y taller) y que se superen las plazas del cupo (un disparador serializa las inscripciones). Si no se define cupo, la inscripción es libre.
-*   **Panel admin:** En «Inscripciones a Talleres» se ven las inscripciones agrupadas por taller con su estado (`pendiente`, `confirmado`, `cancelado`). Cancelar libera la plaza y el email para una futura inscripción.
-*   **Calendario:** Tras inscribirse, o al publicar un taller con fecha desde el panel, aparecen botones para añadir el evento a Google Calendar / Outlook o descargarlo en formato `.ics`.
+```bash
+git clone https://github.com/Ana-Alonso/Catalogo-Web.git
+cd Catalogo-Web
+npm install
+npm run dev
+```
 
-## 📄 Scripts Disponibles
+Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_MOCKS=true`), so **no database or credentials are needed** to explore the UI. The admin panel is available at `/admin`.
 
-| Comando | Descripción |
+<details>
+<summary><strong>Connect a real Supabase project</strong></summary>
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In the **SQL Editor**, run these scripts in order (both are idempotent):
+   - `supabase-migration.sql` — tables, capacity trigger, base policies and the `products` storage bucket.
+   - `supabase-hardening.sql` — hardened RLS policies and data validation constraints.
+3. Create the admin user in **Authentication → Users → Add user**. That account is the only one able to sign in at `/admin` and write to the catalog.
+4. Copy the environment file and fill in your keys:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+5. Run against Supabase (without editing any file):
+
+   ```bash
+   VITE_USE_MOCKS=false npm run dev
+   ```
+
+</details>
+
+## Environment variables
+
+| Variable | Description |
 | --- | --- |
-| `npm run dev` | Servidor de desarrollo con hot reload. |
-| `npm run build` | Typecheck (`tsc -b`) y build de producción. |
-| `npm run lint` | Análisis con ESLint. |
-| `npm test` | Tests unitarios y de componentes (Vitest + Testing Library). |
-| `npm run test:watch` | Tests en modo watch. |
-| `npm run test:db` | Suite de aserciones SQL contra PostgreSQL 15 en Docker (requiere Docker). |
-| `npm run preview` | Vista previa del build de producción. |
+| `VITE_SUPABASE_URL` | Supabase project URL. |
+| `VITE_SUPABASE_ANON_KEY` | Supabase public (anon) key. |
+| `VITE_USE_MOCKS` | `true` uses local mock data; `false` uses Supabase. |
+| `VITE_ETSY_SHOP_URL` | Etsy shop URL shown in the footer. |
+| `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Social media links. |
+| `VITE_CONTACT_EMAIL` | Contact email shown in the footer. |
 
-## 🏗️ CI/CD y Despliegue en Vercel
+Secrets are never committed: real keys live in `.env` (git-ignored) locally and in the Vercel dashboard in production.
 
-### Integración continua (GitHub Actions)
+## Development and production modes
 
-Cada **push a `main`** y cada **Pull Request** ejecuta el workflow `.github/workflows/ci.yml`:
-
-1.  `npm run lint` — análisis con ESLint.
-2.  `npm test` — tests unitarios y de componentes (Vitest).
-3.  `npm run build` — typecheck (`tsc -b`) + build de producción.
-4.  `npm run test:db` — suite SQL contra PostgreSQL 15 en Docker.
-
-El pipeline es autocontenido: no necesita secrets ni acceso a Supabase.
-
-### Despliegue continuo (Vercel)
-
-El CD usa la **integración Git de Vercel**: conecta el repositorio en [vercel.com](https://vercel.com) (*Add New → Project → importar el repo*) y configura:
-
-*   **Framework:** Vite (detectado automáticamente). Build: `npm run build` · Output: `dist`.
-*   **Variables de entorno** (marcar *Production* y *Preview*): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_USE_MOCKS=false`, `VITE_ETSY_SHOP_URL`, `VITE_INSTAGRAM_URL`, `VITE_TIKTOK_URL`, `VITE_CONTACT_EMAIL`.
-*   A partir de ahí: **push a `main` → despliegue en producción automático**; cada **PR → vista previa** con URL propia.
-
-El archivo `vercel.json` ya incluye el rewrite SPA (necesario para React Router) y cabeceras de seguridad (CSP, X-Frame-Options, etc.).
-
-> **Importante (Supabase):** en *Authentication → URL Configuration*, define como *Site URL* el dominio de Vercel para que el login del panel `/admin` funcione en producción.
-
-### Modos de desarrollo y producción
-
-| Contexto | Archivo / Variable | `VITE_USE_MOCKS` | Datos |
+| Context | File | `VITE_USE_MOCKS` | Data source |
 | --- | --- | --- | --- |
-| `npm run dev` | `.env.development` (versionado) | `true` | Mocks + localStorage (offline) |
-| `npm run build` / Vercel | `.env.production` (versionado) | `false` | Supabase real |
+| `npm run dev` | `.env.development` | `true` | Mocks + `localStorage` |
+| `npm run build` / Vercel | `.env.production` | `false` | Supabase |
 
-Las claves reales van en `.env` (ignorado por git) o en el dashboard de Vercel; nunca en los archivos versionados. Para probar en local contra Supabase sin editar archivos: `VITE_USE_MOCKS=false npm run dev`.
+## Project structure
 
-## 📄 Licencia
+```text
+src/
+  components/
+    ui/            # Design system primitives (Button, Input, PasswordInput, CalendarEventActions…)
+    layout/        # Navbar and footer
+    admin/         # Login, dashboard, product form/table, registration and calendar panels
+  hooks/           # useProducts, useRegistrations, useAdminAuth, useWorkshopSpots…
+  services/        # Supabase data access (products, registrations)
+  utils/           # ICS/calendar generation, image validation, logger, Supabase client
+  types/           # Domain models
+  mocks/           # Local data for offline development
+  pages/           # CatalogPage, AdminPage
+scripts/           # Docker-based SQL test suite
+.github/workflows/ # CI pipeline
+```
 
-Este proyecto es de uso exclusivo para **Laurel en Lienzo**. Todos los derechos de las imágenes e ilustraciones pertenecen a su respectivo autor.
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Development server with hot reload (mock data). |
+| `npm run build` | Typecheck (`tsc -b`) and production build. |
+| `npm run lint` | ESLint analysis. |
+| `npm test` | Unit and component tests (Vitest + Testing Library). |
+| `npm run test:watch` | Tests in watch mode. |
+| `npm run test:db` | SQL assertion suite on PostgreSQL 15 via Docker. |
+| `npm run preview` | Preview the production build locally. |
+
+## Testing and CI/CD
+
+- **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request: lint → tests → typecheck + build → SQL suite in a PostgreSQL 15 container. The pipeline needs no secrets.
+- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` provides the SPA rewrite and security headers.
+- In production, set the environment variables listed above in the Vercel dashboard (Production and Preview) and add the deployed domain as the **Site URL** in Supabase *Authentication → URL Configuration*.
+
+## Roadmap
+
+- CSV export of workshop registrations.
+- Optional confirmation emails.
+- Check-in view for workshop attendance.
+
+## Author
+
+**Ana Alonso** — Full-stack developer
+
+- GitHub: [@Ana-Alonso](https://github.com/Ana-Alonso)
+- LinkedIn: <!-- TODO: add your LinkedIn URL --> _add your profile_
+- Portfolio: <!-- TODO: add your portfolio URL --> _add your site_
+- Email: <!-- TODO: replace with your contact email --> _add your email_
+
+## License
+
+The source code may not be reused commercially without permission. All artwork, images and brand assets belong to Laurel en Lienzo and may not be reproduced. © 2026 Ana Alonso and Laurel en Lienzo.
