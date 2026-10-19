@@ -26,5 +26,8 @@ dist-ssr
 .env
 AGENTS.md
 *.sql
+!supabase-migration.sql
+!supabase-hardening.sql
+!scripts/test-db.sql
 
 supabase/

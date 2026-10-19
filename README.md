@@ -50,6 +50,8 @@ Catálogo visual frontend moderno, minimalista y accesible para mostrar obras de
     ```
     Visita `http://localhost:5173`. El panel de administración está en `http://localhost:5173/admin`.
 
+    En modo desarrollo (`npm run dev`) la app usa **datos mock** locales (`VITE_USE_MOCKS=true` en `.env.development`): no toca Supabase y funciona sin conexión. Para desarrollar contra Supabase real: `VITE_USE_MOCKS=false npm run dev`. Cualquier build de producción (`npm run build`, Vercel) usa Supabase (`VITE_USE_MOCKS=false` en `.env.production`).
+
 ## 🔐 Variables de Entorno
 
 | Variable | Descripción |
@@ -78,6 +80,40 @@ Catálogo visual frontend moderno, minimalista y accesible para mostrar obras de
 | `npm run test:watch` | Tests en modo watch. |
 | `npm run test:db` | Suite de aserciones SQL contra PostgreSQL 15 en Docker (requiere Docker). |
 | `npm run preview` | Vista previa del build de producción. |
+
+## 🏗️ CI/CD y Despliegue en Vercel
+
+### Integración continua (GitHub Actions)
+
+Cada **push a `main`** y cada **Pull Request** ejecuta el workflow `.github/workflows/ci.yml`:
+
+1.  `npm run lint` — análisis con ESLint.
+2.  `npm test` — tests unitarios y de componentes (Vitest).
+3.  `npm run build` — typecheck (`tsc -b`) + build de producción.
+4.  `npm run test:db` — suite SQL contra PostgreSQL 15 en Docker.
+
+El pipeline es autocontenido: no necesita secrets ni acceso a Supabase.
+
+### Despliegue continuo (Vercel)
+
+El CD usa la **integración Git de Vercel**: conecta el repositorio en [vercel.com](https://vercel.com) (*Add New → Project → importar el repo*) y configura:
+
+*   **Framework:** Vite (detectado automáticamente). Build: `npm run build` · Output: `dist`.
+*   **Variables de entorno** (marcar *Production* y *Preview*): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_USE_MOCKS=false`, `VITE_ETSY_SHOP_URL`, `VITE_INSTAGRAM_URL`, `VITE_TIKTOK_URL`, `VITE_CONTACT_EMAIL`.
+*   A partir de ahí: **push a `main` → despliegue en producción automático**; cada **PR → vista previa** con URL propia.
+
+El archivo `vercel.json` ya incluye el rewrite SPA (necesario para React Router) y cabeceras de seguridad (CSP, X-Frame-Options, etc.).
+
+> **Importante (Supabase):** en *Authentication → URL Configuration*, define como *Site URL* el dominio de Vercel para que el login del panel `/admin` funcione en producción.
+
+### Modos de desarrollo y producción
+
+| Contexto | Archivo / Variable | `VITE_USE_MOCKS` | Datos |
+| --- | --- | --- | --- |
+| `npm run dev` | `.env.development` (versionado) | `true` | Mocks + localStorage (offline) |
+| `npm run build` / Vercel | `.env.production` (versionado) | `false` | Supabase real |
+
+Las claves reales van en `.env` (ignorado por git) o en el dashboard de Vercel; nunca en los archivos versionados. Para probar en local contra Supabase sin editar archivos: `VITE_USE_MOCKS=false npm run dev`.
 
 ## 📄 Licencia
 
