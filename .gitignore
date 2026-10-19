@@ -31,3 +31,4 @@ AGENTS.md
 !scripts/test-db.sql
 
 supabase/
+scripts/
