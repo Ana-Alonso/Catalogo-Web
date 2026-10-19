@@ -4,6 +4,7 @@ import {
   updateRegistrationStatus,
   deleteRegistration,
 } from '../services/registrationService';
+import { logError } from '../utils/logger';
 import type { WorkshopRegistration, RegistrationStatus } from '../types/registrations';
 
 interface UseRegistrationsResult {
@@ -27,6 +28,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       const data = await fetchRegistrations();
       setRegistrations(data);
     } catch (err) {
+      logError('useRegistrations.loadRegistrations', err);
       const msg = err instanceof Error ? err.message : 'Error desconocido al cargar inscripciones';
       setError(msg);
     } finally {
@@ -46,6 +48,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
         }
       } catch (err) {
         if (!isCancelled) {
+          logError('useRegistrations.init', err);
           const msg = err instanceof Error ? err.message : 'Error desconocido al cargar inscripciones';
           setError(msg);
           setIsLoading(false);
@@ -68,6 +71,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       );
       return true;
     } catch (err) {
+      logError('useRegistrations.setStatus', err);
       const msg = err instanceof Error ? err.message : 'Error al actualizar la inscripción';
       setError(msg);
       return false;
@@ -80,6 +84,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       setRegistrations((prev) => prev.filter((registration) => registration.id !== id));
       return true;
     } catch (err) {
+      logError('useRegistrations.remove', err);
       const msg = err instanceof Error ? err.message : 'Error al eliminar la inscripción';
       setError(msg);
       return false;

@@ -108,7 +108,7 @@ export const createRegistration = async (
   }
 
   const newRegistration: WorkshopRegistration = {
-    id: `local-${Date.now()}`,
+    id: `local-${crypto.randomUUID()}`,
     product_id: productId,
     name,
     email,

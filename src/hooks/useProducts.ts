@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
+import { logError } from '../utils/logger';
 import type { CatalogItem, ProductFormData } from '../types/catalog';
 
 interface UseProductsResult {
@@ -24,6 +25,7 @@ export const useProducts = (): UseProductsResult => {
       const data = await fetchProducts();
       setProducts(data);
     } catch (err) {
+      logError('useProducts.loadProducts', err);
       const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
       setError(msg);
     } finally {
@@ -43,6 +45,7 @@ export const useProducts = (): UseProductsResult => {
         }
       } catch (err) {
         if (!isCancelled) {
+          logError('useProducts.init', err);
           const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
           setError(msg);
           setIsLoading(false);
@@ -63,6 +66,7 @@ export const useProducts = (): UseProductsResult => {
       setProducts((prev) => [created, ...prev]);
       return true;
     } catch (err) {
+      logError('useProducts.addProduct', err);
       const msg = err instanceof Error ? err.message : 'Error al guardar el producto';
       setError(msg);
       return false;
@@ -75,6 +79,7 @@ export const useProducts = (): UseProductsResult => {
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       return true;
     } catch (err) {
+      logError('useProducts.editProduct', err);
       const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
       setError(msg);
       return false;
@@ -87,6 +92,7 @@ export const useProducts = (): UseProductsResult => {
       setProducts((prev) => prev.filter((item) => item.id !== id));
       return true;
     } catch (err) {
+      logError('useProducts.removeProduct', err);
       const msg = err instanceof Error ? err.message : 'Error al eliminar el producto';
       setError(msg);
       return false;
