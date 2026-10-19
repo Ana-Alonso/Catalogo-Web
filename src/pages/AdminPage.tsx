@@ -1,0 +1,27 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminDashboard from '../components/admin/AdminDashboard';
+import { useProducts } from '../hooks/useProducts';
+import { useRegistrations } from '../hooks/useRegistrations';
+
+export const AdminPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { products, addProduct, editProduct, removeProduct } = useProducts();
+  const { registrations, isLoading, setStatus, remove } = useRegistrations();
+
+  return (
+    <AdminDashboard
+      products={products}
+      registrations={registrations}
+      isLoadingRegistrations={isLoading}
+      onAddProduct={addProduct}
+      onEditProduct={editProduct}
+      onDeleteProduct={removeProduct}
+      onSetRegistrationStatus={setStatus}
+      onDeleteRegistration={remove}
+      onClose={() => navigate('/')}
+    />
+  );
+};
+
+export default AdminPage;

@@ -1,0 +1,57 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ShoppingBag } from 'lucide-react';
+import { Box, Typography } from './ui';
+import { theme } from '../theme';
+
+export const HeroSection: React.FC = () => {
+  const etsyUrl = import.meta.env.VITE_ETSY_SHOP_URL;
+
+  return (
+    <section className="relative min-h-[90vh] flex items-center justify-center bg-neutral-950 overflow-hidden px-4 pt-20">
+      <Box 
+        className="absolute inset-0 z-0 opacity-25 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-800 via-neutral-950 to-neutral-950" 
+        aria-hidden="true"
+      />
+      
+      <Box className="relative z-10 text-center max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <Typography variant="h1" className="mb-6">
+            CREAR, SENTIR, CONECTAR
+          </Typography>
+          <Typography variant="subtitle" className="mt-4 max-w-2xl mx-auto mb-10">
+            Ilustraciones únicas, talleres creativos y piezas exclusivas listas para conectar contigo.
+          </Typography>
+          
+          <motion.div 
+            className="flex flex-col sm:flex-row justify-center gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <a 
+              href="#galeria" 
+              className={`px-8 py-4 ${theme.colors.primary} font-bold tracking-widest uppercase rounded-sm transition-colors shadow-lg shadow-orange-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950`}
+            >
+              Ver Catálogo
+            </a>
+            <a 
+              href={etsyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`px-8 py-4 bg-transparent border border-neutral-700 hover:border-white text-white font-bold tracking-widest uppercase rounded-sm transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 flex items-center justify-center gap-2`}
+            >
+              <ShoppingBag className="w-5 h-5" aria-hidden="true" /> Tienda Etsy
+            </a>
+          </motion.div>
+        </motion.div>
+      </Box>
+    </section>
+  );
+};
+
+export default HeroSection;

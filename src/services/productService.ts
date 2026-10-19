@@ -1,0 +1,251 @@
+import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { mockCatalogItems } from '../mocks/catalogMocks';
+import type { CatalogItem, ProductFormData } from '../types/catalog';
+
+const STORAGE_BUCKET = 'products';
+const LOCAL_STORAGE_KEY = 'laurel_custom_products';
+const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
+
+const parseCupo = (value?: string): number | null => {
+  if (!value || !value.trim()) {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const getStoredLocalProducts = (): CatalogItem[] => {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveStoredLocalProducts = (items: CatalogItem[]): void => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    return;
+  }
+};
+
+export const fetchProducts = async (): Promise<CatalogItem[]> => {
+  if (!useMocks) {
+    if (!isSupabaseConfigured || !supabase) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('featured', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []) as CatalogItem[];
+  }
+
+  const localItems = getStoredLocalProducts();
+  if (localItems.length > 0) {
+    return localItems;
+  }
+  return mockCatalogItems;
+};
+
+export const uploadProductImage = async (file: File): Promise<string> => {
+  if (isSupabaseConfigured && supabase) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `items/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filePath);
+
+    return publicUrlData.publicUrl;
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+export const createProduct = async (formData: ProductFormData): Promise<CatalogItem> => {
+  let imageUrl = formData.imageUrl || '';
+
+  if (formData.imageFile) {
+    imageUrl = await uploadProductImage(formData.imageFile);
+  }
+
+  const newProduct: CatalogItem = {
+    id: isSupabaseConfigured ? (undefined as unknown as string) : `mock-${Date.now()}`,
+    title: formData.title.trim(),
+    description: formData.description.trim(),
+    category: formData.category,
+    image: imageUrl,
+    etsyLink: formData.etsyLink?.trim() || undefined,
+    vintedLink: formData.vintedLink?.trim() || undefined,
+    price: formData.price?.trim() || undefined,
+    status: formData.status,
+    featured: formData.featured,
+    eventDate: formData.eventDate?.trim() || undefined,
+    eventLocation: formData.eventLocation?.trim() || undefined,
+    cupo: parseCupo(formData.cupo),
+    created_at: new Date().toISOString()
+  };
+
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([
+        {
+          title: newProduct.title,
+          description: newProduct.description,
+          category: newProduct.category,
+          image: newProduct.image,
+          etsyLink: newProduct.etsyLink || null,
+          vintedLink: newProduct.vintedLink || null,
+          price: newProduct.price || null,
+          status: newProduct.status,
+          featured: newProduct.featured,
+          eventDate: newProduct.eventDate || null,
+          eventLocation: newProduct.eventLocation || null,
+          cupo: newProduct.cupo ?? null
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as CatalogItem;
+  }
+
+  const currentLocals = getStoredLocalProducts();
+  const updated = [newProduct, ...currentLocals];
+  saveStoredLocalProducts(updated);
+  return newProduct;
+};
+
+export const updateProduct = async (
+  id: string,
+  formData: ProductFormData
+): Promise<CatalogItem> => {
+  let imageUrl = formData.imageUrl || '';
+
+  if (formData.imageFile) {
+    imageUrl = await uploadProductImage(formData.imageFile);
+  }
+
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const payload: Partial<CatalogItem> = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      category: formData.category,
+      etsyLink: formData.etsyLink?.trim() || undefined,
+      vintedLink: formData.vintedLink?.trim() || undefined,
+      price: formData.price?.trim() || undefined,
+      status: formData.status,
+      featured: formData.featured,
+      eventDate: formData.eventDate?.trim() || undefined,
+      eventLocation: formData.eventLocation?.trim() || undefined,
+      cupo: parseCupo(formData.cupo)
+    };
+
+    if (imageUrl) {
+      payload.image = imageUrl;
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as CatalogItem;
+  }
+
+  const currentLocals = getStoredLocalProducts();
+  const updatedLocals = currentLocals.map((item) => {
+    if (item.id === id) {
+      return {
+        ...item,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        image: imageUrl || item.image,
+        etsyLink: formData.etsyLink?.trim() || undefined,
+        vintedLink: formData.vintedLink?.trim() || undefined,
+        price: formData.price?.trim() || undefined,
+        status: formData.status,
+        featured: formData.featured,
+        eventDate: formData.eventDate?.trim() || undefined,
+        eventLocation: formData.eventLocation?.trim() || undefined,
+        cupo: parseCupo(formData.cupo)
+      };
+    }
+    return item;
+  });
+
+  saveStoredLocalProducts(updatedLocals);
+  const found = updatedLocals.find((item) => item.id === id);
+  if (!found) {
+    return {
+      id,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      category: formData.category,
+      image: imageUrl,
+      etsyLink: formData.etsyLink?.trim() || undefined,
+      vintedLink: formData.vintedLink?.trim() || undefined,
+      price: formData.price?.trim() || undefined,
+      status: formData.status,
+      featured: formData.featured,
+      eventDate: formData.eventDate?.trim() || undefined,
+      eventLocation: formData.eventLocation?.trim() || undefined,
+      cupo: parseCupo(formData.cupo)
+    };
+  }
+  return found;
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+    return;
+  }
+
+  const currentLocals = getStoredLocalProducts();
+  const updated = currentLocals.filter((item) => item.id !== id);
+  saveStoredLocalProducts(updated);
+};
