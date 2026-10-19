@@ -3,11 +3,14 @@ import { AdminProductForm } from './AdminProductForm';
 import { AdminProductTable } from './AdminProductTable';
 import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
-import { Button, Input, Card } from '../ui';
+import { AdminLoginForm } from './AdminLoginForm';
+import { Button } from '../ui';
 import { theme } from '../../theme';
+import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { isSupabaseConfigured } from '../../utils/supabase';
 import type { CatalogItem, ProductFormData } from '../../types/catalog';
 import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
-import { Lock, Unlock, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Unlock, AlertCircle, CheckCircle, ArrowLeft, LoaderCircle } from 'lucide-react';
 import logoImg from '../../assets/Logo.png';
 
 interface AdminDashboardProps {
@@ -33,32 +36,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onDeleteRegistration,
   onClose
 }) => {
-  const adminPinEnv = import.meta.env.VITE_ADMIN_PIN || 'admin123';
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('laurel_admin_auth') === 'true';
-  });
-  const [pin, setPin] = useState('');
-  const [authError, setAuthError] = useState(false);
+  const { user, isLoading, signIn, signOut } = useAdminAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pin.trim() === adminPinEnv) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('laurel_admin_auth', 'true');
-      setAuthError(false);
-    } else {
-      setAuthError(true);
-    }
+  const isAuthDegraded = !isSupabaseConfigured;
+  const isAuthenticated = isAuthDegraded || user !== null;
+
+  const handleLogin = async (email: string, password: string) => {
+    const result = await signIn(email, password);
+    setAuthError(result.success ? null : (result.message ?? 'Error al iniciar sesión.'));
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('laurel_admin_auth');
+    void signOut();
   };
 
   const handleFormSubmit = async (data: ProductFormData): Promise<boolean> => {
@@ -109,52 +104,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div
+        className={`fixed inset-0 z-50 ${theme.colors.background} flex flex-col justify-center items-center gap-3`}
+        role="status"
+      >
+        <LoaderCircle className="w-6 h-6 text-orange-500 animate-spin" aria-hidden="true" />
+        <p className={`${theme.colors.textMuted} text-sm`}>Cargando sesión…</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
-      <div className={`fixed inset-0 z-50 ${theme.colors.background} flex flex-col justify-center items-center px-4`}>
-        <Card className="max-w-md w-full p-8 text-center shadow-2xl">
-          <div className="flex justify-center mb-6">
-            <img src={logoImg} alt="Logo" className="h-12 w-auto object-contain" />
-          </div>
-          <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600">
-            <Lock className="w-6 h-6" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-wider">Acceso Administrador</h2>
-          <p className={`${theme.colors.textMuted} text-sm mb-6`}>
-            Ingresa tu clave de acceso para gestionar el catálogo.
-          </p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <Input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="Clave de acceso"
-              className="text-center tracking-widest"
-              autoFocus
-            />
-            {authError && (
-              <p className="text-xs text-red-400">Clave incorrecta. Por favor verifica.</p>
-            )}
-            <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                className="w-1/2"
-                onClick={onClose}
-              >
-                Volver a la Web
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-1/2"
-              >
-                Entrar
-              </Button>
-            </div>
-          </form>
-        </Card>
-      </div>
+      <AdminLoginForm
+        onLogin={handleLogin}
+        onClose={onClose}
+        errorMessage={authError}
+      />
     );
   }
 

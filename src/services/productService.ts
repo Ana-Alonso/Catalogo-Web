@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { validateImageFile } from '../utils/imageValidation';
 import { mockCatalogItems } from '../mocks/catalogMocks';
 import type { CatalogItem, ProductFormData } from '../types/catalog';
 
@@ -58,6 +59,11 @@ export const fetchProducts = async (): Promise<CatalogItem[]> => {
 };
 
 export const uploadProductImage = async (file: File): Promise<string> => {
+  const validationError = validateImageFile(file);
+  if (validationError) {
+    throw new Error(validationError);
+  }
+
   if (isSupabaseConfigured && supabase) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;

@@ -1,69 +1,83 @@
 # Laurel en Lienzo - Catálogo Visual
 
-Un catálogo visual frontend moderno, minimalista y accesible desarrollado para mostrar obras de arte, ilustraciones y joyería. La aplicación está diseñada para funcionar como un portafolio interactivo, redirigiendo el proceso de compra a plataformas externas como [Etsy](https://www.etsy.com/es/shop/Laurelenlienzo) o Vinted.
+Catálogo visual frontend moderno, minimalista y accesible para mostrar obras de arte, ilustraciones, camisetas personalizadas y talleres. La aplicación funciona como un portafolio interactivo con panel de administración: el catálogo se gestiona desde Supabase y el proceso de compra se redirige a plataformas externas como [Etsy](https://www.etsy.com/es/shop/Laurelenlienzo) o Vinted.
 
 ## 🚀 Características Principales
 
-*   **Diseño Minimalista y Moderno:** Interfaz limpia utilizando una paleta de colores basada en negro, blanco, escala de grises y acentos vibrantes en color naranja.
-*   **Animaciones Dinámicas:** Transiciones fluidas, aparición de elementos al hacer scroll y efectos hover interactivos impulsados por Framer Motion.
-*   **Totalmente Responsivo:** La cuadrícula de la galería y la navegación se adaptan perfectamente a dispositivos móviles, tablets y monitores de escritorio.
-*   **Accesibilidad (WCAG):** Navegación optimizada para teclado, alto contraste, semántica HTML5 adecuada y atributos ARIA para lectores de pantalla.
-*   **Redirección de Ventas:** Cada obra en el catálogo incluye enlaces directos para adquirir la pieza en tiendas externas (Etsy).
+*   **Catálogo dinámico:** Obras y talleres se cargan desde Supabase (PostgreSQL + Storage), no del código.
+*   **Talleres con inscripciones:** Cupo opcional por taller, contador público de plazas («Quedan N de M» / «Completo»), formulario de inscripción con nombre y email, control de duplicados y bloqueo de sobreventa en la base de datos.
+*   **Añadir al calendario:** Tras inscribirse (y al publicar un taller en el panel) se puede añadir el evento a Google Calendar u Outlook, o descargar un archivo `.ics` compatible con Apple Calendar y otras apps.
+*   **Panel de administración:** Acceso con email y contraseña (Supabase Auth) en `/admin`. Permite crear, editar y eliminar productos (con subida de imágenes a Supabase Storage), destacar piezas y gestionar las inscripciones a talleres (confirmar, cancelar —libera plaza— o borrar). Las políticas RLS restringen la escritura a usuarios autenticados.
+*   **Diseño Minimalista y Moderno:** Interfaz limpia con paleta de negro, blancos, grises y acentos naranja.
+*   **Animaciones Dinámicas:** Transiciones fluidas y efectos hover con Framer Motion.
+*   **Totalmente Responsivo:** Cuadrícula y navegación adaptadas a móvil, tablet y escritorio.
+*   **Accesibilidad (WCAG):** Navegación por teclado, semántica HTML5 y atributos ARIA.
 
 ## 🛠️ Tecnologías Utilizadas
 
-*   **[React](https://reactjs.org/)** (v18+) - Biblioteca principal para la construcción de la interfaz de usuario.
-*   **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático para un código más robusto y mantenible.
-*   **[Tailwind CSS](https://tailwindcss.com/)** - Framework de utilidades CSS para un diseño ágil y adaptable.
-*   **[Framer Motion](https://www.framer.com/motion/)** - Biblioteca de animaciones de grado de producción para React.
-*   **[Lucide React](https://lucide.dev/)** - Paquete de iconos minimalistas y consistentes.
-*   **[Vite](https://vitejs.dev/)** - Entorno de desarrollo rápido y empaquetador moderno.
+*   **[React](https://reactjs.org/)** (v19) + **[React Router](https://reactrouter.com/)** - UI y enrutado (`/` catálogo, `/admin` panel).
+*   **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático estricto.
+*   **[Tailwind CSS](https://tailwindcss.com/)** (v4) - Estilos utilitarios.
+*   **[Framer Motion](https://www.framer.com/motion/)** - Animaciones.
+*   **[Lucide React](https://lucide.dev/)** - Iconos.
+*   **[Supabase](https://supabase.com/)** (`@supabase/supabase-js`) - Base de datos, Storage de imágenes y políticas RLS.
+*   **[Vite](https://vitejs.dev/)** - Desarrollo y empaquetado.
 
 ## 📦 Instalación y Configuración Local
 
-Sigue estos pasos para ejecutar el proyecto en tu máquina local:
-
-1.  **Clonar el repositorio:**
+1.  **Clonar e instalar dependencias:**
     ```bash
-    git clone [https://github.com/tu-usuario/laurel-en-lienzo.git](https://github.com/tu-usuario/laurel-en-lienzo.git)
-    cd laurel-en-lienzo
-    ```
-
-2.  **Instalar las dependencias:**
-    Asegúrate de tener [Node.js](https://nodejs.org/) instalado. Luego ejecuta:
-    ```bash
+    git clone [url-del-repositorio] laura-web
+    cd laura-web
     npm install
-    # o si usas yarn
-    yarn install
     ```
 
-3.  **Iniciar el servidor de desarrollo:**
+2.  **Configurar variables de entorno:**
+    ```bash
+    cp .env.example .env
+    ```
+    Rellena el `.env` (ver tabla siguiente).
+
+3.  **Preparar la base de datos (Supabase):**
+    En el proyecto de [Supabase](https://supabase.com), abre el **SQL Editor** y ejecuta, en este orden:
+    1.  `supabase-migration.sql` — estructura de tablas, disparador de cupo e inscripciones, políticas base y bucket `products`. Es **idempotente**: puede re-ejecutarse sin errores.
+    2.  `supabase-hardening.sql` — endurece las políticas RLS (escritura solo para usuarios autenticados; el INSERT público de inscripciones valida que el status sea `pendiente`) y añade CHECKs de formato de email y longitudes. También es idempotente.
+    3.  Crea el usuario administrador en **Authentication → Users → Add user** (email y contraseña). Ese usuario será el único que pueda entrar en `/admin` y escribir en el catálogo.
+
+4.  **Iniciar el servidor de desarrollo:**
     ```bash
     npm run dev
-    # o si usas yarn
-    yarn dev
     ```
+    Visita `http://localhost:5173`. El panel de administración está en `http://localhost:5173/admin`.
 
-4.  **Abrir en el navegador:**
-    Visita `http://localhost:5173` (o el puerto que indique tu terminal) para ver la aplicación en vivo.
+## 🔐 Variables de Entorno
 
-## 🎨 Personalización del Catálogo
+| Variable | Descripción |
+| --- | --- |
+| `VITE_SUPABASE_URL` | URL del proyecto Supabase. |
+| `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase. |
+| `VITE_USE_MOCKS` | `true` usa datos mock y almacenamiento local; `false` usa Supabase. |
+| `VITE_ETSY_SHOP_URL` | URL de la tienda Etsy (pie de página). |
+| `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Enlaces de redes sociales. |
+| `VITE_CONTACT_EMAIL` | Email de contacto mostrado en el pie. |
 
-Para añadir, modificar o eliminar obras del catálogo, debes editar el array de datos dentro del código (usualmente ubicado en `src/data/obras.ts` o dentro del componente principal si es un archivo único). 
+## 🎓 Talleres e Inscripciones
 
-El formato de cada objeto de obra es el siguiente:
+*   **Público:** Los talleres muestran fecha, lugar y plazas restantes. «Apuntarse al taller» abre un modal con nombre y email; la base de datos impide duplicados (mismo email y taller) y que se superen las plazas del cupo (un disparador serializa las inscripciones). Si no se define cupo, la inscripción es libre.
+*   **Panel admin:** En «Inscripciones a Talleres» se ven las inscripciones agrupadas por taller con su estado (`pendiente`, `confirmado`, `cancelado`). Cancelar libera la plaza y el email para una futura inscripción.
+*   **Calendario:** Tras inscribirse, o al publicar un taller con fecha desde el panel, aparecen botones para añadir el evento a Google Calendar / Outlook o descargarlo en formato `.ics`.
 
-```typescript
-{
-  id: "identificador-unico",
-  title: "Título de la Obra",
-  category: "Categoría (ej. Ilustraciones, Custom)",
-  image: "/ruta/a/tu/imagen.jpg",
-  etsyLink: "[https://www.etsy.com/es/listing/](https://www.etsy.com/es/listing/)...",
-  price: "Precio (opcional)"
-}
+## 📄 Scripts Disponibles
 
-```
+| Comando | Descripción |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo con hot reload. |
+| `npm run build` | Typecheck (`tsc -b`) y build de producción. |
+| `npm run lint` | Análisis con ESLint. |
+| `npm test` | Tests unitarios y de componentes (Vitest + Testing Library). |
+| `npm run test:watch` | Tests en modo watch. |
+| `npm run test:db` | Suite de aserciones SQL contra PostgreSQL 15 en Docker (requiere Docker). |
+| `npm run preview` | Vista previa del build de producción. |
 
 ## 📄 Licencia
 

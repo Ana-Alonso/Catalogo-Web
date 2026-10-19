@@ -1,5 +1,5 @@
 import React, { useState, type FormEvent } from 'react';
-import { CheckCircle, AlertCircle, UserPlus, LoaderCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
 import { Button, Input, Box, CalendarEventActions } from './ui';
 import { theme } from '../theme';
 import type { CatalogItem } from '../types/catalog';
@@ -23,6 +23,8 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const instagramUrl = import.meta.env.VITE_INSTAGRAM_URL;
+  const tiktokUrl = import.meta.env.VITE_TIKTOK_URL;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,6 +76,39 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         </div>
 
         <CalendarEventActions workshop={workshop} attendee={{ name, email }} />
+
+        <Box className="p-3 bg-neutral-950 border border-neutral-800 rounded-lg flex items-start gap-2 text-sm text-neutral-300">
+          <Bell className="w-4 h-4 mt-0.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
+          <span>
+            Estate atento a nuestras redes sociales: publicaremos novedades y
+            actualizaciones sobre el taller
+            {instagramUrl || tiktokUrl ? ' en ' : '.'}
+            {instagramUrl && (
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium"
+                aria-label="Ver novedades del taller en Instagram"
+              >
+                Instagram
+              </a>
+            )}
+            {instagramUrl && tiktokUrl && ' y '}
+            {tiktokUrl && (
+              <a
+                href={tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium"
+                aria-label="Ver novedades del taller en TikTok"
+              >
+                TikTok
+              </a>
+            )}
+            {(instagramUrl || tiktokUrl) && '.'}
+          </span>
+        </Box>
 
         <Button type="button" variant="primary" className="w-full" onClick={onClose}>
           Cerrar

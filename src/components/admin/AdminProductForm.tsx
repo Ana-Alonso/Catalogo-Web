@@ -2,6 +2,7 @@ import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Upload, Plus, Check, X, AlertCircle } from 'lucide-react';
 import { Button, Input, Card, Box } from '../ui';
 import { theme } from '../../theme';
+import { validateImageFile, ACCEPTED_IMAGE_INPUT } from '../../utils/imageValidation';
 import type { CategoryType, CatalogItem, ProductFormData, AvailabilityStatus } from '../../types/catalog';
 
 interface AdminProductFormProps {
@@ -54,11 +55,21 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      setExternalImageUrl('');
+    if (!file) {
+      return;
     }
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setImageFile(null);
+      setPreviewUrl(editingProduct?.image || '');
+      setFormError(validationError);
+      e.target.value = '';
+      return;
+    }
+    setFormError(null);
+    setImageFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setExternalImageUrl('');
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -146,6 +157,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             id="prod-title"
             label="Título de la Obra *"
             required
+            maxLength={120}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Título del producto"
@@ -220,6 +232,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             <Input
               id="prod-event-loc"
               label="Lugar o Modalidad"
+              maxLength={120}
               value={eventLocation}
               onChange={(e) => setEventLocation(e.target.value)}
               placeholder="Ej: Presencial (Madrid) u Online"
@@ -253,6 +266,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             id="prod-desc"
             rows={3}
             required
+            maxLength={2000}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descripción, materiales, dimensiones..."
@@ -264,6 +278,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           <Input
             id="prod-price"
             label="Precio estimado (opcional)"
+            maxLength={50}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Precio"
@@ -273,6 +288,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             id="prod-etsy"
             label="Enlace de Etsy (opcional)"
             type="url"
+            maxLength={300}
             value={etsyLink}
             onChange={(e) => setEtsyLink(e.target.value)}
             placeholder="https://..."
@@ -282,6 +298,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             id="prod-vinted"
             label="Enlace de Vinted (opcional)"
             type="url"
+            maxLength={300}
             value={vintedLink}
             onChange={(e) => setVintedLink(e.target.value)}
             placeholder="https://..."
@@ -297,8 +314,8 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             <label className="w-full sm:w-auto flex-1 cursor-pointer flex flex-col items-center justify-center p-6 border-2 border-dashed border-neutral-800 hover:border-orange-600 rounded-lg transition-colors bg-neutral-950/60">
               <Upload className="w-8 h-8 text-neutral-500 mb-2 group-hover:text-orange-600" />
               <span className="text-sm text-neutral-300 font-medium">Subir archivo desde el dispositivo</span>
-              <span className="text-xs text-neutral-500 mt-1">PNG, JPG, WEBP</span>
-              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <span className="text-xs text-neutral-500 mt-1">PNG, JPG, WEBP o GIF (máx. 5 MB)</span>
+              <input type="file" accept={ACCEPTED_IMAGE_INPUT} onChange={handleFileChange} className="hidden" />
             </label>
 
             {(previewUrl || externalImageUrl) && (
