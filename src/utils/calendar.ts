@@ -1,6 +1,12 @@
+import { formatPrice } from './price';
 import type { CatalogItem } from '../types/catalog';
 
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000;
+
+const buildEventDescription = (workshop: CatalogItem): string => {
+  const price = formatPrice(workshop.priceCents, workshop.currency);
+  return price ? `${workshop.description}\nPrecio: ${price}` : workshop.description;
+};
 
 export interface WorkshopEventDate {
   start: Date;
@@ -59,9 +65,7 @@ export const buildWorkshopIcs = (
   }
 
   const contactEmail = import.meta.env.VITE_CONTACT_EMAIL || '';
-  const description = workshop.price
-    ? `${workshop.description}\nPrecio: ${workshop.price}`
-    : workshop.description;
+  const description = buildEventDescription(workshop);
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',
@@ -104,9 +108,7 @@ export const getGoogleCalendarUrl = (workshop: CatalogItem): string => {
     action: 'TEMPLATE',
     text: workshop.title,
     dates: `${formatIcsDate(eventDate.start)}/${formatIcsDate(eventDate.end)}`,
-    details: workshop.price
-      ? `${workshop.description}\nPrecio: ${workshop.price}`
-      : workshop.description,
+    details: buildEventDescription(workshop),
     location: workshop.eventLocation || '',
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -123,9 +125,7 @@ export const getOutlookCalendarUrl = (workshop: CatalogItem): string => {
     subject: workshop.title,
     startdt: eventDate.start.toISOString(),
     enddt: eventDate.end.toISOString(),
-    body: workshop.price
-      ? `${workshop.description}\nPrecio: ${workshop.price}`
-      : workshop.description,
+    body: buildEventDescription(workshop),
     location: workshop.eventLocation || '',
   });
   return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;

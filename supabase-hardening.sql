@@ -88,14 +88,4 @@ BEGIN
             NOT VALID;
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'products_price_length_check'
-    ) THEN
-        ALTER TABLE public.products
-            ADD CONSTRAINT products_price_length_check
-            CHECK (price IS NULL OR char_length(price) <= 50)
-            NOT VALID;
-    END IF;
 END $$;

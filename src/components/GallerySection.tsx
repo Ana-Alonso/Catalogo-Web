@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { Tag } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { Box, Typography } from './ui';
 import { theme } from '../theme';
+import { isOfferActive } from '../utils/price';
 import type { CatalogItem, CategoryType } from '../types/catalog';
 import type { RegistrationFormData } from '../types/registrations';
 
@@ -10,6 +12,8 @@ interface GallerySectionProps {
   items: CatalogItem[];
   activeCategory: CategoryType;
   onSelectCategory: (category: CategoryType) => void;
+  offersOnly?: boolean;
+  onToggleOffers?: () => void;
   spotsCounts?: Record<string, number>;
   onRegister?: (item: CatalogItem, data: RegistrationFormData) => Promise<void>;
 }
@@ -34,12 +38,19 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   items, 
   activeCategory, 
   onSelectCategory,
+  offersOnly = false,
+  onToggleOffers,
   spotsCounts,
   onRegister
 }) => {
-  const filteredItems = activeCategory === 'todas'
-    ? items
-    : items.filter(item => item.category === activeCategory);
+  const visibleItems = items.filter(item => item.isVisible !== false);
+  const offersCount = visibleItems.filter(isOfferActive).length;
+  const categoryItems = activeCategory === 'todas'
+    ? visibleItems
+    : visibleItems.filter(item => item.category === activeCategory);
+  const filteredItems = offersOnly
+    ? categoryItems.filter(isOfferActive)
+    : categoryItems;
 
   return (
     <section id="galeria" className="py-24 bg-neutral-950 min-h-screen">
@@ -75,6 +86,30 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                 </button>
               );
             })}
+            {onToggleOffers && (
+              <button
+                type="button"
+                onClick={onToggleOffers}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md border transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
+                  offersOnly
+                    ? 'bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-600/30'
+                    : 'bg-neutral-900 border-orange-600/60 text-orange-400 hover:bg-orange-600/10'
+                }`}
+                aria-pressed={offersOnly}
+              >
+                <Tag className="w-3.5 h-3.5" aria-hidden="true" />
+                Ofertas
+                {offersCount > 0 && (
+                  <span
+                    className={`min-w-5 rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
+                      offersOnly ? 'bg-neutral-950/40 text-white' : 'bg-orange-600/20 text-orange-300'
+                    }`}
+                  >
+                    {offersCount}
+                  </span>
+                )}
+              </button>
+            )}
           </Box>
         </Box>
 
@@ -101,7 +136,9 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           ) : (
             <Box className="text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800">
               <Typography variant="body" className="text-lg">
-                No hay piezas disponibles en esta categoría por el momento.
+                {offersOnly
+                  ? 'No hay ofertas activas en esta categoría por el momento.'
+                  : 'No hay piezas disponibles en esta categoría por el momento.'}
               </Typography>
             </Box>
           )}

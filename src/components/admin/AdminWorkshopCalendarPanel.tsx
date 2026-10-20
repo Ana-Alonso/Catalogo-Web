@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { CalendarEventActions } from '../ui';
+import { parsePriceToCents } from '../../utils/price';
 import type { CatalogItem, ProductFormData } from '../../types/catalog';
 
 interface AdminWorkshopCalendarPanelProps {
@@ -17,7 +18,8 @@ const buildWorkshopItem = (data: ProductFormData): CatalogItem => ({
   featured: data.featured,
   eventDate: data.eventDate,
   eventLocation: data.eventLocation,
-  price: data.price,
+  priceCents: parsePriceToCents(data.price),
+  currency: 'EUR',
 });
 
 export const AdminWorkshopCalendarPanel: React.FC<AdminWorkshopCalendarPanelProps> = ({

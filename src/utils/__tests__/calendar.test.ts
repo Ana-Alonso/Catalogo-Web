@@ -20,7 +20,8 @@ const workshop: CatalogItem = {
   featured: false,
   eventDate: '2026-11-20T10:00',
   eventLocation: 'Madrid, Plaza Mayor 1',
-  price: '25,00 €',
+  priceCents: 2500,
+  currency: 'EUR',
 };
 
 describe('parseWorkshopDate', () => {
@@ -106,9 +107,9 @@ describe('buildWorkshopIcs', () => {
     expect(ics).toContain('ATTENDEE;CN=Ana\\; María;RSVP=TRUE:mailto:ana@example.com');
   });
 
-  it('incluye Precio en DESCRIPTION cuando hay price', () => {
-    expect(buildWorkshopIcs(workshop)).toContain('Precio: 25\\,00 €');
-    expect(buildWorkshopIcs({ ...workshop, price: undefined })).not.toContain('Precio:');
+  it('incluye Precio en DESCRIPTION cuando hay priceCents', () => {
+    expect(buildWorkshopIcs(workshop)).toContain('Precio: 25\\,00');
+    expect(buildWorkshopIcs({ ...workshop, priceCents: null })).not.toContain('Precio:');
   });
 
   it('pliega líneas largas con CRLF y espacio inicial', () => {

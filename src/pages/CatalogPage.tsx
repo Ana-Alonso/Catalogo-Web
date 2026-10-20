@@ -9,6 +9,7 @@ import type { CategoryType } from '../types/catalog';
 
 export const CatalogPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
+  const [offersOnly, setOffersOnly] = useState(false);
   const { products } = useProducts();
   const { counts, register } = useWorkshopSpots();
 
@@ -32,6 +33,8 @@ export const CatalogPage: React.FC = () => {
           items={products} 
           activeCategory={activeCategory} 
           onSelectCategory={setActiveCategory} 
+          offersOnly={offersOnly}
+          onToggleOffers={() => setOffersOnly((prev) => !prev)}
           spotsCounts={counts}
           onRegister={(item, data) => register(item.id, data, item.cupo ?? null)}
         />

@@ -35,6 +35,7 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 ### Sitio público
 
 - **Catálogo dinámico** desde Supabase (PostgreSQL + Storage): publicar una pieza no requiere volver a desplegar.
+- **Ofertas en porcentaje** por producto con filtro «Ofertas» y precio tachado. El precio también puede quedar «a consultar».
 - **Filtros por categoría** y piezas destacadas fijadas arriba.
 - **Talleres con plazas en vivo**: «Quedan N de M plazas» o «Completo», calculado con las inscripciones reales.
 - **Formulario de inscripción** con nombre y email, control de duplicados por taller y sin sobreventa incluso con peticiones concurrentes.
@@ -45,7 +46,8 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 ### Panel de administración (`/admin`)
 
 - **Autenticación email + contraseña** con Supabase Auth. Las políticas de base de datos restringen toda escritura a usuarios autenticados.
-- **Gestión de productos**: crear, editar y eliminar, subir imágenes a Supabase Storage (tipo MIME y límite de 5 MB validados), destacar piezas y cambiar disponibilidad.
+- **Gestión de productos**: crear, editar y eliminar, subir imágenes a Supabase Storage (tipo MIME y límite de 5 MB validados), fijar precios en euros, aplicar descuentos en porcentaje, destacar piezas y cambiar disponibilidad.
+- **Sincronización con Etsy**: los productos llegan por webhooks o con el botón «Sincronizar ahora». Los campos sincronizados son de solo lectura; la categoría y el destacado se editan en local.
 - **Cupo por taller** configurable por evento (opcional; sin límite si se deja vacío).
 - **Gestión de inscripciones** agrupadas por taller: confirmar, cancelar (libera plaza y email) o borrar.
 - **Accesos rápidos al calendario** al publicar un taller nuevo.
@@ -56,6 +58,7 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 - Migraciones SQL versionadas e idempotentes para esquema, políticas y restricciones.
 - Row Level Security endurecido para producción (lectura pública, escritura autenticada, inserción anónima acotada).
 - Tests automatizados y suite de aserciones SQL real sobre PostgreSQL 15.
+- Integración serverless con Etsy: OAuth 2.0 + PKCE, webhooks firmados y endpoint de reconciliación manual.
 - CI en cada push y pull request; despliegue continuo mediante Vercel.
 - Cabeceras de seguridad y Content Security Policy definidas en `vercel.json`.
 
@@ -63,9 +66,10 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 
 - **Sobreventa imposible, garantizada por la base de datos.** Un disparador `BEFORE INSERT/UPDATE` bloquea la fila del taller (`SELECT ... FOR UPDATE`) y rechaza inscripciones al alcanzar el cupo. Un índice único parcial sobre `(product_id, lower(email))` impide duplicados, a la vez que permite volver a inscribirse tras una cancelación.
 - **Los usuarios anónimos solo pueden hacer una cosa**: crear una inscripción con `status = 'pendiente'`. Todo lo demás (escritura del catálogo e inscripciones, subidas a Storage) requiere sesión autenticada.
-- **Migraciones idempotentes**: ambos scripts SQL pueden re-ejecutarse sin errores sobre una base existente.
-- **Integridad en el esquema**: CHECKs de formato de email, longitudes de nombre/título y valores válidos de estado.
-- **43 tests automatizados** que cubren generación de calendario/ICS, el servicio de inscripciones (incluido el mapeo de errores de Supabase) y flujos de UI, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
+- **Migraciones idempotentes**: todos los scripts SQL pueden re-ejecutarse sin errores sobre una base existente.
+- **Integridad en el esquema**: CHECKs de formato de email, longitudes de nombre/título, validez de precio/moneda, límites del descuento, unicidad del listing de Etsy y valores válidos de estado.
+- **71 tests automatizados** que cubren generación de calendario/ICS, utilidades de precio y ofertas, mapeo de Etsy y firmas de webhook, el servicio de inscripciones (incluido el mapeo de errores de Supabase) y flujos de UI, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
+- **Autenticidad de los webhooks**: las peticiones de Etsy se verifican con HMAC-SHA256 sobre el cuerpo original, ventana de 5 minutos y comparación en tiempo constante.
 - **Modo desarrollo offline**: la app funciona con datos mock y `localStorage`, sin credenciales de base de datos.
 
 ## Stack
@@ -96,9 +100,10 @@ Abre `http://localhost:5173`. El modo desarrollo usa datos mock (`VITE_USE_MOCKS
 <summary><strong>Conectar un proyecto real de Supabase</strong></summary>
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. En el **SQL Editor**, ejecuta estos scripts en orden (ambos son idempotentes):
+2. En el **SQL Editor**, ejecuta estos scripts en orden (todos son idempotentes):
    - `supabase-migration.sql` — tablas, disparador de cupo, políticas base y bucket `products`.
    - `supabase-hardening.sql` — políticas RLS endurecidas y restricciones de validación.
+   - `supabase-offers-etsy.sql` — precios numéricos, ofertas en porcentaje, visibilidad, metadatos de Etsy y tabla `etsy_credentials`.
 3. Crea el usuario administrador en **Authentication → Users → Add user**. Esa cuenta será la única que pueda entrar en `/admin` y escribir en el catálogo.
 4. Copia el archivo de entorno y rellena tus claves:
 
@@ -124,8 +129,44 @@ Abre `http://localhost:5173`. El modo desarrollo usa datos mock (`VITE_USE_MOCKS
 | `VITE_ETSY_SHOP_URL` | URL de la tienda Etsy en el pie de página. |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Enlaces a redes sociales. |
 | `VITE_CONTACT_EMAIL` | Email de contacto mostrado en el pie. |
+| `ETSY_KEYSTRING` / `ETSY_SHARED_SECRET` | Credenciales de la app de Etsy (solo servidor). |
+| `ETSY_SHOP_ID` | ID numérico de la tienda de Etsy a sincronizar. |
+| `ETSY_REFRESH_TOKEN` | Refresh token inicial, solo se usa si `etsy_credentials` está vacía. |
+| `ETSY_WEBHOOK_SECRET` | Secreto de firma del Webhook Portal de Etsy (empieza por `whsec_`). |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | URL y clave pública de Supabase para verificar el JWT en el servidor. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio usada por los procesos de sincronización (solo servidor). |
+| `CRON_SECRET` | Protege el endpoint de reconciliación diaria (`GET /api/etsy-sync`). |
 
-Las claves reales nunca se versionan: viven en `.env` (ignorado por git) en local y en el dashboard de Vercel en producción.
+Las claves reales nunca se versionan: viven en `.env` (ignorado por git) en local y en el dashboard de Vercel en producción. Solo las variables `VITE_*` llegan al navegador.
+
+## Integración con Etsy
+
+1. Crea una app personal en el [panel de desarrollador de Etsy](https://www.etsy.com/developers/your-apps) y añade `https://<tu-dominio>/etsy-callback.html` como URI de redirección permitida. Solicita los scopes `listings_r` y `shops_r`.
+2. Genera los tokens OAuth en local:
+
+   ```bash
+   ETSY_KEYSTRING=... ETSY_SHARED_SECRET=... \
+   ETSY_REDIRECT_URI=https://<tu-dominio>/etsy-callback.html \
+   node scripts/etsy-oauth.mjs
+   ```
+
+   Abre la URL que imprime, autoriza la app, copia el código que muestra la página de callback y canjéalo:
+
+   ```bash
+   node scripts/etsy-oauth.mjs --exchange <code>
+   ```
+
+   El script imprime `ETSY_REFRESH_TOKEN` y una sentencia SQL idempotente para `etsy_credentials`. Los refresh tokens rotan: la función guarda el nuevo automáticamente.
+3. Registra el webhook en el Webhook Portal de Etsy con URL `https://<tu-dominio>/api/etsy-webhook`, el `ETSY_WEBHOOK_SECRET` que elijas y los eventos `listing.created`, `listing.updated`, `listing.deleted`, `inventory.updated` e `inventory.out_of_stock`.
+4. Define las variables de servidor anteriores en Vercel. La reconciliación diaria opcional usa un Cron de Vercel:
+
+   ```json
+   { "crons": [{ "path": "/api/etsy-sync", "schedule": "0 4 * * *" }] }
+   ```
+
+   Vercel envía `Authorization: Bearer $CRON_SECRET` automáticamente si la variable existe.
+
+El título, la descripción, la imagen, el precio y el estado sincronizados vienen de Etsy. La categoría y el destacado se editan en esta app. Los listings desactivados o borrados se ocultan en lugar de eliminarse. La API de Etsy no expone las rebajas de tienda, así que el precio sincronizado es el precio base del listing; las ofertas porcentuales son locales.
 
 ## Modos de desarrollo y producción
 
@@ -141,14 +182,15 @@ src/
   components/
     ui/            # Primitivas del sistema de diseño (Button, Input, PasswordInput, CalendarEventActions…)
     layout/        # Navbar y pie de página
-    admin/         # Login, dashboard, formulario/tabla de productos, paneles de inscripciones y calendario
+    admin/         # Login, dashboard, formulario/tabla de productos, paneles de inscripciones, Etsy y calendario
   hooks/           # useProducts, useRegistrations, useAdminAuth, useWorkshopSpots…
-  services/        # Acceso a datos de Supabase (productos, inscripciones)
-  utils/           # Generación de ICS/calendario, validación de imágenes, logger, cliente Supabase
+  services/        # Acceso a datos de Supabase (productos, inscripciones) y cliente de sync de Etsy
+  utils/           # Generación de ICS/calendario, utilidades de precio, validación de imágenes, logger, cliente Supabase
   types/           # Modelos de dominio
   mocks/           # Datos locales para desarrollo offline
   pages/           # CatalogPage, AdminPage
-scripts/           # Suite SQL de tests con Docker
+api/               # Funciones de Vercel: webhook de Etsy, sync y helpers de servidor
+scripts/           # Bootstrap de OAuth y suite SQL de tests con Docker
 .github/workflows/ # Pipeline de CI
 ```
 
@@ -163,6 +205,7 @@ scripts/           # Suite SQL de tests con Docker
 | `npm run test:watch` | Tests en modo watch. |
 | `npm run test:db` | Suite de aserciones SQL sobre PostgreSQL 15 con Docker. |
 | `npm run preview` | Vista previa del build de producción. |
+| `node scripts/etsy-oauth.mjs` | Genera los tokens OAuth de Etsy y el SQL de `etsy_credentials`. |
 
 ## Testing y CI/CD
 
@@ -180,10 +223,7 @@ scripts/           # Suite SQL de tests con Docker
 
 **Ana Alonso** — Desarrolladora full-stack
 
-- GitHub: [@Ana-Alonso](https://github.com/Ana-Alonso)
-- LinkedIn: <!-- TODO: añade tu URL de LinkedIn --> _añade tu perfil_
-- Portfolio: <!-- TODO: añade tu web personal --> _añade tu web_
-- Email: <!-- TODO: sustituye por tu email de contacto --> _añade tu email_
+
 
 ## Licencia
 

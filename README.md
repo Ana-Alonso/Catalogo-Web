@@ -35,6 +35,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 ### Public site
 
 - **Dynamic catalog** served from Supabase (PostgreSQL + Storage): publishing a piece does not require a redeploy.
+- **Percentage offers** per product with an "Ofertas" filter and discounted-price badges. Prices can also be set to "consultar" (no public price).
 - **Category filters** and featured items pinned to the top.
 - **Workshops with live capacity**: "N of M spots left" or "Full", computed from real registrations.
 - **Signup form** with name and email, duplicate protection per workshop, and no overbooking even under concurrent requests.
@@ -45,7 +46,8 @@ The site replaces a static portfolio with a small product: a public catalog back
 ### Admin panel (`/admin`)
 
 - **Email + password authentication** with Supabase Auth. Database policies restrict every write to authenticated users.
-- **Product management**: create, edit and delete items, upload images to Supabase Storage (MIME type and 5 MB limit validated), mark items as featured and set availability.
+- **Product management**: create, edit and delete items, upload images to Supabase Storage (MIME type and 5 MB limit validated), set prices in euros, apply a percentage discount, mark items as featured and set availability.
+- **Etsy sync**: products arrive from Etsy through webhooks or the "Sincronizar ahora" button. Synced fields are read-only; category and featured status remain editable locally.
 - **Workshop capacity** configured per event (optional, unlimited if empty).
 - **Registration management** grouped by workshop: confirm, cancel (frees the spot and the email) or delete.
 - **Calendar shortcuts** for newly published workshops.
@@ -56,6 +58,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 - Versioned, idempotent SQL migrations for schema, policies and constraints.
 - Row Level Security hardened for production (public reads, authenticated writes, guarded anonymous inserts).
 - Automated tests and a real SQL assertion suite running on PostgreSQL 15.
+- Serverless Etsy integration with OAuth 2.0 + PKCE, signed webhooks and a manual reconciliation endpoint.
 - CI on every push and pull request; continuous deployment through Vercel.
 - Security headers and a Content Security Policy defined in `vercel.json`.
 
@@ -63,9 +66,10 @@ The site replaces a static portfolio with a small product: a public catalog back
 
 - **No overbooking, guaranteed by the database.** A `BEFORE INSERT/UPDATE` trigger locks the workshop row (`SELECT ... FOR UPDATE`) and rejects registrations once the capacity is reached. A partial unique index on `(product_id, lower(email))` blocks duplicate signups while still allowing a cancelled user to register again.
 - **Anonymous users can only do one thing**: create a registration with `status = 'pendiente'`. Everything else (catalog and registration writes, Storage uploads) requires an authenticated session.
-- **Idempotent migrations**: both SQL scripts can be re-run safely against an existing database.
-- **Data integrity in the schema**: CHECK constraints for email format, name/title lengths and valid status values.
-- **43 automated tests** covering calendar/ICS generation, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **Idempotent migrations**: all SQL scripts can be re-run safely against an existing database.
+- **Data integrity in the schema**: CHECK constraints for email format, name/title lengths, price/currency validity, discount bounds, Etsy listing uniqueness and valid status values.
+- **71 automated tests** covering calendar/ICS generation, price and offer helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **Webhook authenticity**: Etsy requests are verified with HMAC-SHA256 over the raw body, a 5-minute timestamp window and constant-time signature comparison.
 - **Offline development mode**: the app runs with local mock data and `localStorage`, with no database credentials required.
 
 ## Tech stack
@@ -96,9 +100,10 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 <summary><strong>Connect a real Supabase project</strong></summary>
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the **SQL Editor**, run these scripts in order (both are idempotent):
+2. In the **SQL Editor**, run these scripts in order (all are idempotent):
    - `supabase-migration.sql` — tables, capacity trigger, base policies and the `products` storage bucket.
    - `supabase-hardening.sql` — hardened RLS policies and data validation constraints.
+   - `supabase-offers-etsy.sql` — numeric prices, percentage offers, visibility flags, Etsy metadata and the `etsy_credentials` table.
 3. Create the admin user in **Authentication → Users → Add user**. That account is the only one able to sign in at `/admin` and write to the catalog.
 4. Copy the environment file and fill in your keys:
 
@@ -124,8 +129,44 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 | `VITE_ETSY_SHOP_URL` | Etsy shop URL shown in the footer. |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Social media links. |
 | `VITE_CONTACT_EMAIL` | Contact email shown in the footer. |
+| `ETSY_KEYSTRING` / `ETSY_SHARED_SECRET` | Etsy app credentials (server only). |
+| `ETSY_SHOP_ID` | Numeric Etsy shop ID to synchronise. |
+| `ETSY_REFRESH_TOKEN` | Bootstrap refresh token, used only when `etsy_credentials` has no row. |
+| `ETSY_WEBHOOK_SECRET` | Signing secret from the Etsy Webhook Portal (starts with `whsec_`). |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Supabase project URL and public key for server-side JWT verification. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key used by the sync jobs (server only). |
+| `CRON_SECRET` | Protects the daily reconciliation endpoint (`GET /api/etsy-sync`). |
 
-Secrets are never committed: real keys live in `.env` (git-ignored) locally and in the Vercel dashboard in production.
+Secrets are never committed: real keys live in `.env` (git-ignored) locally and in the Vercel dashboard in production. Only `VITE_*` variables are exposed to the browser.
+
+## Etsy integration
+
+1. Create a personal app in the [Etsy developer dashboard](https://www.etsy.com/developers/your-apps) and add `https://<your-domain>/etsy-callback.html` as an allowed redirect URI. Request the `listings_r` and `shops_r` scopes.
+2. Generate the OAuth tokens locally:
+
+   ```bash
+   ETSY_KEYSTRING=... ETSY_SHARED_SECRET=... \
+   ETSY_REDIRECT_URI=https://<your-domain>/etsy-callback.html \
+   node scripts/etsy-oauth.mjs
+   ```
+
+   Open the printed URL, authorise the app, then copy the code shown on the callback page and exchange it:
+
+   ```bash
+   node scripts/etsy-oauth.mjs --exchange <code>
+   ```
+
+   The script prints the `ETSY_REFRESH_TOKEN` and an idempotent SQL statement for `etsy_credentials`. Refresh tokens rotate: the function stores the new one automatically.
+3. Register the webhook in the Etsy Webhook Portal with URL `https://<your-domain>/api/etsy-webhook`, the `ETSY_WEBHOOK_SECRET` you chose and the events `listing.created`, `listing.updated`, `listing.deleted`, `inventory.updated` and `inventory.out_of_stock`.
+4. Set the server variables listed above in Vercel. The optional daily reconciliation uses a Vercel Cron job:
+
+   ```json
+   { "crons": [{ "path": "/api/etsy-sync", "schedule": "0 4 * * *" }] }
+   ```
+
+   Vercel sends `Authorization: Bearer $CRON_SECRET` automatically when the variable is defined.
+
+Synced title, description, image, price and state come from Etsy. Category and featured status stay editable in this app. Deactivated or deleted listings are hidden instead of removed. Etsy shop-wide sales are not exposed by the API, so the synced price is the listing's base price; percentage offers are local-only.
 
 ## Development and production modes
 
@@ -141,14 +182,15 @@ src/
   components/
     ui/            # Design system primitives (Button, Input, PasswordInput, CalendarEventActions…)
     layout/        # Navbar and footer
-    admin/         # Login, dashboard, product form/table, registration and calendar panels
+    admin/         # Login, dashboard, product form/table, registration, Etsy and calendar panels
   hooks/           # useProducts, useRegistrations, useAdminAuth, useWorkshopSpots…
-  services/        # Supabase data access (products, registrations)
-  utils/           # ICS/calendar generation, image validation, logger, Supabase client
+  services/        # Supabase data access (products, registrations) and Etsy sync client
+  utils/           # ICS/calendar generation, price helpers, image validation, logger, Supabase client
   types/           # Domain models
   mocks/           # Local data for offline development
   pages/           # CatalogPage, AdminPage
-scripts/           # Docker-based SQL test suite
+api/               # Vercel functions: Etsy webhook, sync and shared server helpers
+scripts/           # OAuth bootstrap and Docker-based SQL test suite
 .github/workflows/ # CI pipeline
 ```
 
@@ -163,6 +205,7 @@ scripts/           # Docker-based SQL test suite
 | `npm run test:watch` | Tests in watch mode. |
 | `npm run test:db` | SQL assertion suite on PostgreSQL 15 via Docker. |
 | `npm run preview` | Preview the production build locally. |
+| `node scripts/etsy-oauth.mjs` | Generate Etsy OAuth tokens and the `etsy_credentials` SQL. |
 
 ## Testing and CI/CD
 
@@ -179,11 +222,6 @@ scripts/           # Docker-based SQL test suite
 ## Author
 
 **Ana Alonso** — Full-stack developer
-
-- GitHub: [@Ana-Alonso](https://github.com/Ana-Alonso)
-- LinkedIn: <!-- TODO: add your LinkedIn URL --> _add your profile_
-- Portfolio: <!-- TODO: add your portfolio URL --> _add your site_
-- Email: <!-- TODO: replace with your contact email --> _add your email_
 
 ## License
 
