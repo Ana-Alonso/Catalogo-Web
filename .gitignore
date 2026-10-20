@@ -28,7 +28,10 @@ AGENTS.md
 *.sql
 !supabase-migration.sql
 !supabase-hardening.sql
+!supabase-offers-etsy.sql
 !scripts/test-db.sql
 
 supabase/
-scripts/
+scripts/*
+!scripts/etsy-oauth.mjs
+.etsy-oauth.json

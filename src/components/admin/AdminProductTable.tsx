@@ -2,6 +2,7 @@ import React from 'react';
 import { Trash2, Edit3, ExternalLink, Sparkles } from 'lucide-react';
 import { Card, Badge, Button, Box } from '../ui';
 import { theme } from '../../theme';
+import { formatPrice, getDiscountedCents, isOfferActive } from '../../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 
 interface AdminProductTableProps {
@@ -55,6 +56,15 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
           <tbody className={`divide-y ${theme.colors.borderSubtle} text-sm`}>
             {products.map((item) => {
               const currentStatus = item.status || 'disponible';
+              const currency = item.currency || 'EUR';
+              const offerPercent =
+                item.priceCents != null && item.discountPercent != null && isOfferActive(item)
+                  ? item.discountPercent
+                  : null;
+              const displayCents =
+                offerPercent != null && item.priceCents != null
+                  ? getDiscountedCents(item.priceCents, offerPercent)
+                  : item.priceCents;
               return (
                 <tr key={item.id} className="hover:bg-neutral-800/40 transition-colors">
                   <td className="py-4 px-6">
@@ -65,12 +75,18 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                         className="w-12 h-12 rounded object-cover bg-neutral-800 flex-shrink-0"
                       />
                       <Box>
-                        <Box className="flex items-center gap-1.5">
+                        <Box className="flex flex-wrap items-center gap-1.5">
                           <span className="font-semibold text-white">{item.title}</span>
                           {item.featured && (
                             <span title="Producto Destacado">
                               <Sparkles className="w-3.5 h-3.5 text-orange-500 fill-orange-500/20" />
                             </span>
+                          )}
+                          {item.source === 'etsy' && (
+                            <Badge variant="neutral">Etsy</Badge>
+                          )}
+                          {item.isVisible === false && (
+                            <Badge variant="outline">Oculto</Badge>
                           )}
                         </Box>
                         <Box className={`${theme.colors.textMuted} text-xs line-clamp-1 max-w-xs`}>
@@ -95,7 +111,19 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                     </Badge>
                   </td>
                   <td className="py-4 px-6 font-medium text-neutral-300">
-                    {item.price || '—'}
+                    {displayCents != null ? (
+                      <Box className="space-y-1">
+                        <span>{formatPrice(displayCents, currency)}</span>
+                        {offerPercent != null && item.priceCents != null && (
+                          <Box className="text-xs text-neutral-500">
+                            <s>{formatPrice(item.priceCents, currency)}</s>
+                            <span className="ml-2 text-orange-400">-{offerPercent}%</span>
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
+                      'A consultar'
+                    )}
                   </td>
                   <td className="py-4 px-6">
                     <Box className="flex items-center gap-3">
@@ -134,13 +162,22 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={isDeleting}
+                        disabled={isDeleting || item.source === 'etsy'}
+                        title={
+                          item.source === 'etsy'
+                            ? 'Los productos de Etsy se eliminan desde Etsy'
+                            : undefined
+                        }
                         onClick={() => {
                           if (window.confirm(`¿Seguro que deseas eliminar "${item.title}"?`)) {
                             onDelete(String(item.id));
                           }
                         }}
-                        aria-label={`Eliminar ${item.title}`}
+                        aria-label={
+                          item.source === 'etsy'
+                            ? `${item.title} se elimina desde Etsy`
+                            : `Eliminar ${item.title}`
+                        }
                       >
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </Button>

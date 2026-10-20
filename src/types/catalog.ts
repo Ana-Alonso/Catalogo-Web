@@ -2,6 +2,8 @@ export type CategoryType = 'todas' | 'personalizados' | 'camisetas' | 'ilustraci
 
 export type AvailabilityStatus = 'disponible' | 'reservado' | 'vendido';
 
+export type ProductSource = 'local' | 'etsy';
+
 export interface CatalogItem {
   id: string;
   title: string;
@@ -10,7 +12,14 @@ export interface CatalogItem {
   category: CategoryType;
   etsyLink?: string;
   vintedLink?: string;
-  price?: string;
+  priceCents?: number | null;
+  currency?: string;
+  discountPercent?: number | null;
+  source?: ProductSource;
+  etsyListingId?: number | null;
+  etsyState?: string | null;
+  etsySyncedAt?: string | null;
+  isVisible?: boolean;
   status: AvailabilityStatus;
   featured: boolean;
   eventDate?: string;
@@ -34,9 +43,15 @@ export interface ProductFormData {
   etsyLink?: string;
   vintedLink?: string;
   price?: string;
+  discountPercent?: string;
   status: AvailabilityStatus;
   featured: boolean;
   eventDate?: string;
   eventLocation?: string;
   cupo?: string;
+}
+
+export interface EtsyProductMetadata {
+  category: Exclude<CategoryType, 'todas'>;
+  featured: boolean;
 }

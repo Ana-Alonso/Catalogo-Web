@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { AdminProductForm } from './AdminProductForm';
+import { AdminEtsyProductForm } from './AdminEtsyProductForm';
+import { AdminEtsySyncPanel } from './AdminEtsySyncPanel';
 import { AdminProductTable } from './AdminProductTable';
 import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
@@ -8,7 +10,11 @@ import { Button } from '../ui';
 import { theme } from '../../theme';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
-import type { CatalogItem, ProductFormData } from '../../types/catalog';
+import type {
+  CatalogItem,
+  EtsyProductMetadata,
+  ProductFormData,
+} from '../../types/catalog';
 import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
 import { Unlock, AlertCircle, CheckCircle, ArrowLeft, LoaderCircle } from 'lucide-react';
 import logoImg from '../../assets/Logo.png';
@@ -19,7 +25,9 @@ interface AdminDashboardProps {
   isLoadingRegistrations: boolean;
   onAddProduct: (data: ProductFormData) => Promise<boolean>;
   onEditProduct: (id: string, data: ProductFormData) => Promise<boolean>;
+  onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   onDeleteProduct: (id: string) => Promise<boolean>;
+  onRefreshProducts: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onClose: () => void;
@@ -31,7 +39,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   isLoadingRegistrations,
   onAddProduct,
   onEditProduct,
+  onEditEtsyMetadata,
   onDeleteProduct,
+  onRefreshProducts,
   onSetRegistrationStatus,
   onDeleteRegistration,
   onClose
@@ -84,6 +94,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
 
     setFeedbackMsg({ text: 'Error al procesar la operación.', type: 'error' });
+    return false;
+  };
+
+  const handleEtsySubmit = async (metadata: EtsyProductMetadata): Promise<boolean> => {
+    if (!editingProduct) {
+      return false;
+    }
+
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+
+    const success = await onEditEtsyMetadata(String(editingProduct.id), metadata);
+    setIsSubmitting(false);
+
+    if (success) {
+      setFeedbackMsg({
+        text: 'Producto de Etsy actualizado correctamente.',
+        type: 'success',
+      });
+      setEditingProduct(null);
+      setTimeout(() => setFeedbackMsg(null), 3500);
+      return true;
+    }
+
+    setFeedbackMsg({ text: 'Error al actualizar el producto de Etsy.', type: 'error' });
     return false;
   };
 
@@ -180,13 +215,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <AdminWorkshopCalendarPanel workshopData={createdWorkshop} />
         )}
 
-        <AdminProductForm
-          key={editingProduct ? editingProduct.id : 'new-product-form'}
-          onSubmit={handleFormSubmit}
-          isSubmitting={isSubmitting}
-          editingProduct={editingProduct}
-          onCancelEdit={() => setEditingProduct(null)}
-        />
+        {isSupabaseConfigured && <AdminEtsySyncPanel onSynced={onRefreshProducts} />}
+
+        {editingProduct?.source === 'etsy' ? (
+          <AdminEtsyProductForm
+            key={editingProduct.id}
+            product={editingProduct}
+            onSubmit={handleEtsySubmit}
+            isSubmitting={isSubmitting}
+            onCancelEdit={() => setEditingProduct(null)}
+          />
+        ) : (
+          <AdminProductForm
+            key={editingProduct ? editingProduct.id : 'new-product-form'}
+            onSubmit={handleFormSubmit}
+            isSubmitting={isSubmitting}
+            editingProduct={editingProduct}
+            onCancelEdit={() => setEditingProduct(null)}
+          />
+        )}
 
         <AdminProductTable
           products={products}

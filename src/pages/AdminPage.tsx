@@ -6,7 +6,14 @@ import { useRegistrations } from '../hooks/useRegistrations';
 
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
-  const { products, addProduct, editProduct, removeProduct } = useProducts();
+  const {
+    products,
+    addProduct,
+    editProduct,
+    editEtsyMetadata,
+    removeProduct,
+    refreshProducts,
+  } = useProducts();
   const { registrations, isLoading, setStatus, remove } = useRegistrations();
 
   return (
@@ -16,7 +23,9 @@ export const AdminPage: React.FC = () => {
       isLoadingRegistrations={isLoading}
       onAddProduct={addProduct}
       onEditProduct={editProduct}
+      onEditEtsyMetadata={editEtsyMetadata}
       onDeleteProduct={removeProduct}
+      onRefreshProducts={refreshProducts}
       onSetRegistrationStatus={setStatus}
       onDeleteRegistration={remove}
       onClose={() => navigate('/')}

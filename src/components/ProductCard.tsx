@@ -5,6 +5,11 @@ import { Badge, Box, Typography, Button } from './ui';
 import { Modal } from './ui/Modal';
 import { WorkshopSignupForm } from './WorkshopSignupForm';
 import { theme } from '../theme';
+import {
+  formatPrice,
+  getDiscountedCents,
+  isOfferActive,
+} from '../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../types/catalog';
 import type { RegistrationFormData } from '../types/registrations';
 
@@ -35,6 +40,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const isWorkshop = item.category === 'talleres';
+  const hasOffer = isOfferActive(item);
+  const priceCents = item.priceCents ?? null;
+  const finalCents = hasOffer
+    ? getDiscountedCents(priceCents, item.discountPercent)
+    : priceCents;
+  const finalPrice = formatPrice(finalCents, item.currency);
+  const originalPrice = formatPrice(priceCents, item.currency);
   const cupo = item.cupo ?? null;
   const registeredCount = spotsCount ?? 0;
   const spotsLeft = cupo === null ? null : Math.max(cupo - registeredCount, 0);
@@ -71,11 +83,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           </Box>
         )}
         
-        {item.price && (
-          <span className="absolute top-3 right-3 bg-neutral-950/80 backdrop-blur-sm border border-neutral-700 text-orange-400 font-bold text-xs uppercase px-2.5 py-1 rounded-sm">
-            {item.price}
+        <Box className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+          {hasOffer && (
+            <span className="bg-orange-600 text-white font-bold text-[10px] uppercase px-2 py-1 rounded shadow-md">
+              -{item.discountPercent}%
+            </span>
+          )}
+          <span
+            className="bg-neutral-950/80 backdrop-blur-sm border border-neutral-700 text-orange-400 font-bold text-xs uppercase px-2.5 py-1 rounded-sm"
+            aria-label={
+              priceCents == null
+                ? 'Precio a consultar'
+                : hasOffer
+                  ? `Precio ${finalPrice}, antes ${originalPrice}, ${item.discountPercent}% de descuento`
+                  : `Precio ${finalPrice}`
+            }
+          >
+            {priceCents == null ? (
+              'Consultar'
+            ) : hasOffer ? (
+              <span className="inline-flex items-center gap-1.5">
+                <s className="text-neutral-400 font-medium normal-case">{originalPrice}</s>
+                <span>{finalPrice}</span>
+              </span>
+            ) : (
+              finalPrice
+            )}
           </span>
-        )}
+        </Box>
       </Box>
 
       <Box className="p-6 flex flex-col flex-grow">

@@ -1,10 +1,15 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
 import { validateImageFile } from '../utils/imageValidation';
+import { parsePriceToCents } from '../utils/price';
 import { mockCatalogItems } from '../mocks/catalogMocks';
-import type { CatalogItem, ProductFormData } from '../types/catalog';
+import type {
+  CatalogItem,
+  EtsyProductMetadata,
+  ProductFormData,
+} from '../types/catalog';
 
 const STORAGE_BUCKET = 'products';
-const LOCAL_STORAGE_KEY = 'laurel_custom_products';
+const LOCAL_STORAGE_KEY = 'laurel_custom_products_v2';
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
 const parseCupo = (value?: string): number | null => {
@@ -13,6 +18,40 @@ const parseCupo = (value?: string): number | null => {
   }
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+interface LocalPriceFields {
+  priceCents: number | null;
+  currency: string;
+  discountPercent: number | null;
+}
+
+const resolvePriceFields = (formData: ProductFormData): LocalPriceFields => {
+  const priceCents = parsePriceToCents(formData.price);
+
+  if (formData.price?.trim() && priceCents == null) {
+    throw new Error('El precio introducido no es válido.');
+  }
+
+  if (!formData.discountPercent?.trim()) {
+    return { priceCents, currency: 'EUR', discountPercent: null };
+  }
+
+  const discountPercent = Number(formData.discountPercent.replace(',', '.'));
+
+  if (
+    !Number.isInteger(discountPercent) ||
+    discountPercent < 1 ||
+    discountPercent > 90
+  ) {
+    throw new Error('El descuento debe ser un número entero entre 1 y 90.');
+  }
+
+  if (priceCents == null) {
+    throw new Error('Para aplicar un descuento primero debes indicar un precio.');
+  }
+
+  return { priceCents, currency: 'EUR', discountPercent };
 };
 
 const getStoredLocalProducts = (): CatalogItem[] => {
@@ -94,6 +133,7 @@ export const uploadProductImage = async (file: File): Promise<string> => {
 
 export const createProduct = async (formData: ProductFormData): Promise<CatalogItem> => {
   let imageUrl = formData.imageUrl || '';
+  const priceFields = resolvePriceFields(formData);
 
   if (formData.imageFile) {
     imageUrl = await uploadProductImage(formData.imageFile);
@@ -107,7 +147,9 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
     image: imageUrl,
     etsyLink: formData.etsyLink?.trim() || undefined,
     vintedLink: formData.vintedLink?.trim() || undefined,
-    price: formData.price?.trim() || undefined,
+    ...priceFields,
+    source: 'local',
+    isVisible: true,
     status: formData.status,
     featured: formData.featured,
     eventDate: formData.eventDate?.trim() || undefined,
@@ -127,7 +169,11 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
           image: newProduct.image,
           etsyLink: newProduct.etsyLink || null,
           vintedLink: newProduct.vintedLink || null,
-          price: newProduct.price || null,
+          priceCents: newProduct.priceCents ?? null,
+          currency: newProduct.currency,
+          discountPercent: newProduct.discountPercent ?? null,
+          source: 'local',
+          isVisible: true,
           status: newProduct.status,
           featured: newProduct.featured,
           eventDate: newProduct.eventDate || null,
@@ -156,6 +202,7 @@ export const updateProduct = async (
   formData: ProductFormData
 ): Promise<CatalogItem> => {
   let imageUrl = formData.imageUrl || '';
+  const priceFields = resolvePriceFields(formData);
 
   if (formData.imageFile) {
     imageUrl = await uploadProductImage(formData.imageFile);
@@ -168,7 +215,7 @@ export const updateProduct = async (
       category: formData.category,
       etsyLink: formData.etsyLink?.trim() || undefined,
       vintedLink: formData.vintedLink?.trim() || undefined,
-      price: formData.price?.trim() || undefined,
+      ...priceFields,
       status: formData.status,
       featured: formData.featured,
       eventDate: formData.eventDate?.trim() || undefined,
@@ -184,10 +231,14 @@ export const updateProduct = async (
       .from('products')
       .update(payload)
       .eq('id', id)
+      .eq('source', 'local')
       .select()
       .single();
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        throw new Error('Los productos de Etsy se editan desde Etsy.');
+      }
       throw error;
     }
 
@@ -205,7 +256,7 @@ export const updateProduct = async (
         image: imageUrl || item.image,
         etsyLink: formData.etsyLink?.trim() || undefined,
         vintedLink: formData.vintedLink?.trim() || undefined,
-        price: formData.price?.trim() || undefined,
+        ...priceFields,
         status: formData.status,
         featured: formData.featured,
         eventDate: formData.eventDate?.trim() || undefined,
@@ -227,7 +278,7 @@ export const updateProduct = async (
       image: imageUrl,
       etsyLink: formData.etsyLink?.trim() || undefined,
       vintedLink: formData.vintedLink?.trim() || undefined,
-      price: formData.price?.trim() || undefined,
+      ...priceFields,
       status: formData.status,
       featured: formData.featured,
       eventDate: formData.eventDate?.trim() || undefined,
@@ -240,13 +291,19 @@ export const updateProduct = async (
 
 export const deleteProduct = async (id: string): Promise<void> => {
   if (!useMocks && isSupabaseConfigured && supabase) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('source', 'local')
+      .select('id');
 
     if (error) {
       throw error;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('Los productos de Etsy se gestionan desde Etsy.');
     }
     return;
   }
@@ -254,4 +311,51 @@ export const deleteProduct = async (id: string): Promise<void> => {
   const currentLocals = getStoredLocalProducts();
   const updated = currentLocals.filter((item) => item.id !== id);
   saveStoredLocalProducts(updated);
+};
+
+export const updateEtsyProductMetadata = async (
+  id: string,
+  metadata: EtsyProductMetadata
+): Promise<CatalogItem> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({
+        category: metadata.category,
+        featured: metadata.featured,
+      })
+      .eq('id', id)
+      .eq('source', 'etsy')
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as CatalogItem;
+  }
+
+  const currentLocals = getStoredLocalProducts();
+  let updatedProduct: CatalogItem | null = null;
+
+  const updatedLocals = currentLocals.map((item) => {
+    if (item.id !== id) {
+      return item;
+    }
+    updatedProduct = {
+      ...item,
+      category: metadata.category,
+      featured: metadata.featured,
+    };
+    return updatedProduct;
+  });
+
+  saveStoredLocalProducts(updatedLocals);
+
+  if (!updatedProduct) {
+    throw new Error('Producto no encontrado.');
+  }
+
+  return updatedProduct;
 };

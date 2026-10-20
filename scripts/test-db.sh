@@ -40,6 +40,13 @@ END $$;
 CREATE SCHEMA IF NOT EXISTS storage;
 CREATE TABLE IF NOT EXISTS storage.buckets (id TEXT PRIMARY KEY, name TEXT, public BOOLEAN DEFAULT false);
 CREATE TABLE IF NOT EXISTS storage.objects (id UUID DEFAULT gen_random_uuid() PRIMARY KEY, bucket_id TEXT, name TEXT);
+CREATE SCHEMA IF NOT EXISTS auth;
+CREATE OR REPLACE FUNCTION auth.role() RETURNS text
+LANGUAGE sql STABLE
+AS $$ SELECT current_setting('role', true) $$;
+GRANT USAGE ON SCHEMA public, auth TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated;
 SQL
 }
 
@@ -49,21 +56,25 @@ run_file() {
   docker exec -i "$CONTAINER" psql -U "$PSQL_USER" -d "$db" -v ON_ERROR_STOP=1 -q < "$file"
 }
 
-echo "==> BBDD 1 (laurel): stub storage + migración x2 + endurecimiento x2"
+echo "==> BBDD 1 (laurel): stub storage + migración x2 + endurecimiento x2 + ofertas x2"
 create_storage_stub laurel
 run_file laurel "$ROOT_DIR/supabase-migration.sql"
 run_file laurel "$ROOT_DIR/supabase-migration.sql"
 run_file laurel "$ROOT_DIR/supabase-hardening.sql"
 run_file laurel "$ROOT_DIR/supabase-hardening.sql"
+run_file laurel "$ROOT_DIR/supabase-offers-etsy.sql"
+run_file laurel "$ROOT_DIR/supabase-offers-etsy.sql"
 
 echo "==> BBDD 1: suite de aserciones"
 run_file laurel "$ROOT_DIR/scripts/test-db.sql"
 
-echo "==> BBDD 2 (laurel_fresh): stub storage + schema.sql + endurecimiento"
+echo "==> BBDD 2 (laurel_fresh): stub storage + schema.sql + endurecimiento + ofertas x2"
 docker exec "$CONTAINER" createdb -U "$PSQL_USER" laurel_fresh
 create_storage_stub laurel_fresh
 run_file laurel_fresh "$ROOT_DIR/supabase-schema.sql"
 run_file laurel_fresh "$ROOT_DIR/supabase-hardening.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase-offers-etsy.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase-offers-etsy.sql"
 run_file laurel_fresh "$ROOT_DIR/scripts/test-db.sql"
 
 echo "==> TODO OK: 2 bases de datos y aserciones superadas"

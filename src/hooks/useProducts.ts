@@ -1,7 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
+import {
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  updateEtsyProductMetadata,
+} from '../services/productService';
 import { logError } from '../utils/logger';
-import type { CatalogItem, ProductFormData } from '../types/catalog';
+import type {
+  CatalogItem,
+  EtsyProductMetadata,
+  ProductFormData,
+} from '../types/catalog';
 
 interface UseProductsResult {
   products: CatalogItem[];
@@ -9,6 +19,7 @@ interface UseProductsResult {
   error: string | null;
   addProduct: (data: ProductFormData) => Promise<boolean>;
   editProduct: (id: string, data: ProductFormData) => Promise<boolean>;
+  editEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   removeProduct: (id: string) => Promise<boolean>;
   refreshProducts: () => Promise<void>;
 }
@@ -86,6 +97,22 @@ export const useProducts = (): UseProductsResult => {
     }
   };
 
+  const editEtsyMetadata = async (
+    id: string,
+    metadata: EtsyProductMetadata
+  ): Promise<boolean> => {
+    try {
+      const updated = await updateEtsyProductMetadata(id, metadata);
+      setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      return true;
+    } catch (err) {
+      logError('useProducts.editEtsyMetadata', err);
+      const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
+      setError(msg);
+      return false;
+    }
+  };
+
   const removeProduct = async (id: string): Promise<boolean> => {
     try {
       await deleteProduct(id);
@@ -105,6 +132,7 @@ export const useProducts = (): UseProductsResult => {
     error,
     addProduct,
     editProduct,
+    editEtsyMetadata,
     removeProduct,
     refreshProducts: loadProducts,
   };
