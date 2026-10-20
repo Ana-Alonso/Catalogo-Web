@@ -127,7 +127,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                   </td>
                   <td className="py-4 px-6">
                     <Box className="flex items-center gap-3">
-                      {item.etsyLink && (
+                      {item.category !== 'talleres' && item.etsyLink && (
                         <a 
                           href={item.etsyLink} 
                           target="_blank" 
@@ -137,7 +137,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                           Etsy <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
-                      {item.vintedLink && (
+                      {item.category !== 'talleres' && item.vintedLink && (
                         <a 
                           href={item.vintedLink} 
                           target="_blank" 

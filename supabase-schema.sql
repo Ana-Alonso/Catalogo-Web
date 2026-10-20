@@ -34,7 +34,11 @@ CREATE TABLE IF NOT EXISTS public.products (
     ),
     CONSTRAINT products_source_check CHECK (source IN ('local', 'etsy')),
     CONSTRAINT products_etsy_listing_check CHECK (source <> 'etsy' OR "etsyListingId" IS NOT NULL),
-    CONSTRAINT products_etsy_no_discount_check CHECK (source <> 'etsy' OR "discountPercent" IS NULL)
+    CONSTRAINT products_etsy_no_discount_check CHECK (source <> 'etsy' OR "discountPercent" IS NULL),
+    CONSTRAINT products_workshop_links_check CHECK (
+        category <> 'talleres'
+        OR ("etsyLink" IS NULL AND "vintedLink" IS NULL)
+    )
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS products_etsy_listing_id_idx

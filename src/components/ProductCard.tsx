@@ -192,7 +192,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               Taller completo
             </Box>
           )}
-          {item.etsyLink && currentStatus !== 'vendido' && (
+          {!isWorkshop && item.etsyLink && currentStatus !== 'vendido' && (
             <a 
               href={item.etsyLink}
               target="_blank"
@@ -201,10 +201,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               aria-label={`Comprar ${item.title} en Etsy`}
             >
               <ShoppingBag className="w-4 h-4" aria-hidden="true" />
-              {item.category === 'talleres' ? 'Reservar Plaza en Etsy' : 'Comprar en Etsy'}
+              Comprar en Etsy
             </a>
           )}
-          {item.vintedLink && currentStatus !== 'vendido' && (
+          {!isWorkshop && item.vintedLink && currentStatus !== 'vendido' && (
             <a 
               href={item.vintedLink}
               target="_blank"

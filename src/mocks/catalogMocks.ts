@@ -38,8 +38,6 @@ export const mockCatalogItems: CatalogItem[] = [
     description: "Sesión presencial de técnicas mixtas y expresión artística.",
     category: "talleres",
     image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&q=80&w=800",
-    etsyLink: "https://www.etsy.com",
-    vintedLink: "https://www.vinted.es",
     priceCents: 4500,
     currency: "EUR",
     discountPercent: 10,

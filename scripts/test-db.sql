@@ -171,6 +171,14 @@ BEGIN
 
   IF NOT EXISTS (
     SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'products_workshop_links_check'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: CHECK de enlaces en talleres ausente';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'products'
@@ -369,6 +377,39 @@ BEGIN
       END IF;
   END;
 END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.products (
+        id, title, description, image, category, status, featured, "etsyLink"
+    )
+    VALUES (
+        '00000000-0000-0000-0000-000000000009', 'Taller con enlace', 'Descripción',
+        'img.png', 'talleres', 'disponible', false, 'https://www.etsy.com/listing/1'
+    );
+    RAISE EXCEPTION 'FAIL: se permitió un enlace de Etsy en un taller';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM NOT LIKE '%products_workshop_links_check%' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al validar enlace en taller: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+INSERT INTO public.products (
+    id, title, description, image, category, status, featured,
+    "etsyLink", "vintedLink"
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000010', 'Obra con enlaces', 'Descripción',
+    'img.png', 'ilustraciones', 'disponible', false,
+    'https://www.etsy.com/listing/2', 'https://www.vinted.es/items/2'
+);
 
 DO $$
 BEGIN
