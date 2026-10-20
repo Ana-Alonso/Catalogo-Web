@@ -10,8 +10,8 @@ export interface CatalogItem {
   description: string;
   image: string;
   category: CategoryType;
-  etsyLink?: string;
-  vintedLink?: string;
+  etsyLink?: string | null;
+  vintedLink?: string | null;
   priceCents?: number | null;
   currency?: string;
   discountPercent?: number | null;

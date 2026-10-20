@@ -41,7 +41,7 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 - **Formulario de inscripción** con nombre y email, control de duplicados por taller y sin sobreventa incluso con peticiones concurrentes.
 - **Añadir al calendario** tras inscribirse: Google Calendar, Outlook o descarga de un archivo `.ics` compatible con Apple Calendar y otras apps.
 - **Responsive y accesible**: navegación por teclado, HTML semántico, etiquetas ARIA y foco visible.
-- **Enlaces de compra** a Etsy / Vinted — la app no maneja datos de pago.
+- **Enlaces de compra** a Etsy / Vinted en productos que no son talleres — la app no maneja datos de pago. Los talleres nunca muestran enlaces externos de compra.
 
 ### Panel de administración (`/admin`)
 
@@ -68,7 +68,7 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 - **Los usuarios anónimos solo pueden hacer una cosa**: crear una inscripción con `status = 'pendiente'`. Todo lo demás (escritura del catálogo e inscripciones, subidas a Storage) requiere sesión autenticada.
 - **Migraciones idempotentes**: todos los scripts SQL pueden re-ejecutarse sin errores sobre una base existente.
 - **Integridad en el esquema**: CHECKs de formato de email, longitudes de nombre/título, validez de precio/moneda, límites del descuento, unicidad del listing de Etsy y valores válidos de estado.
-- **71 tests automatizados** que cubren generación de calendario/ICS, utilidades de precio y ofertas, mapeo de Etsy y firmas de webhook, el servicio de inscripciones (incluido el mapeo de errores de Supabase) y flujos de UI, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
+- **74 tests automatizados** que cubren generación de calendario/ICS, utilidades de precio, ofertas y enlaces de compra, mapeo de Etsy y firmas de webhook, el servicio de inscripciones (incluido el mapeo de errores de Supabase) y flujos de UI, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
 - **Autenticidad de los webhooks**: las peticiones de Etsy se verifican con HMAC-SHA256 sobre el cuerpo original, ventana de 5 minutos y comparación en tiempo constante.
 - **Modo desarrollo offline**: la app funciona con datos mock y `localStorage`, sin credenciales de base de datos.
 
@@ -104,6 +104,7 @@ Abre `http://localhost:5173`. El modo desarrollo usa datos mock (`VITE_USE_MOCKS
    - `supabase-migration.sql` — tablas, disparador de cupo, políticas base y bucket `products`.
    - `supabase-hardening.sql` — políticas RLS endurecidas y restricciones de validación.
    - `supabase-offers-etsy.sql` — precios numéricos, ofertas en porcentaje, visibilidad, metadatos de Etsy y tabla `etsy_credentials`.
+   - `supabase-workshop-links.sql` — elimina los enlaces de compra de los talleres y los bloquea a nivel de base de datos.
 3. Crea el usuario administrador en **Authentication → Users → Add user**. Esa cuenta será la única que pueda entrar en `/admin` y escribir en el catálogo.
 4. Copia el archivo de entorno y rellena tus claves:
 
@@ -166,7 +167,7 @@ Las claves reales nunca se versionan: viven en `.env` (ignorado por git) en loca
 
    Vercel envía `Authorization: Bearer $CRON_SECRET` automáticamente si la variable existe.
 
-El título, la descripción, la imagen, el precio y el estado sincronizados vienen de Etsy. La categoría y el destacado se editan en esta app. Los listings desactivados o borrados se ocultan en lugar de eliminarse. La API de Etsy no expone las rebajas de tienda, así que el precio sincronizado es el precio base del listing; las ofertas porcentuales son locales.
+El título, la descripción, la imagen, el precio y el estado sincronizados vienen de Etsy. La categoría y el destacado se editan en esta app, pero los listings de Etsy no pueden clasificarse como talleres. Los listings desactivados o borrados se ocultan en lugar de eliminarse. La API de Etsy no expone las rebajas de tienda, así que el precio sincronizado es el precio base del listing; las ofertas porcentuales son locales.
 
 ## Modos de desarrollo y producción
 

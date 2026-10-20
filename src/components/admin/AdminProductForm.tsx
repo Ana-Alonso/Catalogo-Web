@@ -3,6 +3,7 @@ import { Plus, Check, X, AlertCircle } from 'lucide-react';
 import { Button, Card, Box } from '../ui';
 import { theme } from '../../theme';
 import { validateImageFile } from '../../utils/imageValidation';
+import { resolvePurchaseLinks } from '../../utils/productLinks';
 import { validateProductForm } from '../../utils/productFormValidation';
 import { ImageField } from './product-form/ImageField';
 import { PriceFields } from './product-form/PriceFields';
@@ -138,14 +139,15 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       return;
     }
 
+    const purchaseLinks = resolvePurchaseLinks(category, etsyLink, vintedLink);
+
     const success = await onSubmit({
       title,
       description,
       category,
       price: priceOnRequest ? '' : price,
       discountPercent: priceOnRequest ? '' : discountPercent,
-      etsyLink: etsyLink.trim() || undefined,
-      vintedLink: vintedLink.trim() || undefined,
+      ...purchaseLinks,
       status,
       featured,
       eventDate: category === 'talleres' ? eventDate : undefined,
@@ -197,6 +199,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           featured={featured}
           etsyLink={etsyLink}
           vintedLink={vintedLink}
+          showLinks={category !== 'talleres'}
           onTitleChange={setTitle}
           onDescriptionChange={setDescription}
           onCategoryChange={setCategory}

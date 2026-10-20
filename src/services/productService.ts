@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
 import { validateImageFile } from '../utils/imageValidation';
 import { parsePriceToCents } from '../utils/price';
+import { resolvePurchaseLinks } from '../utils/productLinks';
 import { mockCatalogItems } from '../mocks/catalogMocks';
 import type {
   CatalogItem,
@@ -134,6 +135,11 @@ export const uploadProductImage = async (file: File): Promise<string> => {
 export const createProduct = async (formData: ProductFormData): Promise<CatalogItem> => {
   let imageUrl = formData.imageUrl || '';
   const priceFields = resolvePriceFields(formData);
+  const purchaseLinks = resolvePurchaseLinks(
+    formData.category,
+    formData.etsyLink,
+    formData.vintedLink
+  );
 
   if (formData.imageFile) {
     imageUrl = await uploadProductImage(formData.imageFile);
@@ -145,8 +151,7 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
     description: formData.description.trim(),
     category: formData.category,
     image: imageUrl,
-    etsyLink: formData.etsyLink?.trim() || undefined,
-    vintedLink: formData.vintedLink?.trim() || undefined,
+    ...purchaseLinks,
     ...priceFields,
     source: 'local',
     isVisible: true,
@@ -203,6 +208,11 @@ export const updateProduct = async (
 ): Promise<CatalogItem> => {
   let imageUrl = formData.imageUrl || '';
   const priceFields = resolvePriceFields(formData);
+  const purchaseLinks = resolvePurchaseLinks(
+    formData.category,
+    formData.etsyLink,
+    formData.vintedLink
+  );
 
   if (formData.imageFile) {
     imageUrl = await uploadProductImage(formData.imageFile);
@@ -213,8 +223,8 @@ export const updateProduct = async (
       title: formData.title.trim(),
       description: formData.description.trim(),
       category: formData.category,
-      etsyLink: formData.etsyLink?.trim() || undefined,
-      vintedLink: formData.vintedLink?.trim() || undefined,
+      etsyLink: purchaseLinks.etsyLink ?? null,
+      vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
       featured: formData.featured,
@@ -254,8 +264,8 @@ export const updateProduct = async (
         description: formData.description.trim(),
         category: formData.category,
         image: imageUrl || item.image,
-        etsyLink: formData.etsyLink?.trim() || undefined,
-        vintedLink: formData.vintedLink?.trim() || undefined,
+        etsyLink: purchaseLinks.etsyLink ?? null,
+        vintedLink: purchaseLinks.vintedLink ?? null,
         ...priceFields,
         status: formData.status,
         featured: formData.featured,
@@ -276,8 +286,8 @@ export const updateProduct = async (
       description: formData.description.trim(),
       category: formData.category,
       image: imageUrl,
-      etsyLink: formData.etsyLink?.trim() || undefined,
-      vintedLink: formData.vintedLink?.trim() || undefined,
+      etsyLink: purchaseLinks.etsyLink ?? null,
+      vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
       featured: formData.featured,
@@ -317,6 +327,10 @@ export const updateEtsyProductMetadata = async (
   id: string,
   metadata: EtsyProductMetadata
 ): Promise<CatalogItem> => {
+  if (metadata.category === 'talleres') {
+    throw new Error('Los talleres no pueden sincronizarse desde Etsy.');
+  }
+
   if (!useMocks && isSupabaseConfigured && supabase) {
     const { data, error } = await supabase
       .from('products')

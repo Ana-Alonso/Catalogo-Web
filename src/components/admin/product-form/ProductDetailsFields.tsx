@@ -16,6 +16,7 @@ interface ProductDetailsFieldsProps {
   featured: boolean;
   etsyLink: string;
   vintedLink: string;
+  showLinks: boolean;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onCategoryChange: (value: FormCategory) => void;
@@ -46,6 +47,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
   featured,
   etsyLink,
   vintedLink,
+  showLinks,
   onTitleChange,
   onDescriptionChange,
   onCategoryChange,
@@ -138,27 +140,29 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
         />
       </Box>
 
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          id="prod-etsy"
-          label="Enlace de Etsy (opcional)"
-          type="url"
-          maxLength={300}
-          value={etsyLink}
-          onChange={(event) => onEtsyLinkChange(event.target.value)}
-          placeholder="https://..."
-        />
+      {showLinks && (
+        <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
+            id="prod-etsy"
+            label="Enlace de Etsy (opcional)"
+            type="url"
+            maxLength={300}
+            value={etsyLink}
+            onChange={(event) => onEtsyLinkChange(event.target.value)}
+            placeholder="https://..."
+          />
 
-        <Input
-          id="prod-vinted"
-          label="Enlace de Vinted (opcional)"
-          type="url"
-          maxLength={300}
-          value={vintedLink}
-          onChange={(event) => onVintedLinkChange(event.target.value)}
-          placeholder="https://..."
-        />
-      </Box>
+          <Input
+            id="prod-vinted"
+            label="Enlace de Vinted (opcional)"
+            type="url"
+            maxLength={300}
+            value={vintedLink}
+            onChange={(event) => onVintedLinkChange(event.target.value)}
+            placeholder="https://..."
+          />
+        </Box>
+      )}
     </>
   );
 };

@@ -29,6 +29,7 @@ AGENTS.md
 !supabase-migration.sql
 !supabase-hardening.sql
 !supabase-offers-etsy.sql
+!supabase-workshop-links.sql
 !supabase-schema.sql
 !scripts/test-db.sql
 

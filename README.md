@@ -41,7 +41,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 - **Signup form** with name and email, duplicate protection per workshop, and no overbooking even under concurrent requests.
 - **Add to calendar** after signing up: Google Calendar, Outlook, or a downloadable `.ics` file for Apple Calendar and other apps.
 - **Responsive and accessible**: keyboard navigation, semantic HTML, ARIA labels and visible focus states.
-- **Purchase links** to Etsy / Vinted — no payment data is handled by this app.
+- **Purchase links** to Etsy / Vinted on non-workshop items — no payment data is handled by this app. Workshops never show external purchase links.
 
 ### Admin panel (`/admin`)
 
@@ -68,7 +68,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 - **Anonymous users can only do one thing**: create a registration with `status = 'pendiente'`. Everything else (catalog and registration writes, Storage uploads) requires an authenticated session.
 - **Idempotent migrations**: all SQL scripts can be re-run safely against an existing database.
 - **Data integrity in the schema**: CHECK constraints for email format, name/title lengths, price/currency validity, discount bounds, Etsy listing uniqueness and valid status values.
-- **71 automated tests** covering calendar/ICS generation, price and offer helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **74 automated tests** covering calendar/ICS generation, price, offer and purchase-link helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
 - **Webhook authenticity**: Etsy requests are verified with HMAC-SHA256 over the raw body, a 5-minute timestamp window and constant-time signature comparison.
 - **Offline development mode**: the app runs with local mock data and `localStorage`, with no database credentials required.
 
@@ -104,6 +104,7 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
    - `supabase-migration.sql` — tables, capacity trigger, base policies and the `products` storage bucket.
    - `supabase-hardening.sql` — hardened RLS policies and data validation constraints.
    - `supabase-offers-etsy.sql` — numeric prices, percentage offers, visibility flags, Etsy metadata and the `etsy_credentials` table.
+   - `supabase-workshop-links.sql` — removes purchase links from workshops and blocks them at the database level.
 3. Create the admin user in **Authentication → Users → Add user**. That account is the only one able to sign in at `/admin` and write to the catalog.
 4. Copy the environment file and fill in your keys:
 
@@ -166,7 +167,7 @@ Secrets are never committed: real keys live in `.env` (git-ignored) locally and 
 
    Vercel sends `Authorization: Bearer $CRON_SECRET` automatically when the variable is defined.
 
-Synced title, description, image, price and state come from Etsy. Category and featured status stay editable in this app. Deactivated or deleted listings are hidden instead of removed. Etsy shop-wide sales are not exposed by the API, so the synced price is the listing's base price; percentage offers are local-only.
+Synced title, description, image, price and state come from Etsy. Category and featured status stay editable in this app, but Etsy listings cannot be classified as workshops. Deactivated or deleted listings are hidden instead of removed. Etsy shop-wide sales are not exposed by the API, so the synced price is the listing's base price; percentage offers are local-only.
 
 ## Development and production modes
 

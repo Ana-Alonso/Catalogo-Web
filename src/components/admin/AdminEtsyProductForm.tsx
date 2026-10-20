@@ -19,7 +19,6 @@ interface AdminEtsyProductFormProps {
 const CATEGORY_OPTIONS: { label: string; value: Exclude<CategoryType, 'todas'> }[] = [
   { label: 'Ilustraciones', value: 'ilustraciones' },
   { label: 'Camisetas', value: 'camisetas' },
-  { label: 'Talleres', value: 'talleres' },
   { label: 'Personalizados', value: 'personalizados' },
 ];
 
@@ -30,7 +29,9 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
   onCancelEdit,
 }) => {
   const [category, setCategory] = useState<Exclude<CategoryType, 'todas'>>(
-    product.category !== 'todas' ? product.category : 'ilustraciones'
+    product.category !== 'todas' && product.category !== 'talleres'
+      ? product.category
+      : 'ilustraciones'
   );
   const [featured, setFeatured] = useState(product.featured);
   const [formError, setFormError] = useState<string | null>(null);
