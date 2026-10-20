@@ -31,9 +31,9 @@ AGENTS.md
 !supabase-offers-etsy.sql
 !supabase-workshop-links.sql
 !supabase-schema.sql
-!scripts/test-db.sql
 
 supabase/
-scripts/*
-!scripts/etsy-oauth.mjs
+scripts/
 .etsy-oauth.json
+.vercel
+.env*
