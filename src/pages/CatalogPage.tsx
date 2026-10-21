@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer';
 import HeroSection from '../components/HeroSection';
 import GallerySection from '../components/GallerySection';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useLocalizedProducts } from '../hooks/useLocalizedProducts';
 import { useProducts } from '../hooks/useProducts';
 import { useWorkshopSpots } from '../hooks/useWorkshopSpots';
 import type { CategoryType } from '../types/catalog';
@@ -15,6 +16,7 @@ export const CatalogPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
   const [offersOnly, setOffersOnly] = useState(false);
   const { products } = useProducts();
+  const localizedProducts = useLocalizedProducts(products);
   const { counts, register } = useWorkshopSpots();
 
   return (
@@ -34,8 +36,8 @@ export const CatalogPage: React.FC = () => {
       <main id="main-content">
         <HeroSection />
         <GallerySection 
-          items={products} 
-          activeCategory={activeCategory} 
+          items={localizedProducts}
+          activeCategory={activeCategory}
           onSelectCategory={setActiveCategory} 
           offersOnly={offersOnly}
           onToggleOffers={() => setOffersOnly((prev) => !prev)}

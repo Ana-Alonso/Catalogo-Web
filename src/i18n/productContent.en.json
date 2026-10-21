@@ -1,0 +1,18 @@
+{
+  "title": {
+    "Obra de Prueba I": "Sample Artwork I",
+    "Camiseta de Prueba": "Sample T-Shirt",
+    "Taller Creativo de Pintura": "Creative Painting Workshop",
+    "Diseño Personalizado Ejemplo": "Custom Design Sample"
+  },
+  "description": {
+    "Ilustración digital en blanco y negro de una obra original.\nTamaño recomendado de impresión 210 x 297 cm o menos, y un gramaje de 200 - 300 gramos.\nEsta obra es solo para uso personal. Está prohibida su reventa, redistribución o uso comercial.": "Digital black and white illustration of an original artwork.\nRecommended print size: 210 x 297 cm or smaller, with a paper weight of 200–300 grams.\nThis artwork is for personal use only. Resale, redistribution or commercial use is prohibited.",
+    "Pieza de muestra para desarrollo y previsualización de catálogo.": "Sample piece for development and catalog preview.",
+    "Diseño estampado de prueba sobre prenda textil orgánica.": "Sample printed design on an organic textile garment.",
+    "Sesión presencial de técnicas mixtas y expresión artística.": "In-person mixed media and artistic expression session.",
+    "Ilustración personalizada de encargo de muestra.": "Sample custom commissioned illustration."
+  },
+  "eventLocation": {
+    "Estudio Laurel / Presencial": "Laurel Studio / In person"
+  }
+}
