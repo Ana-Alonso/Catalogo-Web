@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   fetchRegistrations,
   updateRegistrationStatus,
   deleteRegistration,
 } from '../services/registrationService';
 import { logError } from '../utils/logger';
-import i18n from '../i18n';
 import type { WorkshopRegistration, RegistrationStatus } from '../types/registrations';
 
 interface UseRegistrationsResult {
@@ -18,6 +18,7 @@ interface UseRegistrationsResult {
 }
 
 export const useRegistrations = (): UseRegistrationsResult => {
+  const { t } = useTranslation();
   const [registrations, setRegistrations] = useState<WorkshopRegistration[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +31,12 @@ export const useRegistrations = (): UseRegistrationsResult => {
       setRegistrations(data);
     } catch (err) {
       logError('useRegistrations.loadRegistrations', err);
-      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadRegistrations');
+      const msg = err instanceof Error ? err.message : t('admin.errors.loadRegistrations');
       setError(msg);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -50,7 +51,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       } catch (err) {
         if (!isCancelled) {
           logError('useRegistrations.init', err);
-          const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadRegistrations');
+          const msg = err instanceof Error ? err.message : t('admin.errors.loadRegistrations');
           setError(msg);
           setIsLoading(false);
         }
@@ -62,7 +63,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const setStatus = async (id: string, status: RegistrationStatus): Promise<boolean> => {
     try {
@@ -73,7 +74,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       return true;
     } catch (err) {
       logError('useRegistrations.setStatus', err);
-      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.updateRegistration');
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateRegistration');
       setError(msg);
       return false;
     }
@@ -86,7 +87,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       return true;
     } catch (err) {
       logError('useRegistrations.remove', err);
-      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.deleteRegistration');
+      const msg = err instanceof Error ? err.message : t('admin.errors.deleteRegistration');
       setError(msg);
       return false;
     }

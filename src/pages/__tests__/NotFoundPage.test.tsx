@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import NotFoundPage from '../NotFoundPage';
 
 const renderPage = () =>
@@ -22,23 +22,17 @@ describe('NotFoundPage', () => {
     ).toHaveAttribute('href', '/es');
   });
 
-  it('marca la página como noindex y actualiza el título', () => {
+  it('actualiza el título del documento', () => {
     renderPage();
 
-    expect(
-      document.head.querySelector('meta[name="robots"]')
-    ).toHaveAttribute('content', 'noindex, nofollow');
     expect(document.title).toBe('Página no encontrada | Laurel en Lienzo');
   });
 
-  it('restaura el estado de robots al desmontar', () => {
-    const { unmount } = renderPage();
-    const meta = document.head.querySelector('meta[name="robots"]');
+  it('muestra la descripción del error', () => {
+    renderPage();
 
-    expect(meta).not.toBeNull();
-
-    unmount();
-
-    expect(document.head.querySelector('meta[name="robots"]')).toBeNull();
+    expect(
+      screen.getByText('La página que buscas no existe o se ha movido.')
+    ).toBeInTheDocument();
   });
 });

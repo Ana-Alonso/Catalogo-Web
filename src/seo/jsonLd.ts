@@ -6,6 +6,18 @@ interface HomeStructuredDataOptions {
   socialLinks?: string[];
 }
 
+export type LdJsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | LdJsonValue[]
+  | LdJsonObject;
+
+export interface LdJsonObject {
+  [key: string]: LdJsonValue;
+}
+
 const absoluteUrl = (siteUrl: string, path: string): string => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${siteUrl}${normalizedPath}`;
@@ -22,7 +34,7 @@ export const buildHomeStructuredData = (
   language: SupportedLanguage,
   description: string,
   options: HomeStructuredDataOptions
-): Record<string, unknown> => {
+): LdJsonObject => {
   const { siteUrl, socialLinks = [] } = options;
   const organizationId = `${siteUrl}/#organization`;
   const websiteId = `${siteUrl}/#website`;

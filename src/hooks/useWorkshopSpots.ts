@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fetchRegistrationCounts, createRegistration } from '../services/registrationService';
 import { logError } from '../utils/logger';
-import i18n from '../i18n';
 import type { RegistrationFormData } from '../types/registrations';
 
 interface UseWorkshopSpotsResult {
@@ -17,6 +17,7 @@ interface UseWorkshopSpotsResult {
 }
 
 export const useWorkshopSpots = (): UseWorkshopSpotsResult => {
+  const { t } = useTranslation();
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +31,11 @@ export const useWorkshopSpots = (): UseWorkshopSpotsResult => {
       setCounts(data);
     } catch (err) {
       logError('useWorkshopSpots.loadSpots', err);
-      setError(i18n.t('catalog.spotsError'));
+      setError(t('catalog.spotsError'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -49,7 +50,7 @@ export const useWorkshopSpots = (): UseWorkshopSpotsResult => {
       } catch (err) {
         if (!isCancelled) {
           logError('useWorkshopSpots.init', err);
-          setError(i18n.t('catalog.spotsError'));
+          setError(t('catalog.spotsError'));
         }
       } finally {
         if (!isCancelled) {
@@ -63,7 +64,7 @@ export const useWorkshopSpots = (): UseWorkshopSpotsResult => {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const register = async (
     productId: string,

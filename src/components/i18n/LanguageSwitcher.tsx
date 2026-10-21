@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { persistLanguage } from '../../i18n';
+import { persistLanguage } from '../../i18n/persistLanguage';
 import { normalizeLanguage, type SupportedLanguage } from '../../i18n/languages';
 import { buildLocalizedPath } from '../../i18n/paths';
 

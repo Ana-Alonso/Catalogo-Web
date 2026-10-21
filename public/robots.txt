@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /etsy-callback.html
 
-Sitemap: https://lauraenlienzo.vercel.app/sitemap.xml
+Sitemap: https://laurelenlienzo.vercel.app/sitemap.xml

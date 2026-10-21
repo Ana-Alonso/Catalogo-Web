@@ -1,81 +1,5 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "cookie",
-          "key": "laurel_lang",
-          "value": "en"
-        }
-      ],
-      "destination": "/en",
-      "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "cookie",
-          "key": "laurel_lang",
-          "value": "es"
-        }
-      ],
-      "destination": "/es",
-      "permanent": false
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "header",
-          "key": "accept-language",
-          "value": "^(en|en-)"
-        }
-      ],
-      "destination": "/en",
-      "permanent": false
-    },
-    {
-      "source": "/",
-      "destination": "/es",
-      "permanent": false
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/es",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/es/",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en/",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/admin/",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/admin/:path*",
-      "destination": "/index.html"
-    }
-  ],
+  "framework": "react-router",
   "headers": [
     {
       "source": "/(.*)",
@@ -95,10 +19,6 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://*.etsystatic.com; font-src 'self'; connect-src 'self' https://*.supabase.co; form-action 'self'"
         }
       ]
     },
@@ -156,13 +76,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/etsy-sync.ts": {
-      "maxDuration": 60
-    },
-    "api/etsy-webhook.ts": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }

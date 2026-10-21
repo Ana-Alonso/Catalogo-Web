@@ -11,9 +11,7 @@ An art catalog and workshop-booking website for an independent illustrator. Visi
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 
-> **Live demo:** _coming soon_ (Vercel deployment).
-> <!-- TODO: replace the block below with the production URL once deployed -->
-> <!-- [your-project.vercel.app](https://your-project.vercel.app) -->
+> **Live demo:** [laurelenlienzo.vercel.app](https://laurelenlienzo.vercel.app)
 
 <!--
 SCREENSHOTS
@@ -60,7 +58,8 @@ The site replaces a static portfolio with a small product: a public catalog back
 - Automated tests and a real SQL assertion suite running on PostgreSQL 15.
 - Serverless Etsy integration with OAuth 2.0 + PKCE, signed webhooks and a manual reconciliation endpoint.
 - CI on every push and pull request; continuous deployment through Vercel.
-- Security headers and a Content Security Policy defined in `vercel.json`.
+- Server-side rendering with React Router 7 framework mode, localized metadata and a nonce-based Content Security Policy.
+- Security headers in `vercel.json`; the SSR entry applies a per-request Content Security Policy with nonces.
 
 ## Engineering highlights
 
@@ -68,7 +67,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 - **Anonymous users can only do one thing**: create a registration with `status = 'pendiente'`. Everything else (catalog and registration writes, Storage uploads) requires an authenticated session.
 - **Idempotent migrations**: all SQL scripts can be re-run safely against an existing database.
 - **Data integrity in the schema**: CHECK constraints for email format, name/title lengths, price/currency validity, discount bounds, Etsy listing uniqueness and valid status values.
-- **74 automated tests** covering calendar/ICS generation, price, offer and purchase-link helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **146 automated tests** covering calendar/ICS generation, price, offer and purchase-link helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping), UI flows, localized SEO metadata and sitemap generation, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
 - **Webhook authenticity**: Etsy requests are verified with HMAC-SHA256 over the raw body, a 5-minute timestamp window and constant-time signature comparison.
 - **Offline development mode**: the app runs with local mock data and `localStorage`, with no database credentials required.
 
@@ -127,6 +126,7 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 | `VITE_SUPABASE_URL` | Supabase project URL. |
 | `VITE_SUPABASE_ANON_KEY` | Supabase public (anon) key. |
 | `VITE_USE_MOCKS` | `true` uses local mock data; `false` uses Supabase. |
+| `VITE_SITE_URL` | Canonical production URL. Defaults to `https://laurelenlienzo.vercel.app`. |
 | `VITE_ETSY_SHOP_URL` | Etsy shop URL shown in the footer. |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Social media links. |
 | `VITE_CONTACT_EMAIL` | Contact email shown in the footer. |
@@ -211,7 +211,7 @@ scripts/           # OAuth bootstrap and Docker-based SQL test suite
 ## Testing and CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request: lint → tests → typecheck + build → SQL suite in a PostgreSQL 15 container. The pipeline needs no secrets.
-- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` provides the SPA rewrite and security headers.
+- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` sets the `react-router` framework preset and the security headers; React Router handles SSR routing, redirects and 404 responses.
 - In production, set the environment variables listed above in the Vercel dashboard (Production and Preview) and add the deployed domain as the **Site URL** in Supabase *Authentication → URL Configuration*.
 
 ## Roadmap
