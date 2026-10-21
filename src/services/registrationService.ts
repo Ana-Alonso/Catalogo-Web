@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { RegistrationError } from '../errors/registrationError';
 import type {
   WorkshopRegistration,
   RegistrationFormData,
@@ -25,14 +26,17 @@ const saveStoredLocalRegistrations = (items: WorkshopRegistration[]): void => {
   }
 };
 
-const mapRegistrationError = (code: string | undefined, message: string): string => {
+const mapRegistrationError = (
+  code: string | undefined,
+  message: string
+): RegistrationError => {
   if (code === '23505') {
-    return 'Ya estás apuntado a este taller con este email.';
+    return new RegistrationError('alreadyRegistered');
   }
   if (message.includes('workshop_full')) {
-    return 'El taller está completo: no quedan plazas.';
+    return new RegistrationError('workshopFull');
   }
-  return 'No se pudo completar la inscripción. Inténtalo de nuevo.';
+  return new RegistrationError('unknown');
 };
 
 export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
@@ -83,7 +87,7 @@ export const createRegistration = async (
       .single();
 
     if (error) {
-      throw new Error(mapRegistrationError(error.code, error.message));
+      throw mapRegistrationError(error.code, error.message);
     }
 
     return data as WorkshopRegistration;
@@ -100,11 +104,11 @@ export const createRegistration = async (
   );
 
   if (alreadyRegistered) {
-    throw new Error('Ya estás apuntado a este taller con este email.');
+    throw new RegistrationError('alreadyRegistered');
   }
 
   if (cupo !== null && localRegistrations.filter(isActiveForWorkshop).length >= cupo) {
-    throw new Error('El taller está completo: no quedan plazas.');
+    throw new RegistrationError('workshopFull');
   }
 
   const newRegistration: WorkshopRegistration = {
@@ -133,7 +137,7 @@ export const updateRegistrationStatus = async (
       .single();
 
     if (error) {
-      throw new Error(mapRegistrationError(error.code, error.message));
+      throw mapRegistrationError(error.code, error.message);
     }
 
     return data as WorkshopRegistration;
@@ -147,7 +151,7 @@ export const updateRegistrationStatus = async (
 
   const found = updated.find((registration) => registration.id === id);
   if (!found) {
-    throw new Error('Inscripción no encontrada.');
+    throw new RegistrationError('notFound');
   }
   return found;
 };
@@ -160,7 +164,7 @@ export const deleteRegistration = async (id: string): Promise<void> => {
       .eq('id', id);
 
     if (error) {
-      throw new Error(mapRegistrationError(error.code, error.message));
+      throw mapRegistrationError(error.code, error.message);
     }
     return;
   }

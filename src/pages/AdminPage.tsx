@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminDashboard from '../components/admin/AdminDashboard';
+import { useNoindex } from '../hooks/useNoindex';
 import { useProducts } from '../hooks/useProducts';
 import { useRegistrations } from '../hooks/useRegistrations';
 
 export const AdminPage: React.FC = () => {
+  useNoindex();
   const navigate = useNavigate();
   const {
     products,

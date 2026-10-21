@@ -41,7 +41,8 @@ const normalizeCurrency = (currency?: string | null): string => {
 
 export const formatPrice = (
   cents?: number | null,
-  currency?: string | null
+  currency?: string | null,
+  locale = 'es-ES'
 ): string => {
   if (cents == null) {
     return '';
@@ -50,7 +51,7 @@ export const formatPrice = (
   const code = normalizeCurrency(currency);
 
   try {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: code,
       minimumFractionDigits: 2,

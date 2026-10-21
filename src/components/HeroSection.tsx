@@ -1,10 +1,12 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 import { Box, Typography } from './ui';
 import { theme } from '../theme';
 
 export const HeroSection: React.FC = () => {
+  const { t } = useTranslation();
   const etsyUrl = import.meta.env.VITE_ETSY_SHOP_URL;
 
   return (
@@ -21,10 +23,13 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <Typography variant="h1" className="mb-6 font-hero font-bold tracking-normal">
-            <span className={theme.colors.primaryText}>CREAR</span> SENTIR CONECTAR
+            <Trans
+              i18nKey="hero.title"
+              components={{ highlight: <span className={theme.colors.primaryText} /> }}
+            />
           </Typography>
           <Typography variant="subtitle" className="mt-4 max-w-2xl mx-auto mb-10">
-            Ilustraciones personalizables cuidadas al más mínimo detalle para que tú puedas ser partícipe de ellas, añadiendo color o detalles. Talleres creativos y piezas exclusivas para llevar contigo.
+            {t('hero.subtitle')}
           </Typography>
           
           <motion.div 
@@ -37,7 +42,7 @@ export const HeroSection: React.FC = () => {
               href="#galeria" 
               className={`px-8 py-4 ${theme.colors.primary} font-bold tracking-widest uppercase rounded-sm transition-colors shadow-lg shadow-orange-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950`}
             >
-              Ver Catálogo
+              {t('hero.catalogCta')}
             </a>
             <a 
               href={etsyUrl}
@@ -45,7 +50,7 @@ export const HeroSection: React.FC = () => {
               rel="noopener noreferrer"
               className={`px-8 py-4 bg-transparent border border-neutral-700 hover:border-white text-white font-bold tracking-widest uppercase rounded-sm transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 flex items-center justify-center gap-2`}
             >
-              <ShoppingBag className="w-5 h-5" aria-hidden="true" /> Tienda Etsy
+              <ShoppingBag className="w-5 h-5" aria-hidden="true" /> {t('hero.etsyCta')}
             </a>
           </motion.div>
         </motion.div>
