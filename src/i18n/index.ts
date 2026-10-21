@@ -2,29 +2,11 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 import { resources } from './resources';
-import {
-  normalizeLanguage,
-  SUPPORTED_LANGUAGES,
-  type SupportedLanguage,
-} from './languages';
+import { normalizeLanguage, SUPPORTED_LANGUAGES } from './languages';
+import { LANGUAGE_COOKIE, LANGUAGE_STORAGE_KEY } from './constants';
+import { persistLanguage } from './persistLanguage';
 
-export const LANGUAGE_COOKIE = 'laurel_lang';
-export const LANGUAGE_STORAGE_KEY = 'laurel_language';
-
-export const persistLanguage = (language: string): SupportedLanguage => {
-  const normalized = normalizeLanguage(language);
-
-  if (typeof document !== 'undefined') {
-    document.documentElement.lang = normalized;
-    document.cookie = `${LANGUAGE_COOKIE}=${normalized}; path=/; max-age=31536000; SameSite=Lax`;
-  }
-
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, normalized);
-  }
-
-  return normalized;
-};
+export { LANGUAGE_COOKIE, LANGUAGE_STORAGE_KEY, persistLanguage };
 
 void i18n
   .use(LanguageDetector)

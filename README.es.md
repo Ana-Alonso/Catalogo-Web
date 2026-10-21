@@ -60,7 +60,8 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 - Tests automatizados y suite de aserciones SQL real sobre PostgreSQL 15.
 - Integración serverless con Etsy: OAuth 2.0 + PKCE, webhooks firmados y endpoint de reconciliación manual.
 - CI en cada push y pull request; despliegue continuo mediante Vercel.
-- Cabeceras de seguridad y Content Security Policy definidas en `vercel.json`.
+- Renderizado en servidor con React Router 7 framework mode, metadatos localizados y Content Security Policy con nonce.
+- Cabeceras de seguridad en `vercel.json`; la entrada SSR aplica una Content Security Policy por petición con nonces.
 
 ## Aspectos técnicos destacados
 
@@ -68,7 +69,7 @@ El proyecto sustituye un portafolio estático por un pequeño producto: un catá
 - **Los usuarios anónimos solo pueden hacer una cosa**: crear una inscripción con `status = 'pendiente'`. Todo lo demás (escritura del catálogo e inscripciones, subidas a Storage) requiere sesión autenticada.
 - **Migraciones idempotentes**: todos los scripts SQL pueden re-ejecutarse sin errores sobre una base existente.
 - **Integridad en el esquema**: CHECKs de formato de email, longitudes de nombre/título, validez de precio/moneda, límites del descuento, unicidad del listing de Etsy y valores válidos de estado.
-- **74 tests automatizados** que cubren generación de calendario/ICS, utilidades de precio, ofertas y enlaces de compra, mapeo de Etsy y firmas de webhook, el servicio de inscripciones (incluido el mapeo de errores de Supabase) y flujos de UI, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
+- **146 tests automatizados** que cubren generación de calendario/ICS, utilidades de precio, ofertas y enlaces de compra, mapeo de Etsy y firmas de webhook, el servicio de inscripciones (incluido el mapeo de errores de Supabase), flujos de UI, metadatos SEO localizados y generación del sitemap, más una suite SQL que verifica políticas, restricciones, cupo y duplicados sobre un PostgreSQL real.
 - **Autenticidad de los webhooks**: las peticiones de Etsy se verifican con HMAC-SHA256 sobre el cuerpo original, ventana de 5 minutos y comparación en tiempo constante.
 - **Modo desarrollo offline**: la app funciona con datos mock y `localStorage`, sin credenciales de base de datos.
 
@@ -211,7 +212,7 @@ scripts/           # Bootstrap de OAuth y suite SQL de tests con Docker
 ## Testing y CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) se ejecuta en cada push a `main` y en cada pull request: lint → tests → typecheck + build → suite SQL en un contenedor PostgreSQL 15. El pipeline no necesita secrets.
-- **CD** usa la integración Git de Vercel: los push a `main` despliegan a producción y cada pull request obtiene su propia URL de vista previa. `vercel.json` aporta el rewrite SPA y las cabeceras de seguridad.
+- **CD** usa la integración Git de Vercel: los push a `main` despliegan a producción y cada pull request obtiene su propia URL de vista previa. `vercel.json` aporta las cabeceras de seguridad; React Router gestiona el SSR, las redirecciones y las respuestas 404.
 - En producción, define las variables de entorno anteriores en el dashboard de Vercel (*Production* y *Preview*) y añade el dominio desplegado como **Site URL** en Supabase *Authentication → URL Configuration*.
 
 ## Roadmap

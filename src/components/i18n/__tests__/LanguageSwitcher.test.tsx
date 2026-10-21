@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { AdminLoginForm } from '../../admin/AdminLoginForm';
 import i18n, { LANGUAGE_STORAGE_KEY, persistLanguage } from '../../../i18n';

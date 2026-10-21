@@ -1,14 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { useNoindex } from '../hooks/useNoindex';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { normalizeLanguage } from '../i18n/languages';
 import { SITE_NAME } from '../seo/site';
 import { theme } from '../theme';
 
 export const NotFoundPage: React.FC = () => {
-  useNoindex();
   const { t, i18n } = useTranslation();
   const language = normalizeLanguage(
     i18n.resolvedLanguage ?? i18n.language

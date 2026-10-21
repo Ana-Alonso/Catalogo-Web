@@ -60,7 +60,8 @@ The site replaces a static portfolio with a small product: a public catalog back
 - Automated tests and a real SQL assertion suite running on PostgreSQL 15.
 - Serverless Etsy integration with OAuth 2.0 + PKCE, signed webhooks and a manual reconciliation endpoint.
 - CI on every push and pull request; continuous deployment through Vercel.
-- Security headers and a Content Security Policy defined in `vercel.json`.
+- Server-side rendering with React Router 7 framework mode, localized metadata and a nonce-based Content Security Policy.
+- Security headers in `vercel.json`; the SSR entry applies a per-request Content Security Policy with nonces.
 
 ## Engineering highlights
 
@@ -68,7 +69,7 @@ The site replaces a static portfolio with a small product: a public catalog back
 - **Anonymous users can only do one thing**: create a registration with `status = 'pendiente'`. Everything else (catalog and registration writes, Storage uploads) requires an authenticated session.
 - **Idempotent migrations**: all SQL scripts can be re-run safely against an existing database.
 - **Data integrity in the schema**: CHECK constraints for email format, name/title lengths, price/currency validity, discount bounds, Etsy listing uniqueness and valid status values.
-- **74 automated tests** covering calendar/ICS generation, price, offer and purchase-link helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping) and UI flows, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
+- **146 automated tests** covering calendar/ICS generation, price, offer and purchase-link helpers, Etsy mapping and webhook signatures, the registration service (including Supabase error mapping), UI flows, localized SEO metadata and sitemap generation, plus a SQL suite that verifies policies, constraints, capacity and duplicate handling on a real PostgreSQL instance.
 - **Webhook authenticity**: Etsy requests are verified with HMAC-SHA256 over the raw body, a 5-minute timestamp window and constant-time signature comparison.
 - **Offline development mode**: the app runs with local mock data and `localStorage`, with no database credentials required.
 
@@ -211,7 +212,7 @@ scripts/           # OAuth bootstrap and Docker-based SQL test suite
 ## Testing and CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request: lint → tests → typecheck + build → SQL suite in a PostgreSQL 15 container. The pipeline needs no secrets.
-- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` provides the SPA rewrite and security headers.
+- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` provides security headers; React Router handles SSR routing, redirects and 404 responses.
 - In production, set the environment variables listed above in the Vercel dashboard (Production and Preview) and add the deployed domain as the **Site URL** in Supabase *Authentication → URL Configuration*.
 
 ## Roadmap
