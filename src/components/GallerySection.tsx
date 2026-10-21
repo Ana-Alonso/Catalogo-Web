@@ -3,14 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Tag } from 'lucide-react';
 import { ProductCard } from './ProductCard';
-import { Box, Typography } from './ui';
+import { ProductCardSkeleton } from './ProductCardSkeleton';
+import { Box, Typography, Button, ErrorState } from './ui';
 import { theme } from '../theme';
 import { categoryTranslationKeys } from '../i18n/labels';
 import { isOfferActive } from '../utils/price';
 import type { CatalogItem, CategoryType } from '../types/catalog';
 import type { RegistrationFormData } from '../types/registrations';
 
-interface GallerySectionProps {
+export interface GallerySectionProps {
   items: CatalogItem[];
   activeCategory: CategoryType;
   onSelectCategory: (category: CategoryType) => void;
@@ -18,6 +19,11 @@ interface GallerySectionProps {
   onToggleOffers?: () => void;
   spotsCounts?: Record<string, number>;
   onRegister?: (item: CatalogItem, data: RegistrationFormData) => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  onRetry: () => void | Promise<void>;
+  spotsError?: string | null;
+  onRetrySpots?: () => void | Promise<void>;
 }
 
 const categories: CategoryType[] = [
@@ -27,6 +33,8 @@ const categories: CategoryType[] = [
   'talleres',
   'personalizados',
 ];
+
+const SKELETON_ITEMS = 6;
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -43,7 +51,12 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   offersOnly = false,
   onToggleOffers,
   spotsCounts,
-  onRegister
+  onRegister,
+  isLoading,
+  error,
+  onRetry,
+  spotsError,
+  onRetrySpots,
 }) => {
   const { t } = useTranslation();
   const visibleItems = items.filter(item => item.isVisible !== false);
@@ -116,8 +129,55 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           </Box>
         </Box>
 
+        {spotsError && (
+          <Box
+            role="alert"
+            className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-orange-900/60 bg-orange-950/20 p-4 text-sm text-orange-300"
+          >
+            <span>{spotsError}</span>
+            {onRetrySpots && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void onRetrySpots()}
+              >
+                {t('common.retry')}
+              </Button>
+            )}
+          </Box>
+        )}
+
         <AnimatePresence mode="wait">
-          {filteredItems.length > 0 ? (
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              role="status"
+              aria-label={t('catalog.loading')}
+            >
+              <span className="sr-only">{t('catalog.loading')}</span>
+              {Array.from({ length: SKELETON_ITEMS }, (_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </motion.div>
+          ) : error ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <ErrorState
+                title={t('catalog.errorTitle')}
+                description={t('catalog.errorDescription')}
+                onRetry={onRetry}
+                retryLabel={t('common.retry')}
+              />
+            </motion.div>
+          ) : filteredItems.length > 0 ? (
             <motion.div 
               key={activeCategory}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -137,11 +197,18 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
               ))}
             </motion.div>
           ) : (
-            <Box className="text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800">
-              <Typography variant="body" className="text-lg">
-                {offersOnly ? t('catalog.emptyOffers') : t('catalog.empty')}
-              </Typography>
-            </Box>
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Box className="text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800">
+                <Typography variant="body" className="text-lg">
+                  {offersOnly ? t('catalog.emptyOffers') : t('catalog.empty')}
+                </Typography>
+              </Box>
+            </motion.div>
           )}
         </AnimatePresence>
 

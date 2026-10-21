@@ -22,12 +22,16 @@ import { AlertCircle, CheckCircle, LoaderCircle } from 'lucide-react';
 interface AdminDashboardProps {
   products: CatalogItem[];
   registrations: WorkshopRegistration[];
+  isLoadingProducts: boolean;
+  productsError: string | null;
   isLoadingRegistrations: boolean;
+  registrationsError: string | null;
   onAddProduct: (data: ProductFormData) => Promise<boolean>;
   onEditProduct: (id: string, data: ProductFormData) => Promise<boolean>;
   onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   onDeleteProduct: (id: string) => Promise<boolean>;
   onRefreshProducts: () => Promise<void>;
+  onRefreshRegistrations: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onClose: () => void;
@@ -36,12 +40,16 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   products,
   registrations,
+  isLoadingProducts,
+  productsError,
   isLoadingRegistrations,
+  registrationsError,
   onAddProduct,
   onEditProduct,
   onEditEtsyMetadata,
   onDeleteProduct,
   onRefreshProducts,
+  onRefreshRegistrations,
   onSetRegistrationStatus,
   onDeleteRegistration,
   onClose
@@ -224,12 +232,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           isDeleting={isDeleting}
+          isLoading={isLoadingProducts}
+          error={productsError}
+          onRetry={onRefreshProducts}
         />
 
         <AdminRegistrationsPanel
           workshops={products}
           registrations={registrations}
           isLoading={isLoadingRegistrations}
+          error={registrationsError}
+          onRetry={onRefreshRegistrations}
           onSetStatus={onSetRegistrationStatus}
           onDelete={onDeleteRegistration}
         />

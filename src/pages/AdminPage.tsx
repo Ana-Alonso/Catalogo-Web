@@ -10,24 +10,37 @@ export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     products,
+    isLoading: isLoadingProducts,
+    error: productsError,
     addProduct,
     editProduct,
     editEtsyMetadata,
     removeProduct,
     refreshProducts,
   } = useProducts();
-  const { registrations, isLoading, setStatus, remove } = useRegistrations();
+  const {
+    registrations,
+    isLoading: isLoadingRegistrations,
+    error: registrationsError,
+    setStatus,
+    remove,
+    refreshRegistrations,
+  } = useRegistrations();
 
   return (
     <AdminDashboard
       products={products}
       registrations={registrations}
-      isLoadingRegistrations={isLoading}
+      isLoadingProducts={isLoadingProducts}
+      productsError={productsError}
+      isLoadingRegistrations={isLoadingRegistrations}
+      registrationsError={registrationsError}
       onAddProduct={addProduct}
       onEditProduct={editProduct}
       onEditEtsyMetadata={editEtsyMetadata}
       onDeleteProduct={removeProduct}
       onRefreshProducts={refreshProducts}
+      onRefreshRegistrations={refreshRegistrations}
       onSetRegistrationStatus={setStatus}
       onDeleteRegistration={remove}
       onClose={() => navigate('/')}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Card, Badge, Button, Box } from '../ui';
+import { Card, Badge, Button, Box, ErrorState } from '../ui';
+import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { theme } from '../../theme';
 import { getIntlLocale } from '../../i18n/languages';
 import { registrationStatusTranslationKeys } from '../../i18n/labels';
@@ -12,6 +13,8 @@ interface AdminRegistrationsPanelProps {
   workshops: CatalogItem[];
   registrations: WorkshopRegistration[];
   isLoading: boolean;
+  error: string | null;
+  onRetry: () => void | Promise<void>;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
 }
@@ -40,6 +43,8 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
   workshops,
   registrations,
   isLoading,
+  error,
+  onRetry,
   onSetStatus,
   onDelete,
 }) => {
@@ -70,18 +75,27 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
       <Box className="p-6 space-y-8">
         {isLoading && (
-          <p className={`${theme.colors.textMuted} text-sm`}>
-            {t('admin.registrations.loading')}
-          </p>
+          <div role="status" aria-label={t('admin.registrations.loading')}>
+            <AdminRegistrationsSkeleton />
+          </div>
         )}
 
-        {!isLoading && workshopsWithRegistrations.length === 0 && (
+        {!isLoading && error && (
+          <ErrorState
+            title={t('admin.registrations.errorTitle')}
+            description={error}
+            onRetry={onRetry}
+            retryLabel={t('common.retry')}
+          />
+        )}
+
+        {!isLoading && !error && workshopsWithRegistrations.length === 0 && (
           <p className={`${theme.colors.textMuted} text-sm text-center py-4`}>
             {t('admin.registrations.emptyWorkshops')}
           </p>
         )}
 
-        {!isLoading &&
+        {!isLoading && !error &&
           workshopsWithRegistrations.map(({ workshop, list }) => {
             const activeCount = list.filter(
               (registration) => registration.status !== 'cancelado'
