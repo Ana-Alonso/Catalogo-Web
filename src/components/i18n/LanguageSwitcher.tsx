@@ -24,6 +24,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const currentLanguage = normalizeLanguage(
     i18n.resolvedLanguage ?? i18n.language
   );
+  const isAdminRoute =
+    location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   return (
     <nav aria-label={t('language.label')} className={className}>
@@ -50,6 +52,9 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => {
                   persistLanguage(language.code);
+                  if (isAdminRoute) {
+                    void i18n.changeLanguage(language.code);
+                  }
                   onSelect?.();
                 }}
                 className={`inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${

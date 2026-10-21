@@ -137,20 +137,166 @@
     "discountRequiresPrice": "Para aplicar un descuento primero debes indicar un precio."
   },
   "admin": {
-    "title": "Panel de administración",
-    "login": "Iniciar sesión",
+    "title": "Panel de Administración",
+    "loadingSession": "Cargando sesión…",
+    "backToSite": "Volver a la Web",
     "logout": "Cerrar sesión",
-    "dashboard": "Dashboard",
-    "products": "Productos",
+    "login": {
+      "title": "Acceso Administrador",
+      "subtitle": "Inicia sesión para gestionar el catálogo.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Contraseña",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "invalidCredentials": "Email o contraseña incorrectos.",
+      "unknownError": "Error al iniciar sesión."
+    },
+    "feedback": {
+      "productCreated": "Producto publicado con éxito.",
+      "productUpdated": "Producto actualizado correctamente.",
+      "productDeleted": "Producto eliminado correctamente.",
+      "productOperationError": "Error al procesar la operación.",
+      "etsyUpdated": "Producto de Etsy actualizado correctamente.",
+      "etsyUpdateError": "Error al actualizar el producto de Etsy.",
+      "productDeleteError": "Error al eliminar el producto."
+    },
+    "productForm": {
+      "editTitle": "Modificar Producto",
+      "createTitle": "Añadir Nuevo Producto",
+      "editDescription": "Editando los datos de \"{{title}}\"",
+      "createDescription": "Sube nuevas obras, camisetas o talleres al catálogo.",
+      "cancelEdit": "Cancelar Edición",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Modificación",
+      "publish": "Publicar Producto",
+      "imageFormatError": "Formato no permitido. Usa PNG, JPG, WEBP o GIF.",
+      "imageSizeError": "La imagen supera los 5 MB."
+    },
+    "productFields": {
+      "titleLabel": "Título de la Obra *",
+      "titlePlaceholder": "Título del producto",
+      "categoryLabel": "Categoría *",
+      "statusLabel": "Estado / Disponibilidad *",
+      "featuredLabel": "Destacar en la parte superior del catálogo",
+      "descriptionLabel": "Descripción *",
+      "descriptionPlaceholder": "Descripción, materiales, dimensiones...",
+      "etsyLinkLabel": "Enlace de Etsy (opcional)",
+      "vintedLinkLabel": "Enlace de Vinted (opcional)"
+    },
+    "workshopFields": {
+      "dateLabel": "Fecha y Hora del Taller",
+      "locationLabel": "Lugar o Modalidad",
+      "locationPlaceholder": "Ej: Presencial (Madrid) u Online",
+      "capacityLabel": "Cupo (opcional)",
+      "capacityPlaceholder": "Sin límite",
+      "capacityHint": "Deja vacío para inscripciones sin límite."
+    },
+    "priceFields": {
+      "priceLabel": "Precio estimado en € (opcional)",
+      "pricePlaceholder": "25,00",
+      "onRequest": "Precio a consultar",
+      "discountLabel": "Descuento % (opcional)",
+      "discountPlaceholder": "20",
+      "discountHint": "Se aplica solo a productos locales. Entre 1 % y 90 %.",
+      "preview": "Vista previa",
+      "before": "antes"
+    },
+    "imageField": {
+      "label": "Imagen del Producto",
+      "optionalHint": "(opcional si conservas la actual)",
+      "requiredHint": "*",
+      "upload": "Subir archivo desde el dispositivo",
+      "formats": "PNG, JPG, WEBP o GIF (máx. 5 MB)",
+      "previewAlt": "Vista previa",
+      "urlHint": "O introduce una URL de imagen:"
+    },
+    "etsyForm": {
+      "title": "Producto de Etsy",
+      "subtitle": "Título, descripción, imagen, precio y estado se sincronizan desde Etsy.",
+      "close": "Cerrar",
+      "priceOnRequest": "Precio a consultar",
+      "listing": "Listing #{{id}}",
+      "status": "Estado en Etsy: {{state}}",
+      "hidden": "Oculto en la web",
+      "offersNote": "Las ofertas porcentuales solo están disponibles en productos locales. Para cambiar el precio o retirar este producto, hazlo desde Etsy.",
+      "saveError": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "categoryLabel": "Categoría en la web *",
+      "featuredLabel": "Destacar en la parte superior del catálogo",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Cambios"
+    },
+    "etsySync": {
+      "title": "Sincronización con Etsy",
+      "description": "Los cambios en Etsy llegan automáticamente. Usa este botón para forzar una reconciliación completa.",
+      "syncNow": "Sincronizar ahora",
+      "syncing": "Sincronizando...",
+      "success": "Sincronización completada: {{total}} productos ({{created}} nuevos, {{updated}} actualizados, {{hidden}} ocultos).",
+      "error": "Error al sincronizar con Etsy.",
+      "errors": {
+        "notConfigured": "Supabase no está configurado.",
+        "unauthorized": "Debes iniciar sesión para sincronizar con Etsy.",
+        "unexpectedResponse": "Respuesta inesperada del servidor.",
+        "unknown": "No se pudo sincronizar con Etsy."
+      }
+    },
+    "productTable": {
+      "empty": "No hay productos registrados en el catálogo.",
+      "title": "Productos en Catálogo ({{count}})",
+      "subtitle": "Gestiona disponibilidad, destacados y enlaces.",
+      "columns": {
+        "artwork": "Obra",
+        "category": "Categoría",
+        "availability": "Disponibilidad",
+        "price": "Precio",
+        "links": "Enlaces",
+        "actions": "Acciones"
+      },
+      "featuredTitle": "Producto Destacado",
+      "etsy": "Etsy",
+      "hidden": "Oculto",
+      "capacity": "Cupo: {{count}} plazas",
+      "noCapacity": "Sin cupo",
+      "consult": "A consultar",
+      "editAria": "Modificar {{title}}",
+      "deleteConfirm": "¿Seguro que deseas eliminar \"{{title}}\"?",
+      "etsyDeleteHint": "Los productos de Etsy se eliminan desde Etsy",
+      "etsyDeleteAria": "{{title}} se elimina desde Etsy",
+      "deleteAria": "Eliminar {{title}}"
+    },
     "registrations": {
-      "title": "Inscripciones",
+      "title": "Inscripciones a Talleres ({{count}})",
+      "subtitle": "Confirma, cancela o elimina las plazas solicitadas.",
+      "loading": "Cargando inscripciones...",
+      "emptyWorkshops": "No hay talleres publicados en el catálogo.",
+      "spots": "{{active}} / {{cupo}} plazas",
+      "attendee": "{{count}} inscrito",
+      "attendees": "{{count}} inscritos",
+      "empty": "Sin inscripciones todavía.",
+      "confirmAria": "Confirmar inscripción de {{name}}",
+      "cancelAria": "Cancelar inscripción de {{name}}",
+      "deleteAria": "Eliminar inscripción de {{name}}",
+      "deleteConfirm": "¿Seguro que deseas eliminar la inscripción de \"{{name}}\"?",
       "status": {
         "pending": "Pendiente",
         "confirmed": "Confirmado",
         "cancelled": "Cancelado"
       }
     },
-    "calendar": "Calendario",
-    "etsy": "Etsy"
+    "calendarPanel": {
+      "published": "Taller «{{title}}» publicado. Añade el evento a tu calendario:"
+    },
+    "errors": {
+      "loadProducts": "Error desconocido al cargar productos",
+      "saveProduct": "Error al guardar el producto",
+      "updateProduct": "Error al actualizar el producto",
+      "deleteProduct": "Error al eliminar el producto",
+      "loadRegistrations": "Error desconocido al cargar inscripciones",
+      "updateRegistration": "Error al actualizar la inscripción",
+      "deleteRegistration": "Error al eliminar la inscripción"
+    }
   }
 }

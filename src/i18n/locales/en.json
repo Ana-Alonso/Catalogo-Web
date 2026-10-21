@@ -137,20 +137,166 @@
     "discountRequiresPrice": "To apply a discount you must first enter a price."
   },
   "admin": {
-    "title": "Admin panel",
-    "login": "Log in",
+    "title": "Admin Panel",
+    "loadingSession": "Loading session…",
+    "backToSite": "Back to site",
     "logout": "Log out",
-    "dashboard": "Dashboard",
-    "products": "Products",
+    "login": {
+      "title": "Admin Access",
+      "subtitle": "Sign in to manage the catalog.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "invalidCredentials": "Incorrect email or password.",
+      "unknownError": "Could not sign in."
+    },
+    "feedback": {
+      "productCreated": "Product published successfully.",
+      "productUpdated": "Product updated successfully.",
+      "productDeleted": "Product deleted successfully.",
+      "productOperationError": "Could not complete the operation.",
+      "etsyUpdated": "Etsy product updated successfully.",
+      "etsyUpdateError": "Could not update the Etsy product.",
+      "productDeleteError": "Could not delete the product."
+    },
+    "productForm": {
+      "editTitle": "Edit Product",
+      "createTitle": "Add New Product",
+      "editDescription": "Editing the details of \"{{title}}\"",
+      "createDescription": "Add new artwork, t-shirts or workshops to the catalog.",
+      "cancelEdit": "Cancel Editing",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "publish": "Publish Product",
+      "imageFormatError": "Unsupported format. Use PNG, JPG, WEBP or GIF.",
+      "imageSizeError": "The image exceeds 5 MB."
+    },
+    "productFields": {
+      "titleLabel": "Artwork Title *",
+      "titlePlaceholder": "Product title",
+      "categoryLabel": "Category *",
+      "statusLabel": "Status / Availability *",
+      "featuredLabel": "Feature at the top of the catalog",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Description, materials, dimensions...",
+      "etsyLinkLabel": "Etsy link (optional)",
+      "vintedLinkLabel": "Vinted link (optional)"
+    },
+    "workshopFields": {
+      "dateLabel": "Workshop Date and Time",
+      "locationLabel": "Location or Format",
+      "locationPlaceholder": "E.g. In person (Madrid) or Online",
+      "capacityLabel": "Capacity (optional)",
+      "capacityPlaceholder": "No limit",
+      "capacityHint": "Leave empty for unlimited registrations."
+    },
+    "priceFields": {
+      "priceLabel": "Estimated price in € (optional)",
+      "pricePlaceholder": "25.00",
+      "onRequest": "Price on request",
+      "discountLabel": "Discount % (optional)",
+      "discountPlaceholder": "20",
+      "discountHint": "Applies only to local products. Between 1% and 90%.",
+      "preview": "Preview",
+      "before": "before"
+    },
+    "imageField": {
+      "label": "Product Image",
+      "optionalHint": "(optional if you keep the current one)",
+      "requiredHint": "*",
+      "upload": "Upload file from device",
+      "formats": "PNG, JPG, WEBP or GIF (max. 5 MB)",
+      "previewAlt": "Preview",
+      "urlHint": "Or enter an image URL:"
+    },
+    "etsyForm": {
+      "title": "Etsy Product",
+      "subtitle": "Title, description, image, price and status are synced from Etsy.",
+      "close": "Close",
+      "priceOnRequest": "Price on request",
+      "listing": "Listing #{{id}}",
+      "status": "Etsy status: {{state}}",
+      "hidden": "Hidden on the site",
+      "offersNote": "Percentage offers are only available on local products. To change the price or remove this product, do it from Etsy.",
+      "saveError": "Could not save the changes. Please try again.",
+      "categoryLabel": "Website category *",
+      "featuredLabel": "Feature at the top of the catalog",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "etsySync": {
+      "title": "Etsy Sync",
+      "description": "Changes from Etsy arrive automatically. Use this button to force a full reconciliation.",
+      "syncNow": "Sync now",
+      "syncing": "Syncing...",
+      "success": "Sync complete: {{total}} products ({{created}} new, {{updated}} updated, {{hidden}} hidden).",
+      "error": "Could not sync with Etsy.",
+      "errors": {
+        "notConfigured": "Supabase is not configured.",
+        "unauthorized": "You must sign in to sync with Etsy.",
+        "unexpectedResponse": "Unexpected server response.",
+        "unknown": "Could not sync with Etsy."
+      }
+    },
+    "productTable": {
+      "empty": "There are no products registered in the catalog.",
+      "title": "Products in Catalog ({{count}})",
+      "subtitle": "Manage availability, featured items and links.",
+      "columns": {
+        "artwork": "Artwork",
+        "category": "Category",
+        "availability": "Availability",
+        "price": "Price",
+        "links": "Links",
+        "actions": "Actions"
+      },
+      "featuredTitle": "Featured Product",
+      "etsy": "Etsy",
+      "hidden": "Hidden",
+      "capacity": "Capacity: {{count}} spots",
+      "noCapacity": "No capacity",
+      "consult": "Ask",
+      "editAria": "Edit {{title}}",
+      "deleteConfirm": "Are you sure you want to delete \"{{title}}\"?",
+      "etsyDeleteHint": "Etsy products are deleted from Etsy",
+      "etsyDeleteAria": "{{title}} is deleted from Etsy",
+      "deleteAria": "Delete {{title}}"
+    },
     "registrations": {
-      "title": "Registrations",
+      "title": "Workshop Registrations ({{count}})",
+      "subtitle": "Confirm, cancel or delete requested spots.",
+      "loading": "Loading registrations...",
+      "emptyWorkshops": "There are no published workshops in the catalog.",
+      "spots": "{{active}} / {{cupo}} spots",
+      "attendee": "{{count}} registered",
+      "attendees": "{{count}} registered",
+      "empty": "No registrations yet.",
+      "confirmAria": "Confirm registration for {{name}}",
+      "cancelAria": "Cancel registration for {{name}}",
+      "deleteAria": "Delete registration for {{name}}",
+      "deleteConfirm": "Are you sure you want to delete the registration for \"{{name}}\"?",
       "status": {
         "pending": "Pending",
         "confirmed": "Confirmed",
         "cancelled": "Cancelled"
       }
     },
-    "calendar": "Calendar",
-    "etsy": "Etsy"
+    "calendarPanel": {
+      "published": "Workshop \"{{title}}\" published. Add the event to your calendar:"
+    },
+    "errors": {
+      "loadProducts": "Unknown error while loading products",
+      "saveProduct": "Could not save the product",
+      "updateProduct": "Could not update the product",
+      "deleteProduct": "Could not delete the product",
+      "loadRegistrations": "Unknown error while loading registrations",
+      "updateRegistration": "Could not update the registration",
+      "deleteRegistration": "Could not delete the registration"
+    }
   }
 }

@@ -4,12 +4,14 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export const ACCEPTED_IMAGE_INPUT = ALLOWED_IMAGE_MIME_TYPES.join(',');
 
-export const validateImageFile = (file: File): string | null => {
+export type ImageValidationError = 'format' | 'size';
+
+export const validateImageFile = (file: File): ImageValidationError | null => {
   if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.type)) {
-    return 'Formato no permitido. Usa PNG, JPG, WEBP o GIF.';
+    return 'format';
   }
   if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    return 'La imagen supera los 5 MB.';
+    return 'size';
   }
   return null;
 };

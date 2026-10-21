@@ -11,6 +11,10 @@ export const buildLocalizedPath = (
   hash: string,
   language: SupportedLanguage
 ): string => {
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return `${pathname}${search}${hash}`;
+  }
+
   const segments = pathname.split('/').filter(Boolean);
 
   if (isSupportedLanguage(segments[0])) {
