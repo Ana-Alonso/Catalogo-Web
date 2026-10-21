@@ -20,11 +20,11 @@ export const HeroSection: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <Typography variant="h1" className="mb-6">
-            CREAR, SENTIR, CONECTAR
+          <Typography variant="h1" className="mb-6 font-hero font-bold tracking-normal">
+            <span className={theme.colors.primaryText}>CREAR</span> SENTIR CONECTAR
           </Typography>
           <Typography variant="subtitle" className="mt-4 max-w-2xl mx-auto mb-10">
-            Ilustraciones únicas, talleres creativos y piezas exclusivas listas para conectar contigo.
+            Ilustraciones personalizables cuidadas al más mínimo detalle para que tú puedas ser partícipe de ellas, añadiendo color o detalles. Talleres creativos y piezas exclusivas para llevar contigo.
           </Typography>
           
           <motion.div 

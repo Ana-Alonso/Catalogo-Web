@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105" 
             />
             <Typography variant="h4" as="span" className="tracking-widest uppercase hidden sm:inline">
-              Laurel<span className={theme.colors.primaryText}>EnLienzo</span>
+              <span className={theme.colors.primaryText}>Laurel</span> en Lienzo
             </Typography>
           </a>
 

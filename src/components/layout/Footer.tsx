@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
               className="h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105" 
             />
             <Typography variant="h4" className="tracking-widest uppercase">
-              Laurel<span className={theme.colors.primaryText}>EnLienzo</span>
+              <span className={theme.colors.primaryText}>Laurel</span> en Lienzo
             </Typography>
           </Box>
 
