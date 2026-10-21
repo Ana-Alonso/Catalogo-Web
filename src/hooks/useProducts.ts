@@ -7,6 +7,7 @@ import {
   updateEtsyProductMetadata,
 } from '../services/productService';
 import { logError } from '../utils/logger';
+import i18n from '../i18n';
 import type {
   CatalogItem,
   EtsyProductMetadata,
@@ -37,7 +38,7 @@ export const useProducts = (): UseProductsResult => {
       setProducts(data);
     } catch (err) {
       logError('useProducts.loadProducts', err);
-      const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadProducts');
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -57,7 +58,7 @@ export const useProducts = (): UseProductsResult => {
       } catch (err) {
         if (!isCancelled) {
           logError('useProducts.init', err);
-          const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
+          const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadProducts');
           setError(msg);
           setIsLoading(false);
         }
@@ -78,7 +79,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.addProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al guardar el producto';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.saveProduct');
       setError(msg);
       return false;
     }
@@ -91,7 +92,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.editProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.updateProduct');
       setError(msg);
       return false;
     }
@@ -107,7 +108,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.editEtsyMetadata', err);
-      const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.updateProduct');
       setError(msg);
       return false;
     }
@@ -120,7 +121,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.removeProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al eliminar el producto';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.deleteProduct');
       setError(msg);
       return false;
     }

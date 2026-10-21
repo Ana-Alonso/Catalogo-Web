@@ -1,8 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Input } from '../../ui';
 import { theme } from '../../../theme';
+import { formatPriceForLanguage } from '../../../i18n/formatters';
 import {
-  formatPrice,
   getDiscountedCents,
   parsePriceToCents,
 } from '../../../utils/price';
@@ -24,6 +25,8 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
   onPriceOnRequestChange,
   onDiscountChange,
 }) => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const priceCents = priceOnRequest ? null : parsePriceToCents(price);
   const parsedDiscount = Number(discountPercent.replace(',', '.'));
   const hasValidDiscount =
@@ -40,7 +43,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
       <Box>
         <Input
           id="prod-price"
-          label="Precio estimado en € (opcional)"
+          label={t('admin.priceFields.priceLabel')}
           type="number"
           min={0}
           step="0.01"
@@ -48,7 +51,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
           value={priceOnRequest ? '' : price}
           disabled={priceOnRequest}
           onChange={(event) => onPriceChange(event.target.value)}
-          placeholder="25,00"
+          placeholder={t('admin.priceFields.pricePlaceholder')}
         />
         <Box className="mt-3 flex items-center gap-2">
           <input
@@ -62,7 +65,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
             htmlFor="prod-price-on-request"
             className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
           >
-            Precio a consultar
+            {t('admin.priceFields.onRequest')}
           </label>
         </Box>
       </Box>
@@ -70,7 +73,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
       <Box>
         <Input
           id="prod-discount"
-          label="Descuento % (opcional)"
+          label={t('admin.priceFields.discountLabel')}
           type="number"
           min={1}
           max={90}
@@ -78,28 +81,30 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
           value={discountPercent}
           disabled={priceOnRequest}
           onChange={(event) => onDiscountChange(event.target.value)}
-          placeholder="20"
+          placeholder={t('admin.priceFields.discountPlaceholder')}
         />
         <p className={`mt-2 text-xs ${theme.colors.textMuted}`}>
-          Se aplica solo a productos locales. Entre 1 % y 90 %.
+          {t('admin.priceFields.discountHint')}
         </p>
       </Box>
 
       <Box className="rounded-lg border border-neutral-800 bg-neutral-950/60 p-4">
         <span className="block text-xs font-semibold uppercase tracking-wider text-neutral-400">
-          Vista previa
+          {t('admin.priceFields.preview')}
         </span>
         {finalCents == null ? (
-          <p className="mt-2 text-sm text-neutral-300">Precio a consultar</p>
+          <p className="mt-2 text-sm text-neutral-300">{t('admin.priceFields.onRequest')}</p>
         ) : (
           <Box className="mt-2 space-y-1">
             <p className="text-lg font-bold text-orange-400">
-              {formatPrice(finalCents, 'EUR')}
+              {formatPriceForLanguage(finalCents, 'EUR', language)}
             </p>
             {hasValidDiscount && priceCents != null && (
               <p className="text-xs text-neutral-400">
-                antes{' '}
-                <s className="text-neutral-500">{formatPrice(priceCents, 'EUR')}</s>{' '}
+                {t('admin.priceFields.before')}{' '}
+                <s className="text-neutral-500">
+                  {formatPriceForLanguage(priceCents, 'EUR', language)}
+                </s>{' '}
                 · -{parsedDiscount}%
               </p>
             )}

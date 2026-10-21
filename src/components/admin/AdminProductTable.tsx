@@ -1,8 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, Edit3, ExternalLink, Sparkles } from 'lucide-react';
 import { Card, Badge, Button, Box } from '../ui';
 import { theme } from '../../theme';
-import { formatPrice, getDiscountedCents, isOfferActive } from '../../utils/price';
+import { formatPriceForLanguage } from '../../i18n/formatters';
+import {
+  availabilityTranslationKeys,
+  categoryTranslationKeys,
+} from '../../i18n/labels';
+import { getDiscountedCents, isOfferActive } from '../../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 
 interface AdminProductTableProps {
@@ -24,10 +30,13 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   onEdit,
   isDeleting 
 }) => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
+
   if (products.length === 0) {
     return (
       <Card className="text-center py-12">
-        <p className={theme.colors.textMuted}>No hay productos registrados en el catálogo.</p>
+        <p className={theme.colors.textMuted}>{t('admin.productTable.empty')}</p>
       </Card>
     );
   }
@@ -36,21 +45,27 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
     <Card>
       <Box className={`p-6 border-b ${theme.colors.border}`}>
         <h3 className="text-xl font-bold text-white uppercase tracking-wider">
-          Productos en Catálogo ({products.length})
+          {t('admin.productTable.title', { count: products.length })}
         </h3>
-        <p className={`${theme.colors.textMuted} text-sm`}>Gestiona disponibilidad, destacados y enlaces.</p>
+        <p className={`${theme.colors.textMuted} text-sm`}>
+          {t('admin.productTable.subtitle')}
+        </p>
       </Box>
 
       <Box className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className={`border-b ${theme.colors.border} bg-neutral-950/60 text-xs font-semibold uppercase tracking-wider text-neutral-400`}>
-              <th className="py-4 px-6">Obra</th>
-              <th className="py-4 px-6">Categoría</th>
-              <th className="py-4 px-6">Disponibilidad</th>
-              <th className="py-4 px-6">Precio</th>
-              <th className="py-4 px-6">Enlaces</th>
-              <th className="py-4 px-6 text-right">Acciones</th>
+              <th className="py-4 px-6">{t('admin.productTable.columns.artwork')}</th>
+              <th className="py-4 px-6">{t('admin.productTable.columns.category')}</th>
+              <th className="py-4 px-6">
+                {t('admin.productTable.columns.availability')}
+              </th>
+              <th className="py-4 px-6">{t('admin.productTable.columns.price')}</th>
+              <th className="py-4 px-6">{t('admin.productTable.columns.links')}</th>
+              <th className="py-4 px-6 text-right">
+                {t('admin.productTable.columns.actions')}
+              </th>
             </tr>
           </thead>
           <tbody className={`divide-y ${theme.colors.borderSubtle} text-sm`}>
@@ -78,15 +93,15 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                         <Box className="flex flex-wrap items-center gap-1.5">
                           <span className="font-semibold text-white">{item.title}</span>
                           {item.featured && (
-                            <span title="Producto Destacado">
+                            <span title={t('admin.productTable.featuredTitle')}>
                               <Sparkles className="w-3.5 h-3.5 text-orange-500 fill-orange-500/20" />
                             </span>
                           )}
                           {item.source === 'etsy' && (
-                            <Badge variant="neutral">Etsy</Badge>
+                            <Badge variant="neutral">{t('admin.productTable.etsy')}</Badge>
                           )}
                           {item.isVisible === false && (
-                            <Badge variant="outline">Oculto</Badge>
+                            <Badge variant="outline">{t('admin.productTable.hidden')}</Badge>
                           )}
                         </Box>
                         <Box className={`${theme.colors.textMuted} text-xs line-clamp-1 max-w-xs`}>
@@ -97,32 +112,42 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                   </td>
                   <td className="py-4 px-6">
                     <Badge variant="outline">
-                      {item.category}
+                      {t(categoryTranslationKeys[item.category])}
                     </Badge>
                     {item.category === 'talleres' && (
                       <div className="mt-1.5 text-xs text-neutral-500">
-                        {item.cupo != null ? `Cupo: ${item.cupo} plazas` : 'Sin cupo'}
+                        {item.cupo != null
+                          ? t('admin.productTable.capacity', { count: item.cupo })
+                          : t('admin.productTable.noCapacity')}
                       </div>
                     )}
                   </td>
                   <td className="py-4 px-6">
                     <Badge variant={statusBadgeVariant[currentStatus]}>
-                      {currentStatus}
+                      {t(availabilityTranslationKeys[currentStatus])}
                     </Badge>
                   </td>
                   <td className="py-4 px-6 font-medium text-neutral-300">
                     {displayCents != null ? (
                       <Box className="space-y-1">
-                        <span>{formatPrice(displayCents, currency)}</span>
+                        <span>
+                          {formatPriceForLanguage(displayCents, currency, language)}
+                        </span>
                         {offerPercent != null && item.priceCents != null && (
                           <Box className="text-xs text-neutral-500">
-                            <s>{formatPrice(item.priceCents, currency)}</s>
+                            <s>
+                              {formatPriceForLanguage(
+                                item.priceCents,
+                                currency,
+                                language
+                              )}
+                            </s>
                             <span className="ml-2 text-orange-400">-{offerPercent}%</span>
                           </Box>
                         )}
                       </Box>
                     ) : (
-                      'A consultar'
+                      t('admin.productTable.consult')
                     )}
                   </td>
                   <td className="py-4 px-6">
@@ -155,7 +180,9 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(item)}
-                        aria-label={`Modificar ${item.title}`}
+                        aria-label={t('admin.productTable.editAria', {
+                          title: item.title,
+                        })}
                       >
                         <Edit3 className="w-4 h-4 text-orange-500" />
                       </Button>
@@ -165,18 +192,28 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                         disabled={isDeleting || item.source === 'etsy'}
                         title={
                           item.source === 'etsy'
-                            ? 'Los productos de Etsy se eliminan desde Etsy'
+                            ? t('admin.productTable.etsyDeleteHint')
                             : undefined
                         }
                         onClick={() => {
-                          if (window.confirm(`¿Seguro que deseas eliminar "${item.title}"?`)) {
+                          if (
+                            window.confirm(
+                              t('admin.productTable.deleteConfirm', {
+                                title: item.title,
+                              })
+                            )
+                          ) {
                             onDelete(String(item.id));
                           }
                         }}
                         aria-label={
                           item.source === 'etsy'
-                            ? `${item.title} se elimina desde Etsy`
-                            : `Eliminar ${item.title}`
+                            ? t('admin.productTable.etsyDeleteAria', {
+                                title: item.title,
+                              })
+                            : t('admin.productTable.deleteAria', {
+                                title: item.title,
+                              })
                         }
                       >
                         <Trash2 className="w-4 h-4 text-red-400" />

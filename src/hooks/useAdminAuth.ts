@@ -4,7 +4,7 @@ import { supabase, isSupabaseConfigured } from '../utils/supabase';
 
 interface SignInResult {
   success: boolean;
-  message?: string;
+  errorKey?: 'admin.login.invalidCredentials';
 }
 
 interface UseAdminAuthReturn {
@@ -54,7 +54,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        return { success: false, message: 'Email o contraseña incorrectos.' };
+        return { success: false, errorKey: 'admin.login.invalidCredentials' };
       }
 
       return { success: true };

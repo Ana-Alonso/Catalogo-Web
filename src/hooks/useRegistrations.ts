@@ -5,6 +5,7 @@ import {
   deleteRegistration,
 } from '../services/registrationService';
 import { logError } from '../utils/logger';
+import i18n from '../i18n';
 import type { WorkshopRegistration, RegistrationStatus } from '../types/registrations';
 
 interface UseRegistrationsResult {
@@ -29,7 +30,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       setRegistrations(data);
     } catch (err) {
       logError('useRegistrations.loadRegistrations', err);
-      const msg = err instanceof Error ? err.message : 'Error desconocido al cargar inscripciones';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadRegistrations');
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -49,7 +50,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       } catch (err) {
         if (!isCancelled) {
           logError('useRegistrations.init', err);
-          const msg = err instanceof Error ? err.message : 'Error desconocido al cargar inscripciones';
+          const msg = err instanceof Error ? err.message : i18n.t('admin.errors.loadRegistrations');
           setError(msg);
           setIsLoading(false);
         }
@@ -72,7 +73,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       return true;
     } catch (err) {
       logError('useRegistrations.setStatus', err);
-      const msg = err instanceof Error ? err.message : 'Error al actualizar la inscripción';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.updateRegistration');
       setError(msg);
       return false;
     }
@@ -85,7 +86,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
       return true;
     } catch (err) {
       logError('useRegistrations.remove', err);
-      const msg = err instanceof Error ? err.message : 'Error al eliminar la inscripción';
+      const msg = err instanceof Error ? err.message : i18n.t('admin.errors.deleteRegistration');
       setError(msg);
       return false;
     }

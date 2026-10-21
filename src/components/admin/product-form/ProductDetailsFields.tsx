@@ -1,6 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Input } from '../../ui';
 import { theme } from '../../../theme';
+import {
+  availabilityTranslationKeys,
+  categoryTranslationKeys,
+} from '../../../i18n/labels';
 import type {
   AvailabilityStatus,
   CategoryType,
@@ -26,17 +31,17 @@ interface ProductDetailsFieldsProps {
   onVintedLinkChange: (value: string) => void;
 }
 
-const CATEGORY_OPTIONS: { label: string; value: FormCategory }[] = [
-  { label: 'Ilustraciones', value: 'ilustraciones' },
-  { label: 'Camisetas', value: 'camisetas' },
-  { label: 'Talleres', value: 'talleres' },
-  { label: 'Personalizados', value: 'personalizados' },
+const CATEGORY_OPTIONS: FormCategory[] = [
+  'ilustraciones',
+  'camisetas',
+  'talleres',
+  'personalizados',
 ];
 
-const STATUS_OPTIONS: { label: string; value: AvailabilityStatus }[] = [
-  { label: 'Disponible', value: 'disponible' },
-  { label: 'Reservado', value: 'reservado' },
-  { label: 'Vendido / Agotado', value: 'vendido' },
+const STATUS_OPTIONS: AvailabilityStatus[] = [
+  'disponible',
+  'reservado',
+  'vendido',
 ];
 
 export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
@@ -56,22 +61,24 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
   onEtsyLinkChange,
   onVintedLinkChange,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
           id="prod-title"
-          label="Título de la Obra *"
+          label={t('admin.productFields.titleLabel')}
           required
           maxLength={120}
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
-          placeholder="Título del producto"
+          placeholder={t('admin.productFields.titlePlaceholder')}
         />
 
         <Box>
           <label htmlFor="prod-category" className={theme.inputs.label}>
-            Categoría *
+            {t('admin.productFields.categoryLabel')}
           </label>
           <select
             id="prod-category"
@@ -80,8 +87,8 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
             className={theme.inputs.base}
           >
             {CATEGORY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+              <option key={option} value={option}>
+                {t(categoryTranslationKeys[option])}
               </option>
             ))}
           </select>
@@ -91,7 +98,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
       <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Box>
           <label htmlFor="prod-status" className={theme.inputs.label}>
-            Estado / Disponibilidad *
+            {t('admin.productFields.statusLabel')}
           </label>
           <select
             id="prod-status"
@@ -100,8 +107,8 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
             className={theme.inputs.base}
           >
             {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+              <option key={option} value={option}>
+                {t(availabilityTranslationKeys[option])}
               </option>
             ))}
           </select>
@@ -119,14 +126,14 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
             htmlFor="prod-featured"
             className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
           >
-            Destacar en la parte superior del catálogo
+            {t('admin.productFields.featuredLabel')}
           </label>
         </Box>
       </Box>
 
       <Box>
         <label htmlFor="prod-desc" className={theme.inputs.label}>
-          Descripción *
+          {t('admin.productFields.descriptionLabel')}
         </label>
         <textarea
           id="prod-desc"
@@ -135,7 +142,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
           maxLength={2000}
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
-          placeholder="Descripción, materiales, dimensiones..."
+          placeholder={t('admin.productFields.descriptionPlaceholder')}
           className={theme.inputs.base}
         />
       </Box>
@@ -144,7 +151,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
         <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
             id="prod-etsy"
-            label="Enlace de Etsy (opcional)"
+            label={t('admin.productFields.etsyLinkLabel')}
             type="url"
             maxLength={300}
             value={etsyLink}
@@ -154,7 +161,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
 
           <Input
             id="prod-vinted"
-            label="Enlace de Vinted (opcional)"
+            label={t('admin.productFields.vintedLinkLabel')}
             type="url"
             maxLength={300}
             value={vintedLink}
