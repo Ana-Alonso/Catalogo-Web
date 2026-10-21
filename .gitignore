@@ -37,3 +37,7 @@ supabase/
 scripts/*
 !scripts/etsy-oauth.mjs
 .etsy-oauth.json
+.vercel
+.env*
+TO-DO.txt
+credenciales.txt

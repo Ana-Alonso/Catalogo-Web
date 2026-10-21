@@ -4,6 +4,7 @@
   --color-orange-500: #ff853a;
   --color-orange-600: #ff751f;
   --color-orange-700: #e65c05;
+  --font-hero: 'Yanone Kaffeesatz Variable', system-ui, sans-serif;
 }
 
 @layer base {
