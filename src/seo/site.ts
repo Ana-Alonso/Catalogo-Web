@@ -1,4 +1,4 @@
-export const DEFAULT_SITE_URL = 'https://lauraenlienzo.vercel.app';
+export const DEFAULT_SITE_URL = 'https://laurelenlienzo.vercel.app';
 export const SITE_NAME = 'Laurel en Lienzo';
 export const DEFAULT_OG_IMAGE_PATH = '/og-image.png';
 

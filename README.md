@@ -11,9 +11,7 @@ An art catalog and workshop-booking website for an independent illustrator. Visi
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 
-> **Live demo:** _coming soon_ (Vercel deployment).
-> <!-- TODO: replace the block below with the production URL once deployed -->
-> <!-- [your-project.vercel.app](https://your-project.vercel.app) -->
+> **Live demo:** [laurelenlienzo.vercel.app](https://laurelenlienzo.vercel.app)
 
 <!--
 SCREENSHOTS
@@ -128,6 +126,7 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 | `VITE_SUPABASE_URL` | Supabase project URL. |
 | `VITE_SUPABASE_ANON_KEY` | Supabase public (anon) key. |
 | `VITE_USE_MOCKS` | `true` uses local mock data; `false` uses Supabase. |
+| `VITE_SITE_URL` | Canonical production URL. Defaults to `https://laurelenlienzo.vercel.app`. |
 | `VITE_ETSY_SHOP_URL` | Etsy shop URL shown in the footer. |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Social media links. |
 | `VITE_CONTACT_EMAIL` | Contact email shown in the footer. |
@@ -212,7 +211,7 @@ scripts/           # OAuth bootstrap and Docker-based SQL test suite
 ## Testing and CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request: lint → tests → typecheck + build → SQL suite in a PostgreSQL 15 container. The pipeline needs no secrets.
-- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` provides security headers; React Router handles SSR routing, redirects and 404 responses.
+- **CD** uses Vercel's Git integration: pushes to `main` deploy to production, and every pull request gets its own preview URL. `vercel.json` sets the `react-router` framework preset and the security headers; React Router handles SSR routing, redirects and 404 responses.
 - In production, set the environment variables listed above in the Vercel dashboard (Production and Preview) and add the deployed domain as the **Site URL** in Supabase *Authentication → URL Configuration*.
 
 ## Roadmap

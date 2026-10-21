@@ -11,9 +11,7 @@ Catálogo de arte y reserva de talleres para una ilustradora independiente. Los 
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 
-> **Demo en vivo:** _próximamente_ (despliegue en Vercel).
-> <!-- TODO: sustituye el bloque inferior por la URL de producción cuando esté desplegada -->
-> <!-- [tu-proyecto.vercel.app](https://tu-proyecto.vercel.app) -->
+> **Demo en vivo:** [laurelenlienzo.vercel.app](https://laurelenlienzo.vercel.app)
 
 <!--
 CAPTURAS
@@ -128,6 +126,7 @@ Abre `http://localhost:5173`. El modo desarrollo usa datos mock (`VITE_USE_MOCKS
 | `VITE_SUPABASE_URL` | URL del proyecto Supabase. |
 | `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase. |
 | `VITE_USE_MOCKS` | `true` usa datos mock locales; `false` usa Supabase. |
+| `VITE_SITE_URL` | URL canónica de producción. Por defecto `https://laurelenlienzo.vercel.app`. |
 | `VITE_ETSY_SHOP_URL` | URL de la tienda Etsy en el pie de página. |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Enlaces a redes sociales. |
 | `VITE_CONTACT_EMAIL` | Email de contacto mostrado en el pie. |
@@ -212,7 +211,7 @@ scripts/           # Bootstrap de OAuth y suite SQL de tests con Docker
 ## Testing y CI/CD
 
 - **CI** (`.github/workflows/ci.yml`) se ejecuta en cada push a `main` y en cada pull request: lint → tests → typecheck + build → suite SQL en un contenedor PostgreSQL 15. El pipeline no necesita secrets.
-- **CD** usa la integración Git de Vercel: los push a `main` despliegan a producción y cada pull request obtiene su propia URL de vista previa. `vercel.json` aporta las cabeceras de seguridad; React Router gestiona el SSR, las redirecciones y las respuestas 404.
+- **CD** usa la integración Git de Vercel: los push a `main` despliegan a producción y cada pull request obtiene su propia URL de vista previa. `vercel.json` fija el preset de framework `react-router` y aporta las cabeceras de seguridad; React Router gestiona el SSR, las redirecciones y las respuestas 404.
 - En producción, define las variables de entorno anteriores en el dashboard de Vercel (*Production* y *Preview*) y añade el dominio desplegado como **Site URL** en Supabase *Authentication → URL Configuration*.
 
 ## Roadmap
