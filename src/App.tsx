@@ -1,15 +1,25 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CatalogPage from './pages/CatalogPage';
 import AdminPage from './pages/AdminPage';
+import { LanguageRedirect } from './components/i18n/LanguageRedirect';
+import { LanguageRoute } from './components/i18n/LanguageRoute';
 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<CatalogPage />} />
+        <Route path="/" element={<LanguageRedirect />} />
+        <Route
+          path="/:lang"
+          element={
+            <LanguageRoute>
+              <CatalogPage />
+            </LanguageRoute>
+          }
+        />
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<LanguageRedirect />} />
       </Routes>
     </BrowserRouter>
   );

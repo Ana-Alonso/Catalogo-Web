@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, type Variants } from 'framer-motion';
 import { ShoppingBag, Tag, Calendar, MapPin, Sparkles, Users, UserPlus } from 'lucide-react';
 import { Badge, Box, Typography, Button } from './ui';
@@ -6,10 +7,14 @@ import { Modal } from './ui/Modal';
 import { WorkshopSignupForm } from './WorkshopSignupForm';
 import { theme } from '../theme';
 import {
-  formatPrice,
-  getDiscountedCents,
-  isOfferActive,
-} from '../utils/price';
+  formatPriceForLanguage,
+  formatWorkshopDateForLanguage,
+} from '../i18n/formatters';
+import {
+  availabilityTranslationKeys,
+  categoryTranslationKeys,
+} from '../i18n/labels';
+import { getDiscountedCents, isOfferActive } from '../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../types/catalog';
 import type { RegistrationFormData } from '../types/registrations';
 
@@ -28,15 +33,17 @@ const itemVariants: Variants = {
   }
 };
 
-const statusConfig: Record<AvailabilityStatus, { label: string; badgeVariant: 'primary' | 'neutral' | 'outline' }> = {
-  disponible: { label: 'Disponible', badgeVariant: 'primary' },
-  reservado: { label: 'Reservado', badgeVariant: 'neutral' },
-  vendido: { label: 'Vendido / Finalizado', badgeVariant: 'outline' },
+const statusBadgeVariants: Record<AvailabilityStatus, 'primary' | 'neutral' | 'outline'> = {
+  disponible: 'primary',
+  reservado: 'neutral',
+  vendido: 'outline',
 };
 
 export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRegister }) => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const currentStatus = item.status || 'disponible';
-  const statusInfo = statusConfig[currentStatus];
+  const statusBadgeVariant = statusBadgeVariants[currentStatus];
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const isWorkshop = item.category === 'talleres';
@@ -45,8 +52,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const finalCents = hasOffer
     ? getDiscountedCents(priceCents, item.discountPercent)
     : priceCents;
-  const finalPrice = formatPrice(finalCents, item.currency);
-  const originalPrice = formatPrice(priceCents, item.currency);
+  const finalPrice = formatPriceForLanguage(finalCents, item.currency, language);
+  const originalPrice = formatPriceForLanguage(priceCents, item.currency, language);
   const cupo = item.cupo ?? null;
   const registeredCount = spotsCount ?? 0;
   const spotsLeft = cupo === null ? null : Math.max(cupo - registeredCount, 0);
@@ -65,7 +72,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
       <Box className="relative aspect-square overflow-hidden bg-neutral-800">
         <img 
           src={item.image} 
-          alt={`Obra: ${item.title}`} 
+          alt={t('product.imageAlt', { title: item.title })}
           className={`w-full h-full object-cover object-center grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out ${
             currentStatus === 'vendido' ? 'opacity-50' : ''
           }`}
@@ -79,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
         {item.featured && (
           <Box className="absolute top-3 left-3 bg-orange-600 text-white font-bold text-[10px] uppercase px-2 py-1 rounded shadow-md flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            Destacado
+            {t('product.featured')}
           </Box>
         )}
         
@@ -93,14 +100,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             className="bg-neutral-950/80 backdrop-blur-sm border border-neutral-700 text-orange-400 font-bold text-xs uppercase px-2.5 py-1 rounded-sm"
             aria-label={
               priceCents == null
-                ? 'Precio a consultar'
+                ? t('product.priceOnRequest')
                 : hasOffer
-                  ? `Precio ${finalPrice}, antes ${originalPrice}, ${item.discountPercent}% de descuento`
-                  : `Precio ${finalPrice}`
+                  ? t('product.offerAria', {
+                      finalPrice,
+                      originalPrice,
+                      discount: item.discountPercent,
+                    })
+                  : t('product.priceAria', { price: finalPrice })
             }
           >
             {priceCents == null ? (
-              'Consultar'
+              t('product.consult')
             ) : hasOffer ? (
               <span className="inline-flex items-center gap-1.5">
                 <s className="text-neutral-400 font-medium normal-case">{originalPrice}</s>
@@ -117,10 +128,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
         <Box className="mb-2">
           <Box className="flex items-center gap-2 mb-1">
             <Badge variant="primary">
-              {item.category}
+              {t(categoryTranslationKeys[item.category])}
             </Badge>
-            <Badge variant={statusInfo.badgeVariant}>
-              {statusInfo.label}
+            <Badge variant={statusBadgeVariant}>
+              {t(availabilityTranslationKeys[currentStatus])}
             </Badge>
           </Box>
           <Typography variant="h4" className="mt-1">{item.title}</Typography>
@@ -128,25 +139,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
 
         {item.category === 'talleres' && (item.eventDate || item.eventLocation) && (
           <Box className="my-2 p-2.5 rounded bg-neutral-950 border border-neutral-800 space-y-1 text-xs text-neutral-300">
-            {item.eventDate && (() => {
-              const parsed = new Date(item.eventDate);
-              const formatted = isNaN(parsed.getTime())
-                ? item.eventDate
-                : parsed.toLocaleString('es-ES', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  });
-              return (
-                <Box className="flex items-center gap-2 text-orange-400 font-medium capitalize">
-                  <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span>{formatted}</span>
-                </Box>
-              );
-            })()}
+            {item.eventDate && (
+              <Box className="flex items-center gap-2 text-orange-400 font-medium capitalize">
+                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{formatWorkshopDateForLanguage(item.eventDate, language)}</span>
+              </Box>
+            )}
             {item.eventLocation && (
               <Box className="flex items-center gap-2 text-neutral-400">
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -165,12 +163,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             <Box className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
               <Users className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
               {cupo === null ? (
-                <span className="text-neutral-400">Inscripción abierta</span>
+                <span className="text-neutral-400">{t('product.spotsOpen')}</span>
               ) : isFull ? (
-                <span className="text-red-400">Completo · no quedan plazas</span>
+                <span className="text-red-400">{t('product.spotsFull')}</span>
               ) : (
                 <span className="text-green-400">
-                  Quedan {spotsLeft} de {cupo} plazas
+                  {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
                 </span>
               )}
             </Box>
@@ -181,15 +179,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               variant="outline"
               className="w-full"
               onClick={() => setIsSignupOpen(true)}
-              aria-label={`Apuntarse al taller ${item.title}`}
+              aria-label={t('product.signupAria', { title: item.title })}
             >
               <UserPlus className="w-4 h-4" aria-hidden="true" />
-              Apuntarse al taller
+              {t('product.signup')}
             </Button>
           )}
           {isWorkshop && isFull && !isFinished && (
             <Box className="text-center py-2.5 text-xs text-red-400 font-semibold uppercase tracking-wider bg-red-950/30 rounded border border-red-900/50">
-              Taller completo
+              {t('product.workshopFull')}
             </Box>
           )}
           {!isWorkshop && item.etsyLink && currentStatus !== 'vendido' && (
@@ -198,10 +196,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               target="_blank"
               rel="noopener noreferrer"
               className={`w-full inline-flex justify-center items-center gap-2 ${theme.colors.primary} font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`}
-              aria-label={`Comprar ${item.title} en Etsy`}
+              aria-label={t('product.buyEtsyAria', { title: item.title })}
             >
               <ShoppingBag className="w-4 h-4" aria-hidden="true" />
-              Comprar en Etsy
+              {t('product.buyEtsy')}
             </a>
           )}
           {!isWorkshop && item.vintedLink && currentStatus !== 'vendido' && (
@@ -210,15 +208,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               target="_blank"
               rel="noopener noreferrer"
               className={`w-full inline-flex justify-center items-center gap-2 bg-transparent border border-neutral-700 hover:border-neutral-400 text-neutral-300 hover:text-white font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`}
-              aria-label={`Comprar ${item.title} en Vinted`}
+              aria-label={t('product.viewVintedAria', { title: item.title })}
             >
               <Tag className="w-4 h-4" aria-hidden="true" />
-              Ver en Vinted
+              {t('product.viewVinted')}
             </a>
           )}
           {currentStatus === 'vendido' && (
             <Box className="text-center py-2.5 text-xs text-neutral-500 font-semibold uppercase tracking-wider bg-neutral-950 rounded border border-neutral-800">
-              Pieza no disponible
+              {t('product.unavailable')}
             </Box>
           )}
         </Box>
@@ -228,7 +226,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
     <Modal
       isOpen={isSignupOpen}
       onClose={() => setIsSignupOpen(false)}
-      title="Inscripción al taller"
+      title={t('product.signupModalTitle')}
     >
       {onRegister && (
         <WorkshopSignupForm

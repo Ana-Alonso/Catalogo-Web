@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Tag } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { Box, Typography } from './ui';
 import { theme } from '../theme';
+import { categoryTranslationKeys } from '../i18n/labels';
 import { isOfferActive } from '../utils/price';
 import type { CatalogItem, CategoryType } from '../types/catalog';
 import type { RegistrationFormData } from '../types/registrations';
@@ -18,12 +20,12 @@ interface GallerySectionProps {
   onRegister?: (item: CatalogItem, data: RegistrationFormData) => Promise<void>;
 }
 
-const categories: { label: string; value: CategoryType }[] = [
-  { label: 'Todas las obras', value: 'todas' },
-  { label: 'Ilustraciones', value: 'ilustraciones' },
-  { label: 'Camisetas', value: 'camisetas' },
-  { label: 'Talleres', value: 'talleres' },
-  { label: 'Personalizados', value: 'personalizados' },
+const categories: CategoryType[] = [
+  'todas',
+  'ilustraciones',
+  'camisetas',
+  'talleres',
+  'personalizados',
 ];
 
 const containerVariants: Variants = {
@@ -43,6 +45,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   spotsCounts,
   onRegister
 }) => {
+  const { t } = useTranslation();
   const visibleItems = items.filter(item => item.isVisible !== false);
   const offersCount = visibleItems.filter(isOfferActive).length;
   const categoryItems = activeCategory === 'todas'
@@ -58,7 +61,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
         <Box className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <Box>
             <Typography variant="h2" className="mb-3">
-              Catálogo <span className={theme.colors.textSubtle}>Visual</span>
+              {t('catalog.heading')} <span className={theme.colors.textSubtle}>{t('catalog.headingAccent')}</span>
             </Typography>
             <Box className="h-1 w-20 bg-orange-600" />
           </Box>
@@ -66,15 +69,15 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           <Box 
             className="flex flex-wrap gap-2" 
             role="toolbar" 
-            aria-label="Filtro de obras por categoría"
+            aria-label={t('catalog.filterAria')}
           >
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat.value;
+            {categories.map((category) => {
+              const isActive = activeCategory === category;
               return (
                 <button
-                  key={cat.value}
+                  key={category}
                   type="button"
-                  onClick={() => onSelectCategory(cat.value)}
+                  onClick={() => onSelectCategory(category)}
                   className={`px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
                     isActive
                       ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
@@ -82,7 +85,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                   }`}
                   aria-pressed={isActive}
                 >
-                  {cat.label}
+                  {t(categoryTranslationKeys[category])}
                 </button>
               );
             })}
@@ -98,7 +101,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                 aria-pressed={offersOnly}
               >
                 <Tag className="w-3.5 h-3.5" aria-hidden="true" />
-                Ofertas
+                {t('catalog.offers')}
                 {offersCount > 0 && (
                   <span
                     className={`min-w-5 rounded-full px-1.5 py-0.5 text-[10px] leading-none ${
@@ -136,9 +139,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           ) : (
             <Box className="text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800">
               <Typography variant="body" className="text-lg">
-                {offersOnly
-                  ? 'No hay ofertas activas en esta categoría por el momento.'
-                  : 'No hay piezas disponibles en esta categoría por el momento.'}
+                {offersOnly ? t('catalog.emptyOffers') : t('catalog.empty')}
               </Typography>
             </Box>
           )}

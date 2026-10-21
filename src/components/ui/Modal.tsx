@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 export interface ModalProps {
@@ -9,6 +10,7 @@ export interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         type="button"
         className="absolute inset-0 bg-neutral-950/85 backdrop-blur-sm cursor-default"
         onClick={onClose}
-        aria-label="Cerrar diálogo"
+        aria-label={t('a11y.closeDialog')}
         tabIndex={-1}
       />
       <div
@@ -64,7 +66,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="p-1.5 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
           >
             <X className="w-5 h-5" aria-hidden="true" />

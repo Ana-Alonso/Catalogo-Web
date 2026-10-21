@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import HeroSection from '../components/HeroSection';
 import GallerySection from '../components/GallerySection';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { useProducts } from '../hooks/useProducts';
 import { useWorkshopSpots } from '../hooks/useWorkshopSpots';
 import type { CategoryType } from '../types/catalog';
 
 export const CatalogPage: React.FC = () => {
+  const { t } = useTranslation();
+  usePageMeta();
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
   const [offersOnly, setOffersOnly] = useState(false);
   const { products } = useProducts();
@@ -19,7 +23,7 @@ export const CatalogPage: React.FC = () => {
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:p-4 focus:bg-orange-600 focus:text-white focus:top-4 focus:left-4 rounded-md shadow-lg"
       >
-        Saltar al contenido principal
+        {t('a11y.skipToContent')}
       </a>
 
       <Navbar 

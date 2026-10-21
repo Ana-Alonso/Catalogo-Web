@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "title": "Laurel en Lienzo - Visual Catalog",
+    "description": "Personalizable illustrations, creative workshops and exclusive pieces to connect with you."
+  },
+  "brand": {
+    "name": "<highlight>Laurel</highlight> en Lienzo"
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading..."
+  },
+  "language": {
+    "label": "Language",
+    "switchToSpanish": "Switch to Spanish",
+    "switchToEnglish": "Switch to English"
+  },
+  "nav": {
+    "ariaLabel": "Main navigation",
+    "homeAria": "Laurel en Lienzo - Home",
+    "logoAlt": "Laurel en Lienzo logo",
+    "openMenu": "Open main menu",
+    "closeMenu": "Close main menu",
+    "links": {
+      "all": "All",
+      "custom": "Custom",
+      "tshirts": "T-shirts",
+      "illustrations": "Illustrations",
+      "workshops": "Workshops"
+    }
+  },
+  "hero": {
+    "title": "<highlight>CREATE</highlight> FEEL CONNECT",
+    "subtitle": "Personalizable illustrations crafted down to the smallest detail so you can be part of them, adding colour or details. Creative workshops and exclusive pieces to take with you.",
+    "catalogCta": "View Catalog",
+    "etsyCta": "Etsy Shop"
+  },
+  "catalog": {
+    "heading": "Visual",
+    "headingAccent": "Catalog",
+    "filterAria": "Filter works by category",
+    "offers": "Offers",
+    "empty": "There are no pieces available in this category right now.",
+    "emptyOffers": "There are no active offers in this category right now.",
+    "categories": {
+      "all": "All works",
+      "custom": "Custom",
+      "tshirts": "T-shirts",
+      "illustrations": "Illustrations",
+      "workshops": "Workshops"
+    }
+  },
+  "product": {
+    "featured": "Featured",
+    "imageAlt": "Artwork: {{title}}",
+    "consult": "Ask",
+    "priceOnRequest": "Price on request",
+    "priceAria": "Price {{price}}",
+    "offerAria": "Price {{finalPrice}}, originally {{originalPrice}}, {{discount}}% off",
+    "status": {
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold / Finished"
+    },
+    "spotsOpen": "Registration open",
+    "spotsFull": "Full · no spots left",
+    "spotsLeft": "{{spots}} of {{total}} spots left",
+    "signup": "Join the workshop",
+    "signupAria": "Join the workshop {{title}}",
+    "workshopFull": "Workshop full",
+    "buyEtsy": "Buy on Etsy",
+    "buyEtsyAria": "Buy {{title}} on Etsy",
+    "viewVinted": "View on Vinted",
+    "viewVintedAria": "Buy {{title}} on Vinted",
+    "unavailable": "Piece unavailable",
+    "signupModalTitle": "Workshop registration"
+  },
+  "workshop": {
+    "form": {
+      "intro": "Leave your details to reserve your spot at «{{title}}».",
+      "nameLabel": "Your name *",
+      "namePlaceholder": "Full name",
+      "emailLabel": "Your email *",
+      "emailPlaceholder": "you@email.com",
+      "submit": "Join the workshop",
+      "submitting": "Registering...",
+      "errors": {
+        "required": "Please enter your name and email.",
+        "invalidEmail": "Enter a valid email.",
+        "alreadyRegistered": "You are already registered for this workshop with this email.",
+        "workshopFull": "The workshop is full: no spots left.",
+        "notFound": "Registration not found.",
+        "unknown": "Could not complete registration. Please try again."
+      },
+      "successTitle": "Registration complete!",
+      "successBody": "You have signed up for the workshop «{{title}}»."
+    },
+    "social": {
+      "both": "Stay tuned to our social media: we will share news and updates about the workshop on <instagram>Instagram</instagram> and <tiktok>TikTok</tiktok>.",
+      "instagram": "Stay tuned to our social media: we will share news and updates about the workshop on <instagram>Instagram</instagram>.",
+      "tiktok": "Stay tuned to our social media: we will share news and updates about the workshop on <tiktok>TikTok</tiktok>.",
+      "none": "Stay tuned to our social media: we will share news and updates about the workshop.",
+      "instagramAria": "See workshop updates on Instagram",
+      "tiktokAria": "See workshop updates on TikTok"
+    }
+  },
+  "calendar": {
+    "heading": "Add to my calendar",
+    "googleAria": "Add workshop {{title}} to Google Calendar",
+    "outlookAria": "Add workshop {{title}} to Outlook",
+    "downloadAria": "Download workshop {{title}} event as ics",
+    "priceLabel": "Price",
+    "filenameFallback": "workshop"
+  },
+  "footer": {
+    "heading": "Footer",
+    "emailAria": "Send email to {{email}}",
+    "etsyAria": "Visit official Etsy shop",
+    "instagramAria": "Visit Instagram profile",
+    "tiktokAria": "Visit TikTok profile",
+    "copyright": "© {{year}} Laurel en Lienzo. All rights reserved.",
+    "accessibility": "Accessibility (WCAG)",
+    "legal": "Legal Notice"
+  },
+  "a11y": {
+    "skipToContent": "Skip to main content",
+    "closeDialog": "Close dialog"
+  },
+  "validation": {
+    "titleDescription": "Please complete the title and description of the piece.",
+    "image": "Please upload an image for the product or enter a URL.",
+    "price": "The price entered is not valid.",
+    "discountRange": "The discount must be a whole number between 1% and 90%.",
+    "discountRequiresPrice": "To apply a discount you must first enter a price."
+  },
+  "admin": {
+    "title": "Admin panel",
+    "login": "Log in",
+    "logout": "Log out",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "registrations": {
+      "title": "Registrations",
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "calendar": "Calendar",
+    "etsy": "Etsy"
+  }
+}

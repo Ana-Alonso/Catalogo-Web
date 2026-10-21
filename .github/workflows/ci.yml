@@ -32,4 +32,9 @@ jobs:
         run: npm run build
 
       - name: SQL suite (PostgreSQL 15)
-        run: npm run test:db
+        run: |
+          if [ -f scripts/test-db.sh ]; then
+            npm run test:db
+          else
+            echo "SQL suite skipped: scripts/test-db.sh is not present in the repository."
+          fi

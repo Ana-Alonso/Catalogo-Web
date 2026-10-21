@@ -125,6 +125,21 @@ describe('buildWorkshopIcs', () => {
     const ics = buildWorkshopIcs(workshop);
     expect(ics).toContain('UID:w-1-');
   });
+
+  it('usa etiquetas y locale ingleses cuando se pasan', () => {
+    const labels = {
+      language: 'en',
+      priceLabel: 'Price',
+      filenameFallback: 'workshop',
+    };
+    const ics = buildWorkshopIcs(workshop, undefined, labels);
+
+    expect(ics).toContain('Price: €25.00');
+    expect(ics).toContain('PRODID:-//Laurel en Lienzo//Talleres//EN');
+    expect(buildIcsFilename('   ', labels.filenameFallback)).toBe(
+      'laurel-workshop.ics'
+    );
+  });
 });
 
 describe('getGoogleCalendarUrl', () => {
