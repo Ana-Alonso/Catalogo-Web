@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Laurel en Lienzo - Catálogo Visual",
-    "description": "Ilustraciones personalizables, talleres creativos y piezas exclusivas para conectar contigo."
+    "title": "Laurel en Lienzo | Ilustraciones personalizadas y talleres creativos",
+    "description": "Catálogo de ilustraciones personalizadas, camisetas y talleres creativos. Piezas exclusivas hechas a mano para conectar contigo."
   },
   "brand": {
     "name": "<highlight>Laurel</highlight> en Lienzo"
@@ -11,7 +11,9 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "delete": "Eliminar",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "reload": "Recargar página"
   },
   "language": {
     "label": "Idioma",
@@ -43,6 +45,10 @@
     "headingAccent": "Visual",
     "filterAria": "Filtro de obras por categoría",
     "offers": "Ofertas",
+    "loading": "Cargando catálogo…",
+    "errorTitle": "No se pudo cargar el catálogo",
+    "errorDescription": "Ha ocurrido un problema al cargar las obras. Vuelve a intentarlo.",
+    "spotsError": "No se pudieron actualizar las plazas de los talleres.",
     "empty": "No hay piezas disponibles en esta categoría por el momento.",
     "emptyOffers": "No hay ofertas activas en esta categoría por el momento.",
     "categories": {
@@ -135,6 +141,17 @@
     "price": "El precio introducido no es válido.",
     "discountRange": "El descuento debe ser un número entero entre 1 % y 90 %.",
     "discountRequiresPrice": "Para aplicar un descuento primero debes indicar un precio."
+  },
+  "errors": {
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o se ha movido.",
+      "backHome": "Volver al catálogo"
+    },
+    "boundary": {
+      "title": "Algo ha salido mal",
+      "description": "No hemos podido mostrar esta página. Recarga para intentarlo de nuevo."
+    }
   },
   "admin": {
     "title": "Panel de Administración",
@@ -245,6 +262,8 @@
     },
     "productTable": {
       "empty": "No hay productos registrados en el catálogo.",
+      "loading": "Cargando productos…",
+      "errorTitle": "No se pudieron cargar los productos",
       "title": "Productos en Catálogo ({{count}})",
       "subtitle": "Gestiona disponibilidad, destacados y enlaces.",
       "columns": {
@@ -271,6 +290,7 @@
       "title": "Inscripciones a Talleres ({{count}})",
       "subtitle": "Confirma, cancela o elimina las plazas solicitadas.",
       "loading": "Cargando inscripciones...",
+      "errorTitle": "No se pudieron cargar las inscripciones",
       "emptyWorkshops": "No hay talleres publicados en el catálogo.",
       "spots": "{{active}} / {{cupo}} plazas",
       "attendee": "{{count}} inscrito",

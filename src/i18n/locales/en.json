@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Laurel en Lienzo - Visual Catalog",
-    "description": "Personalizable illustrations, creative workshops and exclusive pieces to connect with you."
+    "title": "Laurel en Lienzo | Custom illustrations and creative workshops",
+    "description": "Catalog of custom illustrations, T-shirts and creative workshops. Exclusive handmade pieces to connect with you."
   },
   "brand": {
     "name": "<highlight>Laurel</highlight> en Lienzo"
@@ -11,7 +11,9 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "retry": "Retry",
+    "reload": "Reload page"
   },
   "language": {
     "label": "Language",
@@ -43,6 +45,10 @@
     "headingAccent": "Catalog",
     "filterAria": "Filter works by category",
     "offers": "Offers",
+    "loading": "Loading catalog…",
+    "errorTitle": "Could not load the catalog",
+    "errorDescription": "Something went wrong while loading the pieces. Please try again.",
+    "spotsError": "Could not refresh workshop availability.",
     "empty": "There are no pieces available in this category right now.",
     "emptyOffers": "There are no active offers in this category right now.",
     "categories": {
@@ -135,6 +141,17 @@
     "price": "The price entered is not valid.",
     "discountRange": "The discount must be a whole number between 1% and 90%.",
     "discountRequiresPrice": "To apply a discount you must first enter a price."
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist or has moved.",
+      "backHome": "Back to the catalog"
+    },
+    "boundary": {
+      "title": "Something went wrong",
+      "description": "We could not display this page. Reload to try again."
+    }
   },
   "admin": {
     "title": "Admin Panel",
@@ -245,6 +262,8 @@
     },
     "productTable": {
       "empty": "There are no products registered in the catalog.",
+      "loading": "Loading products…",
+      "errorTitle": "Could not load products",
       "title": "Products in Catalog ({{count}})",
       "subtitle": "Manage availability, featured items and links.",
       "columns": {
@@ -271,6 +290,7 @@
       "title": "Workshop Registrations ({{count}})",
       "subtitle": "Confirm, cancel or delete requested spots.",
       "loading": "Loading registrations...",
+      "errorTitle": "Could not load registrations",
       "emptyWorkshops": "There are no published workshops in the catalog.",
       "spots": "{{active}} / {{cupo}} spots",
       "attendee": "{{count}} registered",

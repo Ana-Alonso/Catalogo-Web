@@ -14,8 +14,18 @@ export const CatalogPage: React.FC = () => {
   usePageMeta();
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
   const [offersOnly, setOffersOnly] = useState(false);
-  const { products } = useProducts();
-  const { counts, register } = useWorkshopSpots();
+  const {
+    products,
+    isLoading,
+    error,
+    refreshProducts,
+  } = useProducts();
+  const {
+    counts,
+    register,
+    error: spotsError,
+    refreshSpots,
+  } = useWorkshopSpots();
 
   return (
     <div className="bg-neutral-950 min-h-screen text-neutral-50 selection:bg-orange-600 selection:text-white font-sans overflow-x-hidden">
@@ -41,6 +51,11 @@ export const CatalogPage: React.FC = () => {
           onToggleOffers={() => setOffersOnly((prev) => !prev)}
           spotsCounts={counts}
           onRegister={(item, data) => register(item.id, data, item.cupo ?? null)}
+          isLoading={isLoading}
+          error={error}
+          onRetry={refreshProducts}
+          spotsError={spotsError}
+          onRetrySpots={refreshSpots}
         />
       </main>
 
