@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button, Card, Box } from '../ui';
 import { theme } from '../../theme';
-import { triggerEtsySync } from '../../services/etsySyncService';
+import {
+  EtsySyncError,
+  triggerEtsySync,
+  type EtsySyncErrorCode,
+} from '../../services/etsySyncService';
 
 interface AdminEtsySyncPanelProps {
   onSynced: () => Promise<void>;
@@ -13,7 +18,15 @@ interface SyncFeedback {
   text: string;
 }
 
+const syncErrorKeys = {
+  notConfigured: 'admin.etsySync.errors.notConfigured',
+  unauthorized: 'admin.etsySync.errors.unauthorized',
+  unexpectedResponse: 'admin.etsySync.errors.unexpectedResponse',
+  unknown: 'admin.etsySync.errors.unknown',
+} as const satisfies Record<EtsySyncErrorCode, string>;
+
 export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced }) => {
+  const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [feedback, setFeedback] = useState<SyncFeedback | null>(null);
 
@@ -26,13 +39,21 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
       await onSynced();
       setFeedback({
         type: 'success',
-        text: `Sincronización completada: ${result.total} productos (${result.created} nuevos, ${result.updated} actualizados, ${result.hidden} ocultos).`,
+        text: t('admin.etsySync.success', {
+          total: result.total,
+          created: result.created,
+          updated: result.updated,
+          hidden: result.hidden,
+        }),
       });
     } catch (error) {
-      setFeedback({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Error al sincronizar con Etsy.',
-      });
+      const text =
+        error instanceof EtsySyncError
+          ? t(syncErrorKeys[error.code])
+          : error instanceof Error
+            ? error.message
+            : t('admin.etsySync.error');
+      setFeedback({ type: 'error', text });
     } finally {
       setIsSyncing(false);
     }
@@ -43,16 +64,17 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
       <Box className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Box>
           <h3 className="text-lg font-bold text-white uppercase tracking-wider">
-            Sincronización con Etsy
+            {t('admin.etsySync.title')}
           </h3>
           <p className={`${theme.colors.textMuted} text-sm`}>
-            Los cambios en Etsy llegan automáticamente. Usa este botón para forzar una
-            reconciliación completa.
+            {t('admin.etsySync.description')}
           </p>
         </Box>
         <Button variant="secondary" onClick={handleSync} disabled={isSyncing}>
           <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-          {isSyncing ? 'Sincronizando...' : 'Sincronizar ahora'}
+          {isSyncing
+            ? t('admin.etsySync.syncing')
+            : t('admin.etsySync.syncNow')}
         </Button>
       </Box>
 

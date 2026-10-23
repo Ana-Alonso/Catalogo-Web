@@ -29,7 +29,7 @@ export interface CatalogItem {
 }
 
 export interface NavLinkItem {
-  name: string;
+  labelKey: string;
   category: CategoryType;
   href: string;
 }

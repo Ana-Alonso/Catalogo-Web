@@ -168,6 +168,7 @@
       "submit": "Sign in",
       "submitting": "Signing in…",
       "invalidCredentials": "Incorrect email or password.",
+      "notAdmin": "You don't have permission to access the panel.",
       "unknownError": "Could not sign in."
     },
     "feedback": {

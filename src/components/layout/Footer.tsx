@@ -1,10 +1,12 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { ShoppingBag, Mail } from 'lucide-react';
 import { Box, Typography } from '../ui';
 import logoImg from '../../assets/Logo.png';
 import { theme } from '../../theme';
 
 export const Footer: React.FC = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
   const etsyUrl = import.meta.env.VITE_ETSY_SHOP_URL;
   const instagramUrl = import.meta.env.VITE_INSTAGRAM_URL;
@@ -13,17 +15,20 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="bg-neutral-950 border-t border-neutral-900 pt-16 pb-8" aria-labelledby="footer-heading">
-      <Typography as="h2" id="footer-heading" className="sr-only">Pie de página</Typography>
+      <Typography as="h2" id="footer-heading" className="sr-only">{t('footer.heading')}</Typography>
       <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Box className="flex flex-col md:flex-row justify-between items-center gap-6">
           <Box className="flex items-center gap-3">
             <img 
               src={logoImg} 
-              alt="Logo Laurel en Lienzo" 
+              alt={t('nav.logoAlt')}
               className="h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105" 
             />
             <Typography variant="h4" className="tracking-widest uppercase">
-              Laurel<span className={theme.colors.primaryText}>EnLienzo</span>
+              <Trans
+                i18nKey="brand.name"
+                components={{ highlight: <span className={theme.colors.primaryText} /> }}
+              />
             </Typography>
           </Box>
 
@@ -31,7 +36,7 @@ export const Footer: React.FC = () => {
             <a 
               href={`mailto:${contactEmail}`}
               className="text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center gap-2 text-sm"
-              aria-label={`Enviar correo a ${contactEmail}`}
+              aria-label={t('footer.emailAria', { email: contactEmail })}
               title={contactEmail}
             >
               <Mail className="h-6 w-6" aria-hidden="true" />
@@ -42,7 +47,7 @@ export const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center"
-              aria-label="Visitar tienda oficial en Etsy"
+              aria-label={t('footer.etsyAria')}
             >
               <ShoppingBag className="h-6 w-6" aria-hidden="true" />
             </a>
@@ -51,7 +56,7 @@ export const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center"
-              aria-label="Visitar perfil de Instagram"
+              aria-label={t('footer.instagramAria')}
             >
               <svg 
                 className="h-6 w-6 fill-none stroke-current stroke-2" 
@@ -70,7 +75,7 @@ export const Footer: React.FC = () => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center"
-              aria-label="Visitar perfil de TikTok"
+              aria-label={t('footer.tiktokAria')}
             >
               <svg 
                 className="h-6 w-6 fill-none stroke-current stroke-2" 
@@ -87,14 +92,14 @@ export const Footer: React.FC = () => {
         
         <Box className="mt-8 border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <Typography variant="body" className="text-neutral-500 text-center md:text-left">
-            &copy; {currentYear} Laurel en Lienzo. Todos los derechos reservados.
+            {t('footer.copyright', { year: currentYear })}
           </Typography>
           <Box className="flex gap-4 text-sm text-neutral-500">
             <Typography as="span" variant="caption" className="hover:text-neutral-300 transition-colors cursor-default">
-              Accesibilidad (WCAG)
+              {t('footer.accessibility')}
             </Typography>
             <Typography as="span" variant="caption" className="hover:text-neutral-300 transition-colors cursor-default">
-              Aviso Legal
+              {t('footer.legal')}
             </Typography>
           </Box>
         </Box>

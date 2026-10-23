@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, Download, Globe } from 'lucide-react';
 import { Button, Box } from './index';
 import {
@@ -9,6 +10,7 @@ import {
   buildIcsFilename,
   downloadIcsFile,
 } from '../../utils/calendar';
+import { normalizeLanguage } from '../../i18n/languages';
 import type { CatalogItem } from '../../types/catalog';
 
 interface CalendarEventActionsProps {
@@ -25,19 +27,26 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
   attendee,
   className,
 }) => {
+  const { t, i18n } = useTranslation();
   const eventDate = parseWorkshopDate(workshop.eventDate);
 
   if (!eventDate) {
     return null;
   }
 
-  const googleUrl = getGoogleCalendarUrl(workshop);
-  const outlookUrl = getOutlookCalendarUrl(workshop);
+  const labels = {
+    language: normalizeLanguage(i18n.resolvedLanguage ?? i18n.language),
+    priceLabel: t('calendar.priceLabel'),
+    filenameFallback: t('calendar.filenameFallback'),
+  };
+
+  const googleUrl = getGoogleCalendarUrl(workshop, labels);
+  const outlookUrl = getOutlookCalendarUrl(workshop, labels);
 
   const handleDownload = () => {
     downloadIcsFile(
-      buildIcsFilename(workshop.title),
-      buildWorkshopIcs(workshop, attendee)
+      buildIcsFilename(workshop.title, labels.filenameFallback),
+      buildWorkshopIcs(workshop, attendee, labels)
     );
   };
 
@@ -45,7 +54,7 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
     <Box className={className}>
       <p className="text-xs uppercase font-semibold tracking-wider text-neutral-400 flex items-center gap-1.5 mb-2">
         <Calendar className="w-3.5 h-3.5 text-orange-400" aria-hidden="true" />
-        Añadir a mi calendario
+        {t('calendar.heading')}
       </p>
       <div className="flex flex-col sm:flex-row gap-2">
         <a
@@ -53,7 +62,7 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           className={linkClassName}
-          aria-label={`Añadir el taller ${workshop.title} a Google Calendar`}
+          aria-label={t('calendar.googleAria', { title: workshop.title })}
         >
           <Globe className="w-3.5 h-3.5" aria-hidden="true" />
           Google
@@ -63,7 +72,7 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           className={linkClassName}
-          aria-label={`Añadir el taller ${workshop.title} a Outlook`}
+          aria-label={t('calendar.outlookAria', { title: workshop.title })}
         >
           <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
           Outlook
@@ -74,7 +83,7 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
           size="sm"
           className="w-full uppercase"
           onClick={handleDownload}
-          aria-label={`Descargar el evento del taller ${workshop.title} en formato ics`}
+          aria-label={t('calendar.downloadAria', { title: workshop.title })}
         >
           <Download className="w-3.5 h-3.5" aria-hidden="true" />
           .ics

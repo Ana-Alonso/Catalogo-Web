@@ -168,6 +168,7 @@
       "submit": "Entrar",
       "submitting": "Entrando…",
       "invalidCredentials": "Email o contraseña incorrectos.",
+      "notAdmin": "No tienes permisos para acceder al panel.",
       "unknownError": "Error al iniciar sesión."
     },
     "feedback": {

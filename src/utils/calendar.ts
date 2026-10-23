@@ -3,9 +3,33 @@ import type { CatalogItem } from '../types/catalog';
 
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000;
 
-const buildEventDescription = (workshop: CatalogItem): string => {
-  const price = formatPrice(workshop.priceCents, workshop.currency);
-  return price ? `${workshop.description}\nPrecio: ${price}` : workshop.description;
+export interface CalendarLabels {
+  language: string;
+  priceLabel: string;
+  filenameFallback: string;
+}
+
+const DEFAULT_CALENDAR_LABELS: CalendarLabels = {
+  language: 'es',
+  priceLabel: 'Precio',
+  filenameFallback: 'taller',
+};
+
+const getCalendarLocale = (language: string): string =>
+  language.toLowerCase().startsWith('en') ? 'en-GB' : 'es-ES';
+
+const buildEventDescription = (
+  workshop: CatalogItem,
+  labels: CalendarLabels
+): string => {
+  const price = formatPrice(
+    workshop.priceCents,
+    workshop.currency,
+    getCalendarLocale(labels.language)
+  );
+  return price
+    ? `${workshop.description}\n${labels.priceLabel}: ${price}`
+    : workshop.description;
 };
 
 export interface WorkshopEventDate {
@@ -57,7 +81,8 @@ const foldIcsLine = (line: string): string => {
 
 export const buildWorkshopIcs = (
   workshop: CatalogItem,
-  attendee?: { name: string; email: string }
+  attendee?: { name: string; email: string },
+  labels: CalendarLabels = DEFAULT_CALENDAR_LABELS
 ): string => {
   const eventDate = parseWorkshopDate(workshop.eventDate);
   if (!eventDate) {
@@ -65,12 +90,12 @@ export const buildWorkshopIcs = (
   }
 
   const contactEmail = import.meta.env.VITE_CONTACT_EMAIL || '';
-  const description = buildEventDescription(workshop);
+  const description = buildEventDescription(workshop, labels);
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Laurel en Lienzo//Talleres//ES',
+    `PRODID:-//Laurel en Lienzo//Talleres//${labels.language.toUpperCase()}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -99,7 +124,10 @@ export const buildWorkshopIcs = (
   return `${lines.map(foldIcsLine).join('\r\n')}\r\n`;
 };
 
-export const getGoogleCalendarUrl = (workshop: CatalogItem): string => {
+export const getGoogleCalendarUrl = (
+  workshop: CatalogItem,
+  labels: CalendarLabels = DEFAULT_CALENDAR_LABELS
+): string => {
   const eventDate = parseWorkshopDate(workshop.eventDate);
   if (!eventDate) {
     return '';
@@ -108,13 +136,16 @@ export const getGoogleCalendarUrl = (workshop: CatalogItem): string => {
     action: 'TEMPLATE',
     text: workshop.title,
     dates: `${formatIcsDate(eventDate.start)}/${formatIcsDate(eventDate.end)}`,
-    details: buildEventDescription(workshop),
+    details: buildEventDescription(workshop, labels),
     location: workshop.eventLocation || '',
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-export const getOutlookCalendarUrl = (workshop: CatalogItem): string => {
+export const getOutlookCalendarUrl = (
+  workshop: CatalogItem,
+  labels: CalendarLabels = DEFAULT_CALENDAR_LABELS
+): string => {
   const eventDate = parseWorkshopDate(workshop.eventDate);
   if (!eventDate) {
     return '';
@@ -125,7 +156,7 @@ export const getOutlookCalendarUrl = (workshop: CatalogItem): string => {
     subject: workshop.title,
     startdt: eventDate.start.toISOString(),
     enddt: eventDate.end.toISOString(),
-    body: buildEventDescription(workshop),
+    body: buildEventDescription(workshop, labels),
     location: workshop.eventLocation || '',
   });
   return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
@@ -143,12 +174,15 @@ export const downloadIcsFile = (filename: string, ics: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const buildIcsFilename = (title: string): string => {
+export const buildIcsFilename = (
+  title: string,
+  fallback = 'taller'
+): string => {
   const slug = title
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
-  return `laurel-${slug || 'taller'}.ics`;
+  return `laurel-${slug || fallback}.ics`;
 };
