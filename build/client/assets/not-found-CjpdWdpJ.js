@@ -1,0 +1,1 @@
+import{A as e,t}from"./jsx-runtime-yfTzyxww.js";import{a as n,i as r}from"./meta-C_74IwXA.js";import{t as i}from"./NotFoundPage-CyKVA-pL.js";var a=t();function o({matches:e}){return r(n(e))}var s=e(function(){return(0,a.jsx)(i,{})});export{s as default,o as meta};

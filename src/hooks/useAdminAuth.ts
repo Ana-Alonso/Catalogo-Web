@@ -9,10 +9,20 @@ interface SignInResult {
 
 interface UseAdminAuthReturn {
   user: User | null;
+  isAdmin: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
 }
+
+const isAdminUser = (user: User | null): boolean => {
+  if (!user) {
+    return false;
+  }
+  const appRole = (user.app_metadata as Record<string, unknown> | undefined)?.role;
+  const userRole = (user.user_metadata as Record<string, unknown> | undefined)?.role;
+  return appRole === 'admin' || userRole === 'admin';
+};
 
 export const useAdminAuth = (): UseAdminAuthReturn => {
   const [user, setUser] = useState<User | null>(null);
@@ -57,6 +67,12 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         return { success: false, message: 'Email o contraseña incorrectos.' };
       }
 
+      const { data } = await supabase.auth.getUser();
+      if (!isAdminUser(data.user)) {
+        await supabase.auth.signOut();
+        return { success: false, message: 'No tienes permisos para acceder al panel.' };
+      }
+
       return { success: true };
     },
     []
@@ -69,5 +85,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
     await supabase.auth.signOut();
   }, []);
 
-  return { user, isLoading, signIn, signOut };
+  const isAdmin = isAdminUser(user);
+
+  return { user, isAdmin, isLoading, signIn, signOut };
 };

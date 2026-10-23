@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import CatalogPage from './pages/CatalogPage';
 import AdminPage from './pages/AdminPage';
 

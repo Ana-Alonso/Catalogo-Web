@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./jsx-runtime-yfTzyxww.js";var n=t(e(),1),r=e=>{(0,n.useEffect)(()=>{document.title=e},[e])};export{r as t};

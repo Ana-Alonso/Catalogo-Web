@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /etsy-callback.html
+
+Sitemap: https://laurelenlienzo.vercel.app/sitemap.xml

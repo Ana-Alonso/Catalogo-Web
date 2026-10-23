@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import AdminDashboard from '../components/admin/AdminDashboard';
 import { useProducts } from '../hooks/useProducts';
 import { useRegistrations } from '../hooks/useRegistrations';

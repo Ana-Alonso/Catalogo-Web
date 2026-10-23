@@ -46,7 +46,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onDeleteRegistration,
   onClose
 }) => {
-  const { user, isLoading, signIn, signOut } = useAdminAuth();
+  const { user, isAdmin, isLoading, signIn, signOut } = useAdminAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,7 +55,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
   const isAuthDegraded = !isSupabaseConfigured;
-  const isAuthenticated = isAuthDegraded || user !== null;
+  const isAuthenticated = isAuthDegraded || (user !== null && isAdmin);
 
   const handleLogin = async (email: string, password: string) => {
     const result = await signIn(email, password);
