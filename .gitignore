@@ -37,3 +37,10 @@ scripts/
 .etsy-oauth.json
 .vercel
 .env*
+
+# Build & environments
+build/
+.react-router/
+.env*.local
+.env.development
+.env.production
