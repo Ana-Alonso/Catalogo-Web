@@ -101,10 +101,10 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. In the **SQL Editor**, run these scripts in order (all are idempotent):
-   - `supabase-migration.sql` — tables, capacity trigger, base policies and the `products` storage bucket.
-   - `supabase-hardening.sql` — hardened RLS policies and data validation constraints.
-   - `supabase-offers-etsy.sql` — numeric prices, percentage offers, visibility flags, Etsy metadata and the `etsy_credentials` table.
-   - `supabase-workshop-links.sql` — removes purchase links from workshops and blocks them at the database level.
+   - `supabase/migrations/legacy/000_upgrade_existing.sql` — tables, capacity trigger, base policies and the `products` storage bucket.
+   - `supabase/migrations/002_hardening.sql` — hardened RLS policies and data validation constraints.
+   - `supabase/migrations/003_offers_etsy.sql` — numeric prices, percentage offers, visibility flags, Etsy metadata and the `etsy_credentials` table.
+   - `supabase/migrations/004_workshop_links.sql` — removes purchase links from workshops and blocks them at the database level.
 3. Create the admin user in **Authentication → Users → Add user**. That account is the only one able to sign in at `/admin` and write to the catalog.
 4. Copy the environment file and fill in your keys:
 

@@ -24,6 +24,7 @@ GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
 
 -- 2) Restringir gestión de productos solo a admins
 DROP POLICY IF EXISTS "Permitir gestion de productos" ON public.products;
+DROP POLICY IF EXISTS "Permitir gestion de productos solo a admins" ON public.products;
 CREATE POLICY "Permitir gestion de productos solo a admins"
     ON public.products
     FOR ALL
@@ -32,8 +33,8 @@ CREATE POLICY "Permitir gestion de productos solo a admins"
     WITH CHECK (public.is_admin());
 
 -- 3) Restringir gestión de inscripciones solo a admins
--- Mantener lectura pública para el panel? Las inscripciones se leen en admin autenticado
 DROP POLICY IF EXISTS "Permitir lectura publica de inscripciones" ON public.workshop_registrations;
+DROP POLICY IF EXISTS "Lectura de inscripciones solo a admins" ON public.workshop_registrations;
 CREATE POLICY "Lectura de inscripciones solo a admins"
     ON public.workshop_registrations
     FOR SELECT
@@ -41,6 +42,7 @@ CREATE POLICY "Lectura de inscripciones solo a admins"
     USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Permitir gestion de inscripciones" ON public.workshop_registrations;
+DROP POLICY IF EXISTS "Gestion de inscripciones solo a admins" ON public.workshop_registrations;
 CREATE POLICY "Gestion de inscripciones solo a admins"
     ON public.workshop_registrations
     FOR ALL
@@ -50,6 +52,9 @@ CREATE POLICY "Gestion de inscripciones solo a admins"
 
 -- 4) Restringir storage: solo admins pueden subir/actualizar/borrar
 DROP POLICY IF EXISTS "Permitir subida y gestion de imagenes" ON storage.objects;
+DROP POLICY IF EXISTS "Subida gestion de imagenes solo a admins" ON storage.objects;
+DROP POLICY IF EXISTS "Actualizacion imagenes solo a admins" ON storage.objects;
+DROP POLICY IF EXISTS "Borrado imagenes solo a admins" ON storage.objects;
 CREATE POLICY "Subida gestion de imagenes solo a admins"
     ON storage.objects FOR INSERT
     TO authenticated

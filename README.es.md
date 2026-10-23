@@ -101,10 +101,10 @@ Abre `http://localhost:5173`. El modo desarrollo usa datos mock (`VITE_USE_MOCKS
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. En el **SQL Editor**, ejecuta estos scripts en orden (todos son idempotentes):
-   - `supabase-migration.sql` — tablas, disparador de cupo, políticas base y bucket `products`.
-   - `supabase-hardening.sql` — políticas RLS endurecidas y restricciones de validación.
-   - `supabase-offers-etsy.sql` — precios numéricos, ofertas en porcentaje, visibilidad, metadatos de Etsy y tabla `etsy_credentials`.
-   - `supabase-workshop-links.sql` — elimina los enlaces de compra de los talleres y los bloquea a nivel de base de datos.
+   - `supabase/migrations/legacy/000_upgrade_existing.sql` — tablas, disparador de cupo, políticas base y bucket `products`.
+   - `supabase/migrations/002_hardening.sql` — políticas RLS endurecidas y restricciones de validación.
+   - `supabase/migrations/003_offers_etsy.sql` — precios numéricos, ofertas en porcentaje, visibilidad, metadatos de Etsy y tabla `etsy_credentials`.
+   - `supabase/migrations/004_workshop_links.sql` — elimina los enlaces de compra de los talleres y los bloquea a nivel de base de datos.
 3. Crea el usuario administrador en **Authentication → Users → Add user**. Esa cuenta será la única que pueda entrar en `/admin` y escribir en el catálogo.
 4. Copia el archivo de entorno y rellena tus claves:
 

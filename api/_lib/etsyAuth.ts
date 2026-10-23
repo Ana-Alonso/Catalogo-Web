@@ -47,7 +47,7 @@ const readCredentials = async (): Promise<StoredCredentials> => {
 
   if (error) {
     throw new Error(
-      `No se pudieron leer las credenciales de Etsy. ¿Has aplicado supabase-offers-etsy.sql? (${error.message})`
+      `No se pudieron leer las credenciales de Etsy. ¿Has aplicado supabase/migrations/003_offers_etsy.sql? (${error.message})`
     );
   }
 
