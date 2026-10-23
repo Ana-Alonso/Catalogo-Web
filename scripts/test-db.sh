@@ -44,6 +44,9 @@ CREATE SCHEMA IF NOT EXISTS auth;
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text
 LANGUAGE sql STABLE
 AS $$ SELECT current_setting('role', true) $$;
+CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb
+LANGUAGE sql STABLE
+AS $$ SELECT COALESCE(current_setting('request.jwt.claims', true)::jsonb, '{}'::jsonb) $$;
 GRANT USAGE ON SCHEMA public, auth TO anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated;
@@ -56,29 +59,31 @@ run_file() {
   docker exec -i "$CONTAINER" psql -U "$PSQL_USER" -d "$db" -v ON_ERROR_STOP=1 -q < "$file"
 }
 
-echo "==> BBDD 1 (laurel): stub storage + migración x2 + endurecimiento x2 + ofertas x2 + talleres x2"
+echo "==> BBDD 1 (laurel): stub storage + migración legacy x2 + hardening x2 + ofertas x2 + talleres x2 + rls hardening"
 create_storage_stub laurel
-run_file laurel "$ROOT_DIR/supabase-migration.sql"
-run_file laurel "$ROOT_DIR/supabase-migration.sql"
-run_file laurel "$ROOT_DIR/supabase-hardening.sql"
-run_file laurel "$ROOT_DIR/supabase-hardening.sql"
-run_file laurel "$ROOT_DIR/supabase-offers-etsy.sql"
-run_file laurel "$ROOT_DIR/supabase-offers-etsy.sql"
-run_file laurel "$ROOT_DIR/supabase-workshop-links.sql"
-run_file laurel "$ROOT_DIR/supabase-workshop-links.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/002_hardening.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/002_hardening.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
 
 echo "==> BBDD 1: suite de aserciones"
 run_file laurel "$ROOT_DIR/scripts/test-db.sql"
 
-echo "==> BBDD 2 (laurel_fresh): stub storage + schema.sql + endurecimiento + ofertas x2 + talleres x2"
+echo "==> BBDD 2 (laurel_fresh): stub storage + schema + hardening + ofertas x2 + talleres x2 + rls hardening"
 docker exec "$CONTAINER" createdb -U "$PSQL_USER" laurel_fresh
 create_storage_stub laurel_fresh
-run_file laurel_fresh "$ROOT_DIR/supabase-schema.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase-hardening.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase-offers-etsy.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase-offers-etsy.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase-workshop-links.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase-workshop-links.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/001_initial_schema.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/002_hardening.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
 run_file laurel_fresh "$ROOT_DIR/scripts/test-db.sql"
 
 echo "==> TODO OK: 2 bases de datos y aserciones superadas"
