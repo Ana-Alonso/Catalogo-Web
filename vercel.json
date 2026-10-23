@@ -1,5 +1,5 @@
 {
-  "framework": "react-router",
+  "framework": "vite",
   "headers": [
     {
       "source": "/(.*)",
@@ -75,6 +75,12 @@
           "value": "noindex, nofollow"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api/|google69cab20242c2da9a\\.html|robots\\.txt|sitemap\\.xml|favicon\\.svg|assets/|.*\\.).*)",
+      "destination": "/index.html"
     }
   ]
 }
