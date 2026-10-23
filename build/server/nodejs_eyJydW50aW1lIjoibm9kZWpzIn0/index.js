@@ -1,7 +1,7 @@
 import { handleRequest, streamTimeout } from "@vercel/react-router/entry.server";
-import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, UNSAFE_FrameworkContext, UNSAFE_withComponentProps, UNSAFE_withErrorBoundaryProps, data, isRouteErrorResponse, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
-import React, { forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { I18nextProvider, Trans, useTranslation } from "react-i18next";
+import { Link, Links, Meta, Outlet, Scripts, ScrollRestoration, UNSAFE_withComponentProps, UNSAFE_withErrorBoundaryProps, data, isRouteErrorResponse, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { I18nextProvider, useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { AlertCircle, AlertTriangle, ArrowLeft, Bell, Calendar, Check, CheckCircle, ClipboardList, Download, Edit3, ExternalLink, Eye, EyeOff, Globe, LoaderCircle, Lock, Mail, MapPin, Menu, Plus, RefreshCw, ShoppingBag, Sparkles, Tag, Trash2, Unlock, Upload, UserPlus, Users, X } from "lucide-react";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
@@ -694,7 +694,6 @@ var resources = {
 var SUPPORTED_LANGUAGES = ["es", "en"];
 var isSupportedLanguage = (language) => language === "es" || language === "en";
 var normalizeLanguage = (language) => language?.toLowerCase().startsWith("en") ? "en" : "es";
-var getIntlLocale = (language) => normalizeLanguage(language) === "en" ? "en-GB" : "es-ES";
 //#endregion
 //#region src/i18n/createI18nInstance.ts
 var createI18nInstance = (language) => {
@@ -732,12 +731,6 @@ var persistLanguage = (language) => {
 var getPathLanguage = (pathname) => {
 	const segment = pathname.split("/").filter(Boolean)[0];
 	return isSupportedLanguage(segment) ? segment : null;
-};
-var buildLocalizedPath = (pathname, search, hash, language) => {
-	if (pathname === "/admin" || pathname.startsWith("/admin/")) return `${pathname}${search}${hash}`;
-	const segments = pathname.split("/").filter(Boolean);
-	if (isSupportedLanguage(segments[0])) segments.shift();
-	return `/${language}${segments.length > 0 ? `/${segments.join("/")}` : ""}${search}${hash}`;
 };
 //#endregion
 //#region src/i18n/server.ts
@@ -1320,15 +1313,9 @@ var isOfferActive = (item) => item.source !== "etsy" && item.priceCents != null 
 //#endregion
 //#region src/utils/calendar.ts
 var DEFAULT_DURATION_MS = 72e5;
-var DEFAULT_CALENDAR_LABELS = {
-	language: "es",
-	priceLabel: "Precio",
-	filenameFallback: "taller"
-};
-var getCalendarLocale = (language) => language.toLowerCase().startsWith("en") ? "en-GB" : "es-ES";
-var buildEventDescription = (workshop, labels) => {
-	const price = formatPrice(workshop.priceCents, workshop.currency, getCalendarLocale(labels.language));
-	return price ? `${workshop.description}\n${labels.priceLabel}: ${price}` : workshop.description;
+var buildEventDescription = (workshop) => {
+	const price = formatPrice(workshop.priceCents, workshop.currency);
+	return price ? `${workshop.description}\nPrecio: ${price}` : workshop.description;
 };
 var parseWorkshopDate = (eventDate) => {
 	if (!eventDate) return null;
@@ -1353,15 +1340,15 @@ var foldIcsLine = (line) => {
 	}
 	return segments.join("\r\n");
 };
-var buildWorkshopIcs = (workshop, attendee, labels = DEFAULT_CALENDAR_LABELS) => {
+var buildWorkshopIcs = (workshop, attendee) => {
 	const eventDate = parseWorkshopDate(workshop.eventDate);
 	if (!eventDate) return "";
 	const contactEmail = "laurelenlienzo@gmail.com";
-	const description = buildEventDescription(workshop, labels);
+	const description = buildEventDescription(workshop);
 	const lines = [
 		"BEGIN:VCALENDAR",
 		"VERSION:2.0",
-		`PRODID:-//Laurel en Lienzo//Talleres//${labels.language.toUpperCase()}`,
+		"PRODID:-//Laurel en Lienzo//Talleres//ES",
 		"CALSCALE:GREGORIAN",
 		"METHOD:PUBLISH",
 		"BEGIN:VEVENT",
@@ -1378,18 +1365,18 @@ var buildWorkshopIcs = (workshop, attendee, labels = DEFAULT_CALENDAR_LABELS) =>
 	lines.push("END:VEVENT", "END:VCALENDAR");
 	return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;
 };
-var getGoogleCalendarUrl = (workshop, labels = DEFAULT_CALENDAR_LABELS) => {
+var getGoogleCalendarUrl = (workshop) => {
 	const eventDate = parseWorkshopDate(workshop.eventDate);
 	if (!eventDate) return "";
 	return `https://calendar.google.com/calendar/render?${new URLSearchParams({
 		action: "TEMPLATE",
 		text: workshop.title,
 		dates: `${formatIcsDate(eventDate.start)}/${formatIcsDate(eventDate.end)}`,
-		details: buildEventDescription(workshop, labels),
+		details: buildEventDescription(workshop),
 		location: workshop.eventLocation || ""
 	}).toString()}`;
 };
-var getOutlookCalendarUrl = (workshop, labels = DEFAULT_CALENDAR_LABELS) => {
+var getOutlookCalendarUrl = (workshop) => {
 	const eventDate = parseWorkshopDate(workshop.eventDate);
 	if (!eventDate) return "";
 	return `https://outlook.live.com/calendar/0/deeplink/compose?${new URLSearchParams({
@@ -1398,7 +1385,7 @@ var getOutlookCalendarUrl = (workshop, labels = DEFAULT_CALENDAR_LABELS) => {
 		subject: workshop.title,
 		startdt: eventDate.start.toISOString(),
 		enddt: eventDate.end.toISOString(),
-		body: buildEventDescription(workshop, labels),
+		body: buildEventDescription(workshop),
 		location: workshop.eventLocation || ""
 	}).toString()}`;
 };
@@ -1413,24 +1400,18 @@ var downloadIcsFile = (filename, ics) => {
 	document.body.removeChild(anchor);
 	URL.revokeObjectURL(url);
 };
-var buildIcsFilename = (title, fallback = "taller") => {
-	return `laurel-${title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || fallback}.ics`;
+var buildIcsFilename = (title) => {
+	return `laurel-${title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "taller"}.ics`;
 };
 //#endregion
 //#region src/components/ui/CalendarEventActions.tsx
 var linkClassName = "w-full inline-flex justify-center items-center gap-2 bg-transparent border border-neutral-700 hover:border-white text-neutral-300 hover:text-white font-semibold uppercase tracking-wider text-xs py-2.5 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950";
 var CalendarEventActions = ({ workshop, attendee, className }) => {
-	const { t, i18n } = useTranslation();
 	if (!parseWorkshopDate(workshop.eventDate)) return null;
-	const labels = {
-		language: normalizeLanguage(i18n.resolvedLanguage ?? i18n.language),
-		priceLabel: t("calendar.priceLabel"),
-		filenameFallback: t("calendar.filenameFallback")
-	};
-	const googleUrl = getGoogleCalendarUrl(workshop, labels);
-	const outlookUrl = getOutlookCalendarUrl(workshop, labels);
+	const googleUrl = getGoogleCalendarUrl(workshop);
+	const outlookUrl = getOutlookCalendarUrl(workshop);
 	const handleDownload = () => {
-		downloadIcsFile(buildIcsFilename(workshop.title, labels.filenameFallback), buildWorkshopIcs(workshop, attendee, labels));
+		downloadIcsFile(buildIcsFilename(workshop.title), buildWorkshopIcs(workshop, attendee));
 	};
 	return /* @__PURE__ */ jsxs(Box, {
 		className,
@@ -1439,7 +1420,7 @@ var CalendarEventActions = ({ workshop, attendee, className }) => {
 			children: [/* @__PURE__ */ jsx(Calendar, {
 				className: "w-3.5 h-3.5 text-orange-400",
 				"aria-hidden": "true"
-			}), t("calendar.heading")]
+			}), "Añadir a mi calendario"]
 		}), /* @__PURE__ */ jsxs("div", {
 			className: "flex flex-col sm:flex-row gap-2",
 			children: [
@@ -1448,7 +1429,7 @@ var CalendarEventActions = ({ workshop, attendee, className }) => {
 					target: "_blank",
 					rel: "noopener noreferrer",
 					className: linkClassName,
-					"aria-label": t("calendar.googleAria", { title: workshop.title }),
+					"aria-label": `Añadir el taller ${workshop.title} a Google Calendar`,
 					children: [/* @__PURE__ */ jsx(Globe, {
 						className: "w-3.5 h-3.5",
 						"aria-hidden": "true"
@@ -1459,7 +1440,7 @@ var CalendarEventActions = ({ workshop, attendee, className }) => {
 					target: "_blank",
 					rel: "noopener noreferrer",
 					className: linkClassName,
-					"aria-label": t("calendar.outlookAria", { title: workshop.title }),
+					"aria-label": `Añadir el taller ${workshop.title} a Outlook`,
 					children: [/* @__PURE__ */ jsx(Calendar, {
 						className: "w-3.5 h-3.5",
 						"aria-hidden": "true"
@@ -1471,7 +1452,7 @@ var CalendarEventActions = ({ workshop, attendee, className }) => {
 					size: "sm",
 					className: "w-full uppercase",
 					onClick: handleDownload,
-					"aria-label": t("calendar.downloadAria", { title: workshop.title }),
+					"aria-label": `Descargar el evento del taller ${workshop.title} en formato ics`,
 					children: [/* @__PURE__ */ jsx(Download, {
 						className: "w-3.5 h-3.5",
 						"aria-hidden": "true"
@@ -1479,54 +1460,6 @@ var CalendarEventActions = ({ workshop, attendee, className }) => {
 				})
 			]
 		})]
-	});
-};
-//#endregion
-//#region src/components/ui/Skeleton.tsx
-var roundedStyles = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	full: "rounded-full"
-};
-var Skeleton = ({ className, rounded = "md", ...props }) => {
-	return /* @__PURE__ */ jsx("div", {
-		"aria-hidden": "true",
-		className: twMerge(clsx("animate-pulse bg-neutral-800/80", roundedStyles[rounded], className)),
-		...props
-	});
-};
-//#endregion
-//#region src/components/ui/ErrorState.tsx
-var ErrorState = ({ title, description, onRetry, retryLabel, className }) => {
-	return /* @__PURE__ */ jsxs(Card, {
-		role: "alert",
-		className: twMerge(clsx("p-8 text-center flex flex-col items-center gap-4", className)),
-		children: [
-			/* @__PURE__ */ jsx(AlertTriangle, {
-				className: "w-8 h-8 text-orange-500",
-				"aria-hidden": "true"
-			}),
-			/* @__PURE__ */ jsxs("div", {
-				className: "space-y-2",
-				children: [/* @__PURE__ */ jsx("h3", {
-					className: "text-lg font-bold text-white",
-					children: title
-				}), /* @__PURE__ */ jsx("p", {
-					className: `${theme.colors.textMuted} text-sm max-w-md mx-auto`,
-					children: description
-				})]
-			}),
-			onRetry && retryLabel && /* @__PURE__ */ jsxs(Button, {
-				variant: "outline",
-				onClick: () => void onRetry(),
-				children: [/* @__PURE__ */ jsx(RefreshCw, {
-					className: "w-4 h-4",
-					"aria-hidden": "true"
-				}), retryLabel]
-			})
-		]
 	});
 };
 //#endregion
@@ -1540,8 +1473,8 @@ var ALLOWED_IMAGE_MIME_TYPES = [
 var MAX_IMAGE_SIZE_BYTES = 5242880;
 var ACCEPTED_IMAGE_INPUT = ALLOWED_IMAGE_MIME_TYPES.join(",");
 var validateImageFile = (file) => {
-	if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.type)) return "format";
-	if (file.size > MAX_IMAGE_SIZE_BYTES) return "size";
+	if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.type)) return "Formato no permitido. Usa PNG, JPG, WEBP o GIF.";
+	if (file.size > MAX_IMAGE_SIZE_BYTES) return "La imagen supera los 5 MB.";
 	return null;
 };
 //#endregion
@@ -1556,30 +1489,25 @@ var resolvePurchaseLinks = (category, etsyLink, vintedLink) => {
 //#endregion
 //#region src/utils/productFormValidation.ts
 var validateProductForm = (input) => {
-	if (!input.title.trim() || !input.description.trim()) return "titleDescription";
-	if (!input.isEditing && !input.imageFile && !input.externalImageUrl.trim()) return "image";
+	if (!input.title.trim() || !input.description.trim()) return "Por favor completa el título y la descripción de la obra.";
+	if (!input.isEditing && !input.imageFile && !input.externalImageUrl.trim()) return "Por favor sube una imagen para el producto o introduce una URL.";
 	const priceCents = input.priceOnRequest ? null : parsePriceToCents(input.price);
-	if (!input.priceOnRequest && input.price.trim() && priceCents == null) return "price";
+	if (!input.priceOnRequest && input.price.trim() && priceCents == null) return "El precio introducido no es válido.";
 	if (!input.discountPercent.trim()) return null;
 	const discount = Number(input.discountPercent.replace(",", "."));
-	if (!Number.isInteger(discount) || discount < 1 || discount > 90) return "discountRange";
-	if (priceCents == null) return "discountRequiresPrice";
+	if (!Number.isInteger(discount) || discount < 1 || discount > 90) return "El descuento debe ser un número entero entre 1 % y 90 %.";
+	if (priceCents == null) return "Para aplicar un descuento primero debes indicar un precio.";
 	return null;
 };
 //#endregion
 //#region src/components/admin/product-form/ImageField.tsx
 var ImageField = ({ previewUrl, externalImageUrl, isEditing, onFileChange, onExternalUrlChange }) => {
-	const { t } = useTranslation();
 	return /* @__PURE__ */ jsxs(Box, {
 		className: "space-y-4",
 		children: [
 			/* @__PURE__ */ jsxs("label", {
 				className: theme.inputs.label,
-				children: [
-					t("admin.imageField.label"),
-					" ",
-					isEditing ? t("admin.imageField.optionalHint") : t("admin.imageField.requiredHint")
-				]
+				children: ["Imagen del Producto ", isEditing ? "(opcional si conservas la actual)" : "*"]
 			}),
 			/* @__PURE__ */ jsxs(Box, {
 				className: "flex flex-col sm:flex-row items-center gap-6",
@@ -1589,11 +1517,11 @@ var ImageField = ({ previewUrl, externalImageUrl, isEditing, onFileChange, onExt
 						/* @__PURE__ */ jsx(Upload, { className: "w-8 h-8 text-neutral-500 mb-2 group-hover:text-orange-600" }),
 						/* @__PURE__ */ jsx("span", {
 							className: "text-sm text-neutral-300 font-medium",
-							children: t("admin.imageField.upload")
+							children: "Subir archivo desde el dispositivo"
 						}),
 						/* @__PURE__ */ jsx("span", {
 							className: "text-xs text-neutral-500 mt-1",
-							children: t("admin.imageField.formats")
+							children: "PNG, JPG, WEBP o GIF (máx. 5 MB)"
 						}),
 						/* @__PURE__ */ jsx("input", {
 							type: "file",
@@ -1606,14 +1534,14 @@ var ImageField = ({ previewUrl, externalImageUrl, isEditing, onFileChange, onExt
 					className: "w-28 h-28 relative rounded-lg overflow-hidden border border-neutral-700 bg-neutral-800 flex-shrink-0",
 					children: /* @__PURE__ */ jsx("img", {
 						src: previewUrl || externalImageUrl,
-						alt: t("admin.imageField.previewAlt"),
+						alt: "Vista previa",
 						className: "w-full h-full object-cover"
 					})
 				})]
 			}),
 			/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("span", {
 				className: "text-xs text-neutral-500 block mb-1",
-				children: t("admin.imageField.urlHint")
+				children: "O introduce una URL de imagen:"
 			}), /* @__PURE__ */ jsx("input", {
 				type: "url",
 				value: externalImageUrl,
@@ -1625,25 +1553,8 @@ var ImageField = ({ previewUrl, externalImageUrl, isEditing, onFileChange, onExt
 	});
 };
 //#endregion
-//#region src/i18n/formatters.ts
-var formatPriceForLanguage = (cents, currency, language) => formatPrice(cents, currency, getIntlLocale(language));
-var formatWorkshopDateForLanguage = (value, language) => {
-	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) return value;
-	return new Intl.DateTimeFormat(getIntlLocale(language), {
-		weekday: "long",
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit"
-	}).format(date);
-};
-//#endregion
 //#region src/components/admin/product-form/PriceFields.tsx
 var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPriceOnRequestChange, onDiscountChange }) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.resolvedLanguage ?? i18n.language;
 	const priceCents = priceOnRequest ? null : parsePriceToCents(price);
 	const parsedDiscount = Number(discountPercent.replace(",", "."));
 	const hasValidDiscount = Number.isInteger(parsedDiscount) && parsedDiscount >= 1 && parsedDiscount <= 90 && priceCents != null;
@@ -1653,7 +1564,7 @@ var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPr
 		children: [
 			/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx(Input, {
 				id: "prod-price",
-				label: t("admin.priceFields.priceLabel"),
+				label: "Precio estimado en € (opcional)",
 				type: "number",
 				min: 0,
 				step: "0.01",
@@ -1661,7 +1572,7 @@ var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPr
 				value: priceOnRequest ? "" : price,
 				disabled: priceOnRequest,
 				onChange: (event) => onPriceChange(event.target.value),
-				placeholder: t("admin.priceFields.pricePlaceholder")
+				placeholder: "25,00"
 			}), /* @__PURE__ */ jsxs(Box, {
 				className: "mt-3 flex items-center gap-2",
 				children: [/* @__PURE__ */ jsx("input", {
@@ -1673,12 +1584,12 @@ var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPr
 				}), /* @__PURE__ */ jsx("label", {
 					htmlFor: "prod-price-on-request",
 					className: "text-xs uppercase font-semibold text-neutral-300 cursor-pointer",
-					children: t("admin.priceFields.onRequest")
+					children: "Precio a consultar"
 				})]
 			})] }),
 			/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx(Input, {
 				id: "prod-discount",
-				label: t("admin.priceFields.discountLabel"),
+				label: "Descuento % (opcional)",
 				type: "number",
 				min: 1,
 				max: 90,
@@ -1686,32 +1597,32 @@ var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPr
 				value: discountPercent,
 				disabled: priceOnRequest,
 				onChange: (event) => onDiscountChange(event.target.value),
-				placeholder: t("admin.priceFields.discountPlaceholder")
+				placeholder: "20"
 			}), /* @__PURE__ */ jsx("p", {
 				className: `mt-2 text-xs ${theme.colors.textMuted}`,
-				children: t("admin.priceFields.discountHint")
+				children: "Se aplica solo a productos locales. Entre 1 % y 90 %."
 			})] }),
 			/* @__PURE__ */ jsxs(Box, {
 				className: "rounded-lg border border-neutral-800 bg-neutral-950/60 p-4",
 				children: [/* @__PURE__ */ jsx("span", {
 					className: "block text-xs font-semibold uppercase tracking-wider text-neutral-400",
-					children: t("admin.priceFields.preview")
+					children: "Vista previa"
 				}), finalCents == null ? /* @__PURE__ */ jsx("p", {
 					className: "mt-2 text-sm text-neutral-300",
-					children: t("admin.priceFields.onRequest")
+					children: "Precio a consultar"
 				}) : /* @__PURE__ */ jsxs(Box, {
 					className: "mt-2 space-y-1",
 					children: [/* @__PURE__ */ jsx("p", {
 						className: "text-lg font-bold text-orange-400",
-						children: formatPriceForLanguage(finalCents, "EUR", language)
+						children: formatPrice(finalCents, "EUR")
 					}), hasValidDiscount && priceCents != null && /* @__PURE__ */ jsxs("p", {
 						className: "text-xs text-neutral-400",
 						children: [
-							t("admin.priceFields.before"),
+							"antes",
 							" ",
 							/* @__PURE__ */ jsx("s", {
 								className: "text-neutral-500",
-								children: formatPriceForLanguage(priceCents, "EUR", language)
+								children: formatPrice(priceCents, "EUR")
 							}),
 							" ",
 							"· -",
@@ -1725,63 +1636,64 @@ var PriceFields = ({ price, priceOnRequest, discountPercent, onPriceChange, onPr
 	});
 };
 //#endregion
-//#region src/i18n/labels.ts
-var categoryTranslationKeys = {
-	todas: "catalog.categories.all",
-	personalizados: "catalog.categories.custom",
-	camisetas: "catalog.categories.tshirts",
-	ilustraciones: "catalog.categories.illustrations",
-	talleres: "catalog.categories.workshops"
-};
-var availabilityTranslationKeys = {
-	disponible: "product.status.available",
-	reservado: "product.status.reserved",
-	vendido: "product.status.sold"
-};
-var registrationStatusTranslationKeys = {
-	pendiente: "admin.registrations.status.pending",
-	confirmado: "admin.registrations.status.confirmed",
-	cancelado: "admin.registrations.status.cancelled"
-};
-//#endregion
 //#region src/components/admin/product-form/ProductDetailsFields.tsx
 var CATEGORY_OPTIONS$1 = [
-	"ilustraciones",
-	"camisetas",
-	"talleres",
-	"personalizados"
+	{
+		label: "Ilustraciones",
+		value: "ilustraciones"
+	},
+	{
+		label: "Camisetas",
+		value: "camisetas"
+	},
+	{
+		label: "Talleres",
+		value: "talleres"
+	},
+	{
+		label: "Personalizados",
+		value: "personalizados"
+	}
 ];
 var STATUS_OPTIONS = [
-	"disponible",
-	"reservado",
-	"vendido"
+	{
+		label: "Disponible",
+		value: "disponible"
+	},
+	{
+		label: "Reservado",
+		value: "reservado"
+	},
+	{
+		label: "Vendido / Agotado",
+		value: "vendido"
+	}
 ];
 var ProductDetailsFields = ({ title, description, category, status, featured, etsyLink, vintedLink, showLinks, onTitleChange, onDescriptionChange, onCategoryChange, onStatusChange, onFeaturedChange, onEtsyLinkChange, onVintedLinkChange }) => {
-	const { t } = useTranslation();
 	return /* @__PURE__ */ jsxs(Fragment, { children: [
 		/* @__PURE__ */ jsxs(Box, {
 			className: "grid grid-cols-1 md:grid-cols-2 gap-6",
 			children: [/* @__PURE__ */ jsx(Input, {
 				id: "prod-title",
-				label: t("admin.productFields.titleLabel"),
+				label: "Título de la Obra *",
 				required: true,
 				maxLength: 120,
 				value: title,
 				onChange: (event) => onTitleChange(event.target.value),
-				placeholder: t("admin.productFields.titlePlaceholder")
+				placeholder: "Título del producto"
 			}), /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("label", {
 				htmlFor: "prod-category",
 				className: theme.inputs.label,
-				children: t("admin.productFields.categoryLabel")
+				children: "Categoría *"
 			}), /* @__PURE__ */ jsx("select", {
 				id: "prod-category",
 				value: category,
 				onChange: (event) => onCategoryChange(event.target.value),
 				className: theme.inputs.base,
 				children: CATEGORY_OPTIONS$1.map((option) => /* @__PURE__ */ jsx("option", {
-					value: option,
-					children: t(categoryTranslationKeys[option])
-				}, option))
+					value: option.value,
+					children: option.label
+				}, option.value))
 			})] })]
 		}),
 		/* @__PURE__ */ jsxs(Box, {
@@ -1789,16 +1701,16 @@ var ProductDetailsFields = ({ title, description, category, status, featured, et
 			children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("label", {
 				htmlFor: "prod-status",
 				className: theme.inputs.label,
-				children: t("admin.productFields.statusLabel")
+				children: "Estado / Disponibilidad *"
 			}), /* @__PURE__ */ jsx("select", {
 				id: "prod-status",
 				value: status,
 				onChange: (event) => onStatusChange(event.target.value),
 				className: theme.inputs.base,
 				children: STATUS_OPTIONS.map((option) => /* @__PURE__ */ jsx("option", {
-					value: option,
-					children: t(availabilityTranslationKeys[option])
-				}, option))
+					value: option.value,
+					children: option.label
+				}, option.value))
 			})] }), /* @__PURE__ */ jsxs(Box, {
 				className: "flex items-center gap-3 pt-6",
 				children: [/* @__PURE__ */ jsx("input", {
@@ -1810,14 +1722,14 @@ var ProductDetailsFields = ({ title, description, category, status, featured, et
 				}), /* @__PURE__ */ jsx("label", {
 					htmlFor: "prod-featured",
 					className: "text-xs uppercase font-semibold text-neutral-300 cursor-pointer",
-					children: t("admin.productFields.featuredLabel")
+					children: "Destacar en la parte superior del catálogo"
 				})]
 			})]
 		}),
 		/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("label", {
 			htmlFor: "prod-desc",
 			className: theme.inputs.label,
-			children: t("admin.productFields.descriptionLabel")
+			children: "Descripción *"
 		}), /* @__PURE__ */ jsx("textarea", {
 			id: "prod-desc",
 			rows: 3,
@@ -1825,14 +1737,14 @@ var ProductDetailsFields = ({ title, description, category, status, featured, et
 			maxLength: 2e3,
 			value: description,
 			onChange: (event) => onDescriptionChange(event.target.value),
-			placeholder: t("admin.productFields.descriptionPlaceholder"),
+			placeholder: "Descripción, materiales, dimensiones...",
 			className: theme.inputs.base
 		})] }),
 		showLinks && /* @__PURE__ */ jsxs(Box, {
 			className: "grid grid-cols-1 md:grid-cols-2 gap-6",
 			children: [/* @__PURE__ */ jsx(Input, {
 				id: "prod-etsy",
-				label: t("admin.productFields.etsyLinkLabel"),
+				label: "Enlace de Etsy (opcional)",
 				type: "url",
 				maxLength: 300,
 				value: etsyLink,
@@ -1840,7 +1752,7 @@ var ProductDetailsFields = ({ title, description, category, status, featured, et
 				placeholder: "https://..."
 			}), /* @__PURE__ */ jsx(Input, {
 				id: "prod-vinted",
-				label: t("admin.productFields.vintedLinkLabel"),
+				label: "Enlace de Vinted (opcional)",
 				type: "url",
 				maxLength: 300,
 				value: vintedLink,
@@ -1853,14 +1765,13 @@ var ProductDetailsFields = ({ title, description, category, status, featured, et
 //#endregion
 //#region src/components/admin/product-form/WorkshopFields.tsx
 var WorkshopFields = ({ eventDate, eventLocation, cupo, onEventDateChange, onEventLocationChange, onCupoChange }) => {
-	const { t } = useTranslation();
 	return /* @__PURE__ */ jsxs(Box, {
 		className: "grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-neutral-950 border border-neutral-800",
 		children: [
 			/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("label", {
 				htmlFor: "prod-event-date",
 				className: theme.inputs.label,
-				children: t("admin.workshopFields.dateLabel")
+				children: "Fecha y Hora del Taller"
 			}), /* @__PURE__ */ jsx("input", {
 				id: "prod-event-date",
 				type: "datetime-local",
@@ -1870,17 +1781,17 @@ var WorkshopFields = ({ eventDate, eventLocation, cupo, onEventDateChange, onEve
 			})] }),
 			/* @__PURE__ */ jsx(Input, {
 				id: "prod-event-loc",
-				label: t("admin.workshopFields.locationLabel"),
+				label: "Lugar o Modalidad",
 				maxLength: 120,
 				value: eventLocation,
 				onChange: (event) => onEventLocationChange(event.target.value),
-				placeholder: t("admin.workshopFields.locationPlaceholder")
+				placeholder: "Ej: Presencial (Madrid) u Online"
 			}),
 			/* @__PURE__ */ jsxs(Box, { children: [
 				/* @__PURE__ */ jsx("label", {
 					htmlFor: "prod-cupo",
 					className: theme.inputs.label,
-					children: t("admin.workshopFields.capacityLabel")
+					children: "Cupo (opcional)"
 				}),
 				/* @__PURE__ */ jsx("input", {
 					id: "prod-cupo",
@@ -1890,69 +1801,19 @@ var WorkshopFields = ({ eventDate, eventLocation, cupo, onEventDateChange, onEve
 					value: cupo,
 					onChange: (event) => onCupoChange(event.target.value),
 					className: theme.inputs.base,
-					placeholder: t("admin.workshopFields.capacityPlaceholder")
+					placeholder: "Sin límite"
 				}),
 				/* @__PURE__ */ jsx("p", {
 					className: "mt-1 text-xs text-neutral-500",
-					children: t("admin.workshopFields.capacityHint")
+					children: "Deja vacío para inscripciones sin límite."
 				})
 			] })
 		]
 	});
 };
 //#endregion
-//#region src/components/admin/ProductFormHeader.tsx
-var ProductFormHeader = ({ isEditing, productTitle, onCancelEdit }) => {
-	const { t } = useTranslation();
-	return /* @__PURE__ */ jsxs(Box, {
-		className: `flex items-center justify-between border-b ${theme.colors.border} pb-4`,
-		children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("h3", {
-			className: "text-xl font-bold text-white uppercase tracking-wider",
-			children: t(isEditing ? "admin.productForm.editTitle" : "admin.productForm.createTitle")
-		}), /* @__PURE__ */ jsx("p", {
-			className: `${theme.colors.textMuted} text-sm`,
-			children: isEditing ? t("admin.productForm.editDescription", { title: productTitle ?? "" }) : t("admin.productForm.createDescription")
-		})] }), isEditing && onCancelEdit && /* @__PURE__ */ jsxs(Button, {
-			variant: "secondary",
-			size: "sm",
-			onClick: onCancelEdit,
-			children: [/* @__PURE__ */ jsx(X, { className: "w-3.5 h-3.5" }), t("admin.productForm.cancelEdit")]
-		})]
-	});
-};
-//#endregion
-//#region src/components/admin/ProductFormActions.tsx
-var ProductFormActions = ({ isEditing, isSubmitting, onCancelEdit }) => {
-	const { t } = useTranslation();
-	return /* @__PURE__ */ jsxs(Box, {
-		className: `pt-4 border-t ${theme.colors.border} flex justify-end gap-3`,
-		children: [isEditing && onCancelEdit && /* @__PURE__ */ jsx(Button, {
-			variant: "outline",
-			onClick: onCancelEdit,
-			children: t("admin.productForm.cancel")
-		}), /* @__PURE__ */ jsxs(Button, {
-			type: "submit",
-			variant: "primary",
-			disabled: isSubmitting,
-			children: [isEditing ? /* @__PURE__ */ jsx(Check, { className: "w-4 h-4" }) : /* @__PURE__ */ jsx(Plus, { className: "w-4 h-4" }), isSubmitting ? t("admin.productForm.saving") : isEditing ? t("admin.productForm.saveChanges") : t("admin.productForm.publish")]
-		})]
-	});
-};
-//#endregion
 //#region src/components/admin/AdminProductForm.tsx
-var validationErrorKeys = {
-	titleDescription: "validation.titleDescription",
-	image: "validation.image",
-	price: "validation.price",
-	discountRange: "validation.discountRange",
-	discountRequiresPrice: "validation.discountRequiresPrice"
-};
-var imageValidationKeys = {
-	format: "admin.productForm.imageFormatError",
-	size: "admin.productForm.imageSizeError"
-};
 var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }) => {
-	const { t } = useTranslation();
 	const [title, setTitle] = useState(editingProduct?.title || "");
 	const [description, setDescription] = useState(editingProduct?.description || "");
 	const [category, setCategory] = useState(editingProduct && editingProduct.category !== "todas" ? editingProduct.category : "ilustraciones");
@@ -1977,7 +1838,7 @@ var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }
 		if (validationError) {
 			setImageFile(null);
 			setPreviewUrl(editingProduct?.image || "");
-			setFormError(t(imageValidationKeys[validationError]));
+			setFormError(validationError);
 			event.target.value = "";
 			return;
 		}
@@ -2028,7 +1889,7 @@ var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }
 			externalImageUrl
 		});
 		if (validationError) {
-			setFormError(t(validationErrorKeys[validationError]));
+			setFormError(validationError);
 			return;
 		}
 		const purchaseLinks = resolvePurchaseLinks(category, etsyLink, vintedLink);
@@ -2051,10 +1912,20 @@ var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }
 	return /* @__PURE__ */ jsxs(Card, {
 		className: "p-6 sm:p-8 space-y-6",
 		children: [
-			/* @__PURE__ */ jsx(ProductFormHeader, {
-				isEditing: Boolean(editingProduct),
-				productTitle: editingProduct?.title,
-				onCancelEdit
+			/* @__PURE__ */ jsxs(Box, {
+				className: `flex items-center justify-between border-b ${theme.colors.border} pb-4`,
+				children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("h3", {
+					className: "text-xl font-bold text-white uppercase tracking-wider",
+					children: editingProduct ? "Modificar Producto" : "Añadir Nuevo Producto"
+				}), /* @__PURE__ */ jsx("p", {
+					className: `${theme.colors.textMuted} text-sm`,
+					children: editingProduct ? `Editando los datos de "${editingProduct.title}"` : "Sube nuevas obras, camisetas o talleres al catálogo."
+				})] }), editingProduct && onCancelEdit && /* @__PURE__ */ jsxs(Button, {
+					variant: "secondary",
+					size: "sm",
+					onClick: onCancelEdit,
+					children: [/* @__PURE__ */ jsx(X, { className: "w-3.5 h-3.5" }), "Cancelar Edición"]
+				})]
 			}),
 			formError && /* @__PURE__ */ jsxs(Box, {
 				className: "p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-3 text-red-300 text-sm",
@@ -2104,10 +1975,18 @@ var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }
 						onFileChange: handleFileChange,
 						onExternalUrlChange: handleExternalUrlChange
 					}),
-					/* @__PURE__ */ jsx(ProductFormActions, {
-						isEditing: Boolean(editingProduct),
-						isSubmitting,
-						onCancelEdit
+					/* @__PURE__ */ jsxs(Box, {
+						className: `pt-4 border-t ${theme.colors.border} flex justify-end gap-3`,
+						children: [editingProduct && onCancelEdit && /* @__PURE__ */ jsx(Button, {
+							variant: "outline",
+							onClick: onCancelEdit,
+							children: "Cancelar"
+						}), /* @__PURE__ */ jsxs(Button, {
+							type: "submit",
+							variant: "primary",
+							disabled: isSubmitting,
+							children: [editingProduct ? /* @__PURE__ */ jsx(Check, { className: "w-4 h-4" }) : /* @__PURE__ */ jsx(Plus, { className: "w-4 h-4" }), isSubmitting ? "Guardando..." : editingProduct ? "Guardar Modificación" : "Publicar Producto"]
+						})]
 					})
 				]
 			})
@@ -2117,13 +1996,20 @@ var AdminProductForm = ({ onSubmit, isSubmitting, editingProduct, onCancelEdit }
 //#endregion
 //#region src/components/admin/AdminEtsyProductForm.tsx
 var CATEGORY_OPTIONS = [
-	"ilustraciones",
-	"camisetas",
-	"personalizados"
+	{
+		label: "Ilustraciones",
+		value: "ilustraciones"
+	},
+	{
+		label: "Camisetas",
+		value: "camisetas"
+	},
+	{
+		label: "Personalizados",
+		value: "personalizados"
+	}
 ];
 var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.resolvedLanguage ?? i18n.language;
 	const [category, setCategory] = useState(product.category !== "todas" && product.category !== "talleres" ? product.category : "ilustraciones");
 	const [featured, setFeatured] = useState(product.featured);
 	const [formError, setFormError] = useState(null);
@@ -2133,7 +2019,7 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 		if (!await onSubmit({
 			category,
 			featured
-		})) setFormError(t("admin.etsyForm.saveError"));
+		})) setFormError("No se pudieron guardar los cambios. Inténtalo de nuevo.");
 	};
 	return /* @__PURE__ */ jsxs(Card, {
 		className: "p-6 sm:p-8 space-y-6",
@@ -2142,15 +2028,15 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 				className: `flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b ${theme.colors.border} pb-4`,
 				children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("h3", {
 					className: "text-xl font-bold text-white uppercase tracking-wider",
-					children: t("admin.etsyForm.title")
+					children: "Producto de Etsy"
 				}), /* @__PURE__ */ jsx("p", {
 					className: `${theme.colors.textMuted} text-sm`,
-					children: t("admin.etsyForm.subtitle")
+					children: "Título, descripción, imagen, precio y estado se sincronizan desde Etsy."
 				})] }), /* @__PURE__ */ jsxs(Button, {
 					variant: "secondary",
 					size: "sm",
 					onClick: onCancelEdit,
-					children: [/* @__PURE__ */ jsx(X, { className: "w-3.5 h-3.5" }), t("admin.etsyForm.close")]
+					children: [/* @__PURE__ */ jsx(X, { className: "w-3.5 h-3.5" }), "Cerrar"]
 				})]
 			}),
 			/* @__PURE__ */ jsxs(Box, {
@@ -2172,19 +2058,23 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 						}),
 						/* @__PURE__ */ jsx("p", {
 							className: "text-sm text-neutral-300",
-							children: product.priceCents != null ? formatPriceForLanguage(product.priceCents, product.currency || "EUR", language) : t("admin.etsyForm.priceOnRequest")
+							children: product.priceCents != null ? formatPrice(product.priceCents, product.currency || "EUR") : "Precio a consultar"
 						}),
 						/* @__PURE__ */ jsxs(Box, {
 							className: "flex flex-wrap items-center gap-2 text-xs text-neutral-500",
 							children: [
 								/* @__PURE__ */ jsxs("span", {
 									className: "inline-flex items-center gap-1",
-									children: [/* @__PURE__ */ jsx(RefreshCw, { className: "w-3 h-3" }), t("admin.etsyForm.listing", { id: product.etsyListingId ?? "—" })]
+									children: [
+										/* @__PURE__ */ jsx(RefreshCw, { className: "w-3 h-3" }),
+										"Listing #",
+										product.etsyListingId ?? "—"
+									]
 								}),
-								product.etsyState && /* @__PURE__ */ jsx("span", { children: t("admin.etsyForm.status", { state: product.etsyState }) }),
+								product.etsyState && /* @__PURE__ */ jsxs("span", { children: ["Estado en Etsy: ", product.etsyState] }),
 								product.isVisible === false && /* @__PURE__ */ jsx("span", {
 									className: "text-red-400",
-									children: t("admin.etsyForm.hidden")
+									children: "Oculto en la web"
 								})
 							]
 						})
@@ -2193,7 +2083,7 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 			}),
 			/* @__PURE__ */ jsx(Box, {
 				className: "p-4 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-neutral-400",
-				children: t("admin.etsyForm.offersNote")
+				children: "Las ofertas porcentuales solo están disponibles en productos locales. Para cambiar el precio o retirar este producto, hazlo desde Etsy."
 			}),
 			formError && /* @__PURE__ */ jsxs(Box, {
 				className: "p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-3 text-red-300 text-sm",
@@ -2207,16 +2097,16 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 					children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("label", {
 						htmlFor: "etsy-category",
 						className: theme.inputs.label,
-						children: t("admin.etsyForm.categoryLabel")
+						children: "Categoría en la web *"
 					}), /* @__PURE__ */ jsx("select", {
 						id: "etsy-category",
 						value: category,
 						onChange: (event) => setCategory(event.target.value),
 						className: theme.inputs.base,
 						children: CATEGORY_OPTIONS.map((option) => /* @__PURE__ */ jsx("option", {
-							value: option,
-							children: t(categoryTranslationKeys[option])
-						}, option))
+							value: option.value,
+							children: option.label
+						}, option.value))
 					})] }), /* @__PURE__ */ jsxs(Box, {
 						className: "flex items-center gap-3 pt-6",
 						children: [/* @__PURE__ */ jsx("input", {
@@ -2228,7 +2118,7 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 						}), /* @__PURE__ */ jsx("label", {
 							htmlFor: "etsy-featured",
 							className: "text-xs uppercase font-semibold text-neutral-300 cursor-pointer",
-							children: t("admin.etsyForm.featuredLabel")
+							children: "Destacar en la parte superior del catálogo"
 						})]
 					})]
 				}), /* @__PURE__ */ jsxs(Box, {
@@ -2236,12 +2126,12 @@ var AdminEtsyProductForm = ({ product, onSubmit, isSubmitting, onCancelEdit }) =
 					children: [/* @__PURE__ */ jsx(Button, {
 						variant: "outline",
 						onClick: onCancelEdit,
-						children: t("admin.etsyForm.cancel")
+						children: "Cancelar"
 					}), /* @__PURE__ */ jsxs(Button, {
 						type: "submit",
 						variant: "primary",
 						disabled: isSubmitting,
-						children: [/* @__PURE__ */ jsx(Check, { className: "w-4 h-4" }), isSubmitting ? t("admin.etsyForm.saving") : t("admin.etsyForm.saveChanges")]
+						children: [/* @__PURE__ */ jsx(Check, { className: "w-4 h-4" }), isSubmitting ? "Guardando..." : "Guardar Cambios"]
 					})]
 				})]
 			})
@@ -2256,51 +2146,33 @@ var isSupabaseConfigured = Boolean(supabaseAnonKey);
 var supabase = isSupabaseConfigured ? createClient(supabaseUrl, supabaseAnonKey) : null;
 //#endregion
 //#region src/services/etsySyncService.ts
-var EtsySyncError = class extends Error {
-	code;
-	constructor(code) {
-		super(code);
-		this.name = "EtsySyncError";
-		this.code = code;
-	}
-};
 var isEtsySyncResult = (value) => {
 	if (typeof value !== "object" || value === null) return false;
 	const record = value;
 	return typeof record.created === "number" && typeof record.updated === "number" && typeof record.hidden === "number" && typeof record.total === "number";
 };
 var readErrorMessage = (value) => {
-	if (typeof value !== "object" || value === null) return null;
+	if (typeof value !== "object" || value === null) return "No se pudo sincronizar con Etsy.";
 	const record = value;
-	return typeof record.error === "string" ? record.error : null;
+	return typeof record.error === "string" ? record.error : "No se pudo sincronizar con Etsy.";
 };
 var triggerEtsySync = async () => {
-	if (!supabase) throw new EtsySyncError("notConfigured");
+	if (!supabase) throw new Error("Supabase no está configurado.");
 	const { data, error } = await supabase.auth.getSession();
 	if (error) throw error;
-	if (!data.session) throw new EtsySyncError("unauthorized");
+	if (!data.session) throw new Error("Debes iniciar sesión para sincronizar con Etsy.");
 	const response = await fetch("/api/etsy-sync", {
 		method: "POST",
 		headers: { Authorization: `Bearer ${data.session.access_token}` }
 	});
 	const payload = await response.json().catch(() => null);
-	if (!response.ok) {
-		const message = readErrorMessage(payload);
-		throw message ? new Error(message) : new EtsySyncError("unknown");
-	}
-	if (!isEtsySyncResult(payload)) throw new EtsySyncError("unexpectedResponse");
+	if (!response.ok) throw new Error(readErrorMessage(payload));
+	if (!isEtsySyncResult(payload)) throw new Error("Respuesta inesperada del servidor.");
 	return payload;
 };
 //#endregion
 //#region src/components/admin/AdminEtsySyncPanel.tsx
-var syncErrorKeys = {
-	notConfigured: "admin.etsySync.errors.notConfigured",
-	unauthorized: "admin.etsySync.errors.unauthorized",
-	unexpectedResponse: "admin.etsySync.errors.unexpectedResponse",
-	unknown: "admin.etsySync.errors.unknown"
-};
 var AdminEtsySyncPanel = ({ onSynced }) => {
-	const { t } = useTranslation();
 	const [isSyncing, setIsSyncing] = useState(false);
 	const [feedback, setFeedback] = useState(null);
 	const handleSync = async () => {
@@ -2311,18 +2183,12 @@ var AdminEtsySyncPanel = ({ onSynced }) => {
 			await onSynced();
 			setFeedback({
 				type: "success",
-				text: t("admin.etsySync.success", {
-					total: result.total,
-					created: result.created,
-					updated: result.updated,
-					hidden: result.hidden
-				})
+				text: `Sincronización completada: ${result.total} productos (${result.created} nuevos, ${result.updated} actualizados, ${result.hidden} ocultos).`
 			});
 		} catch (error) {
-			const text = error instanceof EtsySyncError ? t(syncErrorKeys[error.code]) : error instanceof Error ? error.message : t("admin.etsySync.error");
 			setFeedback({
 				type: "error",
-				text
+				text: error instanceof Error ? error.message : "Error al sincronizar con Etsy."
 			});
 		} finally {
 			setIsSyncing(false);
@@ -2334,15 +2200,15 @@ var AdminEtsySyncPanel = ({ onSynced }) => {
 			className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4",
 			children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("h3", {
 				className: "text-lg font-bold text-white uppercase tracking-wider",
-				children: t("admin.etsySync.title")
+				children: "Sincronización con Etsy"
 			}), /* @__PURE__ */ jsx("p", {
 				className: `${theme.colors.textMuted} text-sm`,
-				children: t("admin.etsySync.description")
+				children: "Los cambios en Etsy llegan automáticamente. Usa este botón para forzar una reconciliación completa."
 			})] }), /* @__PURE__ */ jsxs(Button, {
 				variant: "secondary",
 				onClick: handleSync,
 				disabled: isSyncing,
-				children: [/* @__PURE__ */ jsx(RefreshCw, { className: `w-4 h-4 ${isSyncing ? "animate-spin" : ""}` }), isSyncing ? t("admin.etsySync.syncing") : t("admin.etsySync.syncNow")]
+				children: [/* @__PURE__ */ jsx(RefreshCw, { className: `w-4 h-4 ${isSyncing ? "animate-spin" : ""}` }), isSyncing ? "Sincronizando..." : "Sincronizar ahora"]
 			})]
 		}), feedback && /* @__PURE__ */ jsxs(Box, {
 			className: `mt-4 p-3 rounded-lg border flex items-center gap-2 text-sm ${feedback.type === "success" ? "bg-green-950/40 border-green-800 text-green-300" : "bg-red-950/40 border-red-800 text-red-300"}`,
@@ -2351,198 +2217,32 @@ var AdminEtsySyncPanel = ({ onSynced }) => {
 	});
 };
 //#endregion
-//#region src/components/admin/AdminProductTableRow.tsx
+//#region src/components/admin/AdminProductTable.tsx
 var statusBadgeVariant$1 = {
 	disponible: "primary",
 	reservado: "neutral",
 	vendido: "outline"
 };
-var AdminProductTableRow = ({ item, isDeleting, onDelete, onEdit }) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.resolvedLanguage ?? i18n.language;
-	const currentStatus = item.status || "disponible";
-	const currency = item.currency || "EUR";
-	const offerPercent = item.priceCents != null && item.discountPercent != null && isOfferActive(item) ? item.discountPercent : null;
-	const displayCents = offerPercent != null && item.priceCents != null ? getDiscountedCents(item.priceCents, offerPercent) : item.priceCents;
-	return /* @__PURE__ */ jsxs("tr", {
-		className: "hover:bg-neutral-800/40 transition-colors",
-		children: [
-			/* @__PURE__ */ jsx("td", {
-				className: "py-4 px-6",
-				children: /* @__PURE__ */ jsxs(Box, {
-					className: "flex items-center gap-3",
-					children: [/* @__PURE__ */ jsx("img", {
-						src: item.image,
-						alt: "",
-						className: "w-12 h-12 rounded object-cover bg-neutral-800 flex-shrink-0"
-					}), /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs(Box, {
-						className: "flex flex-wrap items-center gap-1.5",
-						children: [
-							/* @__PURE__ */ jsx("span", {
-								className: "font-semibold text-white",
-								children: item.title
-							}),
-							item.featured && /* @__PURE__ */ jsx("span", {
-								title: t("admin.productTable.featuredTitle"),
-								children: /* @__PURE__ */ jsx(Sparkles, { className: "w-3.5 h-3.5 text-orange-500 fill-orange-500/20" })
-							}),
-							item.source === "etsy" && /* @__PURE__ */ jsx(Badge, {
-								variant: "neutral",
-								children: t("admin.productTable.etsy")
-							}),
-							item.isVisible === false && /* @__PURE__ */ jsx(Badge, {
-								variant: "outline",
-								children: t("admin.productTable.hidden")
-							})
-						]
-					}), /* @__PURE__ */ jsx(Box, {
-						className: `${theme.colors.textMuted} text-xs line-clamp-1 max-w-xs`,
-						children: item.description
-					})] })]
-				})
-			}),
-			/* @__PURE__ */ jsxs("td", {
-				className: "py-4 px-6",
-				children: [/* @__PURE__ */ jsx(Badge, {
-					variant: "outline",
-					children: t(categoryTranslationKeys[item.category])
-				}), item.category === "talleres" && /* @__PURE__ */ jsx("div", {
-					className: "mt-1.5 text-xs text-neutral-500",
-					children: item.cupo != null ? t("admin.productTable.capacity", { count: item.cupo }) : t("admin.productTable.noCapacity")
-				})]
-			}),
-			/* @__PURE__ */ jsx("td", {
-				className: "py-4 px-6",
-				children: /* @__PURE__ */ jsx(Badge, {
-					variant: statusBadgeVariant$1[currentStatus],
-					children: t(availabilityTranslationKeys[currentStatus])
-				})
-			}),
-			/* @__PURE__ */ jsx("td", {
-				className: "py-4 px-6 font-medium text-neutral-300",
-				children: displayCents != null ? /* @__PURE__ */ jsxs(Box, {
-					className: "space-y-1",
-					children: [/* @__PURE__ */ jsx("span", { children: formatPriceForLanguage(displayCents, currency, language) }), offerPercent != null && item.priceCents != null && /* @__PURE__ */ jsxs(Box, {
-						className: "text-xs text-neutral-500",
-						children: [/* @__PURE__ */ jsx("s", { children: formatPriceForLanguage(item.priceCents, currency, language) }), /* @__PURE__ */ jsxs("span", {
-							className: "ml-2 text-orange-400",
-							children: [
-								"-",
-								offerPercent,
-								"%"
-							]
-						})]
-					})]
-				}) : t("admin.productTable.consult")
-			}),
-			/* @__PURE__ */ jsx("td", {
-				className: "py-4 px-6",
-				children: /* @__PURE__ */ jsxs(Box, {
-					className: "flex items-center gap-3",
-					children: [item.category !== "talleres" && item.etsyLink && /* @__PURE__ */ jsxs("a", {
-						href: item.etsyLink,
-						target: "_blank",
-						rel: "noopener noreferrer",
-						className: `text-xs ${theme.colors.primaryText} hover:underline inline-flex items-center gap-1`,
-						children: ["Etsy ", /* @__PURE__ */ jsx(ExternalLink, { className: "w-3 h-3" })]
-					}), item.category !== "talleres" && item.vintedLink && /* @__PURE__ */ jsxs("a", {
-						href: item.vintedLink,
-						target: "_blank",
-						rel: "noopener noreferrer",
-						className: "text-xs text-neutral-400 hover:text-white inline-flex items-center gap-1",
-						children: ["Vinted ", /* @__PURE__ */ jsx(ExternalLink, { className: "w-3 h-3" })]
-					})]
-				})
-			}),
-			/* @__PURE__ */ jsx("td", {
-				className: "py-4 px-6 text-right",
-				children: /* @__PURE__ */ jsxs(Box, {
-					className: "flex items-center justify-end gap-1",
-					children: [/* @__PURE__ */ jsx(Button, {
-						variant: "ghost",
-						size: "sm",
-						onClick: () => onEdit(item),
-						"aria-label": t("admin.productTable.editAria", { title: item.title }),
-						children: /* @__PURE__ */ jsx(Edit3, { className: "w-4 h-4 text-orange-500" })
-					}), /* @__PURE__ */ jsx(Button, {
-						variant: "ghost",
-						size: "sm",
-						disabled: isDeleting || item.source === "etsy",
-						title: item.source === "etsy" ? t("admin.productTable.etsyDeleteHint") : void 0,
-						onClick: () => {
-							if (window.confirm(t("admin.productTable.deleteConfirm", { title: item.title }))) onDelete(String(item.id));
-						},
-						"aria-label": item.source === "etsy" ? t("admin.productTable.etsyDeleteAria", { title: item.title }) : t("admin.productTable.deleteAria", { title: item.title }),
-						children: /* @__PURE__ */ jsx(Trash2, { className: "w-4 h-4 text-red-400" })
-					})]
-				})
-			})
-		]
-	});
-};
-//#endregion
-//#region src/components/admin/AdminProductTableSkeleton.tsx
-var SKELETON_ROWS$1 = 5;
-var AdminProductTableSkeleton = () => {
-	return /* @__PURE__ */ jsxs(Card, {
-		"aria-hidden": "true",
-		children: [/* @__PURE__ */ jsxs("div", {
-			className: `p-6 border-b ${theme.colors.border} space-y-2`,
-			children: [/* @__PURE__ */ jsx(Skeleton, { className: "h-6 w-64" }), /* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-80 max-w-full" })]
-		}), /* @__PURE__ */ jsx("div", {
-			className: "divide-y divide-neutral-800",
-			children: Array.from({ length: SKELETON_ROWS$1 }, (_, index) => /* @__PURE__ */ jsxs("div", {
-				className: "p-6 flex items-center gap-4",
-				children: [
-					/* @__PURE__ */ jsx(Skeleton, { className: "w-12 h-12 flex-shrink-0" }),
-					/* @__PURE__ */ jsxs("div", {
-						className: "flex-1 space-y-2",
-						children: [/* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-1/3" }), /* @__PURE__ */ jsx(Skeleton, { className: "h-3 w-1/2" })]
-					}),
-					/* @__PURE__ */ jsx(Skeleton, {
-						className: "h-6 w-24",
-						rounded: "full"
-					}),
-					/* @__PURE__ */ jsx(Skeleton, {
-						className: "h-6 w-20",
-						rounded: "full"
-					}),
-					/* @__PURE__ */ jsx(Skeleton, { className: "h-8 w-16" })
-				]
-			}, index))
-		})]
-	});
-};
-//#endregion
-//#region src/components/admin/AdminProductTable.tsx
-var AdminProductTable = ({ products, onDelete, onEdit, isDeleting, isLoading, error, onRetry }) => {
-	const { t } = useTranslation();
-	if (isLoading) return /* @__PURE__ */ jsx("div", {
-		role: "status",
-		"aria-label": t("admin.productTable.loading"),
-		children: /* @__PURE__ */ jsx(AdminProductTableSkeleton, {})
-	});
-	if (error) return /* @__PURE__ */ jsx(ErrorState, {
-		title: t("admin.productTable.errorTitle"),
-		description: error,
-		onRetry,
-		retryLabel: t("common.retry")
-	});
+var AdminProductTable = ({ products, onDelete, onEdit, isDeleting }) => {
 	if (products.length === 0) return /* @__PURE__ */ jsx(Card, {
 		className: "text-center py-12",
 		children: /* @__PURE__ */ jsx("p", {
 			className: theme.colors.textMuted,
-			children: t("admin.productTable.empty")
+			children: "No hay productos registrados en el catálogo."
 		})
 	});
 	return /* @__PURE__ */ jsxs(Card, { children: [/* @__PURE__ */ jsxs(Box, {
 		className: `p-6 border-b ${theme.colors.border}`,
-		children: [/* @__PURE__ */ jsx("h3", {
+		children: [/* @__PURE__ */ jsxs("h3", {
 			className: "text-xl font-bold text-white uppercase tracking-wider",
-			children: t("admin.productTable.title", { count: products.length })
+			children: [
+				"Productos en Catálogo (",
+				products.length,
+				")"
+			]
 		}), /* @__PURE__ */ jsx("p", {
 			className: `${theme.colors.textMuted} text-sm`,
-			children: t("admin.productTable.subtitle")
+			children: "Gestiona disponibilidad, destacados y enlaces."
 		})]
 	}), /* @__PURE__ */ jsx(Box, {
 		className: "overflow-x-auto",
@@ -2553,68 +2253,155 @@ var AdminProductTable = ({ products, onDelete, onEdit, isDeleting, isLoading, er
 				children: [
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6",
-						children: t("admin.productTable.columns.artwork")
+						children: "Obra"
 					}),
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6",
-						children: t("admin.productTable.columns.category")
+						children: "Categoría"
 					}),
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6",
-						children: t("admin.productTable.columns.availability")
+						children: "Disponibilidad"
 					}),
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6",
-						children: t("admin.productTable.columns.price")
+						children: "Precio"
 					}),
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6",
-						children: t("admin.productTable.columns.links")
+						children: "Enlaces"
 					}),
 					/* @__PURE__ */ jsx("th", {
 						className: "py-4 px-6 text-right",
-						children: t("admin.productTable.columns.actions")
+						children: "Acciones"
 					})
 				]
 			}) }), /* @__PURE__ */ jsx("tbody", {
 				className: `divide-y ${theme.colors.borderSubtle} text-sm`,
-				children: products.map((item) => /* @__PURE__ */ jsx(AdminProductTableRow, {
-					item,
-					isDeleting,
-					onDelete,
-					onEdit
-				}, item.id))
+				children: products.map((item) => {
+					const currentStatus = item.status || "disponible";
+					const currency = item.currency || "EUR";
+					const offerPercent = item.priceCents != null && item.discountPercent != null && isOfferActive(item) ? item.discountPercent : null;
+					const displayCents = offerPercent != null && item.priceCents != null ? getDiscountedCents(item.priceCents, offerPercent) : item.priceCents;
+					return /* @__PURE__ */ jsxs("tr", {
+						className: "hover:bg-neutral-800/40 transition-colors",
+						children: [
+							/* @__PURE__ */ jsx("td", {
+								className: "py-4 px-6",
+								children: /* @__PURE__ */ jsxs(Box, {
+									className: "flex items-center gap-3",
+									children: [/* @__PURE__ */ jsx("img", {
+										src: item.image,
+										alt: "",
+										className: "w-12 h-12 rounded object-cover bg-neutral-800 flex-shrink-0"
+									}), /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs(Box, {
+										className: "flex flex-wrap items-center gap-1.5",
+										children: [
+											/* @__PURE__ */ jsx("span", {
+												className: "font-semibold text-white",
+												children: item.title
+											}),
+											item.featured && /* @__PURE__ */ jsx("span", {
+												title: "Producto Destacado",
+												children: /* @__PURE__ */ jsx(Sparkles, { className: "w-3.5 h-3.5 text-orange-500 fill-orange-500/20" })
+											}),
+											item.source === "etsy" && /* @__PURE__ */ jsx(Badge, {
+												variant: "neutral",
+												children: "Etsy"
+											}),
+											item.isVisible === false && /* @__PURE__ */ jsx(Badge, {
+												variant: "outline",
+												children: "Oculto"
+											})
+										]
+									}), /* @__PURE__ */ jsx(Box, {
+										className: `${theme.colors.textMuted} text-xs line-clamp-1 max-w-xs`,
+										children: item.description
+									})] })]
+								})
+							}),
+							/* @__PURE__ */ jsxs("td", {
+								className: "py-4 px-6",
+								children: [/* @__PURE__ */ jsx(Badge, {
+									variant: "outline",
+									children: item.category
+								}), item.category === "talleres" && /* @__PURE__ */ jsx("div", {
+									className: "mt-1.5 text-xs text-neutral-500",
+									children: item.cupo != null ? `Cupo: ${item.cupo} plazas` : "Sin cupo"
+								})]
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "py-4 px-6",
+								children: /* @__PURE__ */ jsx(Badge, {
+									variant: statusBadgeVariant$1[currentStatus],
+									children: currentStatus
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "py-4 px-6 font-medium text-neutral-300",
+								children: displayCents != null ? /* @__PURE__ */ jsxs(Box, {
+									className: "space-y-1",
+									children: [/* @__PURE__ */ jsx("span", { children: formatPrice(displayCents, currency) }), offerPercent != null && item.priceCents != null && /* @__PURE__ */ jsxs(Box, {
+										className: "text-xs text-neutral-500",
+										children: [/* @__PURE__ */ jsx("s", { children: formatPrice(item.priceCents, currency) }), /* @__PURE__ */ jsxs("span", {
+											className: "ml-2 text-orange-400",
+											children: [
+												"-",
+												offerPercent,
+												"%"
+											]
+										})]
+									})]
+								}) : "A consultar"
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "py-4 px-6",
+								children: /* @__PURE__ */ jsxs(Box, {
+									className: "flex items-center gap-3",
+									children: [item.category !== "talleres" && item.etsyLink && /* @__PURE__ */ jsxs("a", {
+										href: item.etsyLink,
+										target: "_blank",
+										rel: "noopener noreferrer",
+										className: `text-xs ${theme.colors.primaryText} hover:underline inline-flex items-center gap-1`,
+										children: ["Etsy ", /* @__PURE__ */ jsx(ExternalLink, { className: "w-3 h-3" })]
+									}), item.category !== "talleres" && item.vintedLink && /* @__PURE__ */ jsxs("a", {
+										href: item.vintedLink,
+										target: "_blank",
+										rel: "noopener noreferrer",
+										className: "text-xs text-neutral-400 hover:text-white inline-flex items-center gap-1",
+										children: ["Vinted ", /* @__PURE__ */ jsx(ExternalLink, { className: "w-3 h-3" })]
+									})]
+								})
+							}),
+							/* @__PURE__ */ jsx("td", {
+								className: "py-4 px-6 text-right",
+								children: /* @__PURE__ */ jsxs(Box, {
+									className: "flex items-center justify-end gap-1",
+									children: [/* @__PURE__ */ jsx(Button, {
+										variant: "ghost",
+										size: "sm",
+										onClick: () => onEdit(item),
+										"aria-label": `Modificar ${item.title}`,
+										children: /* @__PURE__ */ jsx(Edit3, { className: "w-4 h-4 text-orange-500" })
+									}), /* @__PURE__ */ jsx(Button, {
+										variant: "ghost",
+										size: "sm",
+										disabled: isDeleting || item.source === "etsy",
+										title: item.source === "etsy" ? "Los productos de Etsy se eliminan desde Etsy" : void 0,
+										onClick: () => {
+											if (window.confirm(`¿Seguro que deseas eliminar "${item.title}"?`)) onDelete(String(item.id));
+										},
+										"aria-label": item.source === "etsy" ? `${item.title} se elimina desde Etsy` : `Eliminar ${item.title}`,
+										children: /* @__PURE__ */ jsx(Trash2, { className: "w-4 h-4 text-red-400" })
+									})]
+								})
+							})
+						]
+					}, item.id);
+				})
 			})]
 		})
 	})] });
-};
-//#endregion
-//#region src/components/admin/AdminRegistrationsSkeleton.tsx
-var SKELETON_ROWS = 3;
-var AdminRegistrationsSkeleton = () => {
-	return /* @__PURE__ */ jsx("div", {
-		className: "space-y-6",
-		"aria-hidden": "true",
-		children: Array.from({ length: SKELETON_ROWS }, (_, index) => /* @__PURE__ */ jsxs("div", {
-			className: "space-y-3",
-			children: [/* @__PURE__ */ jsxs("div", {
-				className: "flex items-center justify-between gap-3",
-				children: [/* @__PURE__ */ jsx(Skeleton, { className: "h-5 w-48" }), /* @__PURE__ */ jsx(Skeleton, {
-					className: "h-6 w-28",
-					rounded: "full"
-				})]
-			}), /* @__PURE__ */ jsx("div", {
-				className: "rounded-lg border border-neutral-800 divide-y divide-neutral-800",
-				children: Array.from({ length: 2 }, (_row, rowIndex) => /* @__PURE__ */ jsxs("div", {
-					className: "p-4 flex flex-wrap items-center justify-between gap-3",
-					children: [/* @__PURE__ */ jsxs("div", {
-						className: "space-y-2",
-						children: [/* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-40" }), /* @__PURE__ */ jsx(Skeleton, { className: "h-3 w-56 max-w-full" })]
-					}), /* @__PURE__ */ jsx(Skeleton, { className: "h-8 w-32" })]
-				}, rowIndex))
-			})]
-		}, index))
-	});
 };
 //#endregion
 //#region src/components/admin/AdminRegistrationsPanel.tsx
@@ -2623,10 +2410,15 @@ var statusBadgeVariant = {
 	confirmado: "primary",
 	cancelado: "outline"
 };
-var formatRegistrationDate = (value, language) => {
+var statusLabel = {
+	pendiente: "Pendiente",
+	confirmado: "Confirmado",
+	cancelado: "Cancelado"
+};
+var formatRegistrationDate = (value) => {
 	const parsed = new Date(value);
 	if (isNaN(parsed.getTime())) return value;
-	return parsed.toLocaleDateString(getIntlLocale(language), {
+	return parsed.toLocaleDateString("es-ES", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
@@ -2634,9 +2426,7 @@ var formatRegistrationDate = (value, language) => {
 		minute: "2-digit"
 	});
 };
-var AdminRegistrationsPanel = ({ workshops, registrations, isLoading, error, onRetry, onSetStatus, onDelete }) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.resolvedLanguage ?? i18n.language;
+var AdminRegistrationsPanel = ({ workshops, registrations, isLoading, onSetStatus, onDelete }) => {
 	const workshopsWithRegistrations = workshops.filter((workshop) => workshop.category === "talleres").map((workshop) => ({
 		workshop,
 		list: registrations.filter((registration) => registration.product_id === workshop.id).sort((a, b) => b.created_at.localeCompare(a.created_at))
@@ -2646,32 +2436,29 @@ var AdminRegistrationsPanel = ({ workshops, registrations, isLoading, error, onR
 		children: [/* @__PURE__ */ jsx(ClipboardList, {
 			className: "w-5 h-5 text-orange-500",
 			"aria-hidden": "true"
-		}), /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("h3", {
+		}), /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs("h3", {
 			className: "text-xl font-bold text-white uppercase tracking-wider",
-			children: t("admin.registrations.title", { count: registrations.length })
+			children: [
+				"Inscripciones a Talleres (",
+				registrations.length,
+				")"
+			]
 		}), /* @__PURE__ */ jsx("p", {
 			className: `${theme.colors.textMuted} text-sm`,
-			children: t("admin.registrations.subtitle")
+			children: "Confirma, cancela o elimina las plazas solicitadas."
 		})] })]
 	}), /* @__PURE__ */ jsxs(Box, {
 		className: "p-6 space-y-8",
 		children: [
-			isLoading && /* @__PURE__ */ jsx("div", {
-				role: "status",
-				"aria-label": t("admin.registrations.loading"),
-				children: /* @__PURE__ */ jsx(AdminRegistrationsSkeleton, {})
+			isLoading && /* @__PURE__ */ jsx("p", {
+				className: `${theme.colors.textMuted} text-sm`,
+				children: "Cargando inscripciones..."
 			}),
-			!isLoading && error && /* @__PURE__ */ jsx(ErrorState, {
-				title: t("admin.registrations.errorTitle"),
-				description: error,
-				onRetry,
-				retryLabel: t("common.retry")
-			}),
-			!isLoading && !error && workshopsWithRegistrations.length === 0 && /* @__PURE__ */ jsx("p", {
+			!isLoading && workshopsWithRegistrations.length === 0 && /* @__PURE__ */ jsx("p", {
 				className: `${theme.colors.textMuted} text-sm text-center py-4`,
-				children: t("admin.registrations.emptyWorkshops")
+				children: "No hay talleres publicados en el catálogo."
 			}),
-			!isLoading && !error && workshopsWithRegistrations.map(({ workshop, list }) => {
+			!isLoading && workshopsWithRegistrations.map(({ workshop, list }) => {
 				const activeCount = list.filter((registration) => registration.status !== "cancelado").length;
 				const cupo = workshop.cupo ?? null;
 				return /* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs(Box, {
@@ -2684,16 +2471,13 @@ var AdminRegistrationsPanel = ({ workshops, registrations, isLoading, error, onR
 						children: [/* @__PURE__ */ jsx(Users, {
 							className: "w-3 h-3 mr-1",
 							"aria-hidden": "true"
-						}), cupo !== null ? t("admin.registrations.spots", {
-							active: activeCount,
-							cupo
-						}) : activeCount === 1 ? t("admin.registrations.attendee", { count: activeCount }) : t("admin.registrations.attendees", { count: activeCount })]
+						}), cupo !== null ? `${activeCount} / ${cupo} plazas` : `${activeCount} inscritos`]
 					})]
 				}), /* @__PURE__ */ jsxs(Box, {
 					className: `rounded-lg border ${theme.colors.border} divide-y ${theme.colors.borderSubtle}`,
 					children: [list.length === 0 && /* @__PURE__ */ jsx("p", {
 						className: `${theme.colors.textMuted} text-sm p-4`,
-						children: t("admin.registrations.empty")
+						children: "Sin inscripciones todavía."
 					}), list.map((registration) => /* @__PURE__ */ jsxs(Box, {
 						className: "p-4 flex flex-wrap items-center justify-between gap-3",
 						children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsx("span", {
@@ -2707,33 +2491,33 @@ var AdminRegistrationsPanel = ({ workshops, registrations, isLoading, error, onR
 							children: [
 								/* @__PURE__ */ jsx("span", {
 									className: `text-xs ${theme.colors.textSubtle}`,
-									children: formatRegistrationDate(registration.created_at, language)
+									children: formatRegistrationDate(registration.created_at)
 								}),
 								/* @__PURE__ */ jsx(Badge, {
 									variant: statusBadgeVariant[registration.status],
-									children: t(registrationStatusTranslationKeys[registration.status])
+									children: statusLabel[registration.status]
 								}),
 								registration.status !== "confirmado" && /* @__PURE__ */ jsx(Button, {
 									variant: "ghost",
 									size: "sm",
 									onClick: () => void onSetStatus(registration.id, "confirmado"),
-									"aria-label": t("admin.registrations.confirmAria", { name: registration.name }),
+									"aria-label": `Confirmar inscripción de ${registration.name}`,
 									children: /* @__PURE__ */ jsx(Check, { className: "w-4 h-4 text-green-400" })
 								}),
 								registration.status !== "cancelado" && /* @__PURE__ */ jsx(Button, {
 									variant: "ghost",
 									size: "sm",
 									onClick: () => void onSetStatus(registration.id, "cancelado"),
-									"aria-label": t("admin.registrations.cancelAria", { name: registration.name }),
+									"aria-label": `Cancelar inscripción de ${registration.name}`,
 									children: /* @__PURE__ */ jsx(X, { className: "w-4 h-4 text-orange-400" })
 								}),
 								/* @__PURE__ */ jsx(Button, {
 									variant: "ghost",
 									size: "sm",
 									onClick: () => {
-										if (window.confirm(t("admin.registrations.deleteConfirm", { name: registration.name }))) onDelete(registration.id);
+										if (window.confirm(`¿Seguro que deseas eliminar la inscripción de "${registration.name}"?`)) onDelete(registration.id);
 									},
-									"aria-label": t("admin.registrations.deleteAria", { name: registration.name }),
+									"aria-label": `Eliminar inscripción de ${registration.name}`,
 									children: /* @__PURE__ */ jsx(Trash2, { className: "w-4 h-4 text-red-400" })
 								})
 							]
@@ -2760,7 +2544,6 @@ var buildWorkshopItem = (data) => ({
 	currency: "EUR"
 });
 var AdminWorkshopCalendarPanel = ({ workshopData }) => {
-	const { t } = useTranslation();
 	const workshop = useMemo(() => buildWorkshopItem(workshopData), [workshopData]);
 	return /* @__PURE__ */ jsxs("div", {
 		className: "p-4 rounded-xl border bg-neutral-900/60 border-neutral-700 space-y-3",
@@ -2769,48 +2552,12 @@ var AdminWorkshopCalendarPanel = ({ workshopData }) => {
 			children: [/* @__PURE__ */ jsx(CheckCircle, {
 				className: "w-5 h-5 text-green-400 flex-shrink-0",
 				"aria-hidden": "true"
-			}), /* @__PURE__ */ jsx("span", { children: t("admin.calendarPanel.published", { title: workshop.title }) })]
+			}), /* @__PURE__ */ jsxs("span", { children: [
+				"Taller «",
+				workshop.title,
+				"» publicado. Añade el evento a tu calendario:"
+			] })]
 		}), /* @__PURE__ */ jsx(CalendarEventActions, { workshop })]
-	});
-};
-//#endregion
-//#region src/components/i18n/LanguageSwitcher.tsx
-var languages = [{
-	code: "es",
-	label: "ES"
-}, {
-	code: "en",
-	label: "EN"
-}];
-var LanguageSwitcher = ({ className = "", onSelect }) => {
-	const { t, i18n } = useTranslation();
-	const location = useLocation();
-	const currentLanguage = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language);
-	const isAdminRoute = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
-	return /* @__PURE__ */ jsx("nav", {
-		"aria-label": t("language.label"),
-		className,
-		children: /* @__PURE__ */ jsx("ul", {
-			className: "flex items-center gap-1",
-			children: languages.map((language) => {
-				const isActive = currentLanguage === language.code;
-				const ariaLabel = language.code === "es" ? t("language.switchToSpanish") : t("language.switchToEnglish");
-				return /* @__PURE__ */ jsx("li", { children: /* @__PURE__ */ jsx(Link, {
-					to: buildLocalizedPath(location.pathname, location.search, location.hash, language.code),
-					hrefLang: language.code,
-					lang: language.code,
-					"aria-label": ariaLabel,
-					"aria-current": isActive ? "page" : void 0,
-					onClick: () => {
-						persistLanguage(language.code);
-						if (isAdminRoute) i18n.changeLanguage(language.code);
-						onSelect?.();
-					},
-					className: `inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${isActive ? "bg-orange-600 text-white" : "text-neutral-400 hover:text-white"}`,
-					children: language.label
-				}) }, language.code);
-			})
-		})
 	});
 };
 //#endregion
@@ -2819,7 +2566,6 @@ var Logo_default = "/assets/Logo-35Lqm5dB.png";
 //#endregion
 //#region src/components/admin/AdminLoginForm.tsx
 var AdminLoginForm = ({ onLogin, onClose, errorMessage }) => {
-	const { t } = useTranslation();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -2833,19 +2579,16 @@ var AdminLoginForm = ({ onLogin, onClose, errorMessage }) => {
 			setIsSubmitting(false);
 		}
 	};
-	return /* @__PURE__ */ jsxs("div", {
+	return /* @__PURE__ */ jsx("div", {
 		className: `fixed inset-0 z-50 ${theme.colors.background} flex flex-col justify-center items-center px-4`,
-		children: [/* @__PURE__ */ jsx("div", {
-			className: "absolute top-6 right-6",
-			children: /* @__PURE__ */ jsx(LanguageSwitcher, {})
-		}), /* @__PURE__ */ jsxs(Card, {
+		children: /* @__PURE__ */ jsxs(Card, {
 			className: "max-w-md w-full p-8 text-center shadow-2xl",
 			children: [
 				/* @__PURE__ */ jsx("div", {
 					className: "flex justify-center mb-6",
 					children: /* @__PURE__ */ jsx("img", {
 						src: Logo_default,
-						alt: t("nav.logoAlt"),
+						alt: "Logo Laurel en Lienzo",
 						className: "h-12 w-auto object-contain"
 					})
 				}),
@@ -2858,11 +2601,11 @@ var AdminLoginForm = ({ onLogin, onClose, errorMessage }) => {
 				}),
 				/* @__PURE__ */ jsx("h2", {
 					className: "text-2xl font-bold text-white mb-2 uppercase tracking-wider",
-					children: t("admin.login.title")
+					children: "Acceso Administrador"
 				}),
 				/* @__PURE__ */ jsx("p", {
 					className: `${theme.colors.textMuted} text-sm mb-6`,
-					children: t("admin.login.subtitle")
+					children: "Inicia sesión para gestionar el catálogo."
 				}),
 				/* @__PURE__ */ jsxs("form", {
 					onSubmit: handleSubmit,
@@ -2870,21 +2613,21 @@ var AdminLoginForm = ({ onLogin, onClose, errorMessage }) => {
 					children: [
 						/* @__PURE__ */ jsx(Input, {
 							id: "admin-email",
-							label: t("admin.login.emailLabel"),
+							label: "Email",
 							type: "email",
 							value: email,
 							onChange: (event) => setEmail(event.target.value),
-							placeholder: t("admin.login.emailPlaceholder"),
+							placeholder: "tu@email.com",
 							autoComplete: "username",
 							required: true,
 							autoFocus: true
 						}),
 						/* @__PURE__ */ jsx(PasswordInput, {
 							id: "admin-password",
-							label: t("admin.login.passwordLabel"),
+							label: "Contraseña",
 							value: password,
 							onChange: (event) => setPassword(event.target.value),
-							placeholder: t("admin.login.passwordPlaceholder"),
+							placeholder: "Contraseña",
 							autoComplete: "current-password",
 							required: true
 						}),
@@ -2899,63 +2642,29 @@ var AdminLoginForm = ({ onLogin, onClose, errorMessage }) => {
 								variant: "secondary",
 								className: "w-1/2",
 								onClick: onClose,
-								children: t("admin.backToSite")
+								children: "Volver a la Web"
 							}), /* @__PURE__ */ jsx(Button, {
 								type: "submit",
 								variant: "primary",
 								className: "w-1/2",
 								disabled: isSubmitting,
-								children: isSubmitting ? t("admin.login.submitting") : t("admin.login.submit")
+								children: isSubmitting ? "Entrando…" : "Entrar"
 							})]
 						})
 					]
 				})
 			]
-		})]
-	});
-};
-//#endregion
-//#region src/components/admin/AdminDashboardHeader.tsx
-var AdminDashboardHeader = ({ onClose, onLogout }) => {
-	const { t } = useTranslation();
-	return /* @__PURE__ */ jsx("header", {
-		className: `sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b ${theme.colors.border}`,
-		children: /* @__PURE__ */ jsxs("div", {
-			className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between",
-			children: [/* @__PURE__ */ jsxs("div", {
-				className: "flex items-center gap-3",
-				children: [/* @__PURE__ */ jsx("img", {
-					src: Logo_default,
-					alt: t("nav.logoAlt"),
-					className: "h-10 w-auto object-contain"
-				}), /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", {
-					className: "text-lg font-bold text-white uppercase tracking-wider",
-					children: t("admin.title")
-				}) })]
-			}), /* @__PURE__ */ jsxs("div", {
-				className: "flex items-center gap-3",
-				children: [
-					/* @__PURE__ */ jsx(LanguageSwitcher, {}),
-					/* @__PURE__ */ jsxs(Button, {
-						variant: "secondary",
-						size: "sm",
-						onClick: onClose,
-						children: [/* @__PURE__ */ jsx(ArrowLeft, { className: "w-3.5 h-3.5" }), t("admin.backToSite")]
-					}),
-					/* @__PURE__ */ jsx(Button, {
-						variant: "outline",
-						size: "sm",
-						onClick: onLogout,
-						"aria-label": t("admin.logout"),
-						children: /* @__PURE__ */ jsx(Unlock, { className: "w-3.5 h-3.5" })
-					})
-				]
-			})]
 		})
 	});
 };
 //#endregion
 //#region src/hooks/useAdminAuth.ts
+var isAdminUser = (user) => {
+	if (!user) return false;
+	const appRole = user.app_metadata?.role;
+	const userRole = user.user_metadata?.role;
+	return appRole === "admin" || userRole === "admin";
+};
 var useAdminAuth = () => {
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
@@ -2979,42 +2688,52 @@ var useAdminAuth = () => {
 			listener.subscription.unsubscribe();
 		};
 	}, []);
+	const signIn = useCallback(async (email, password) => {
+		if (!isSupabaseConfigured || !supabase) return { success: true };
+		const { error } = await supabase.auth.signInWithPassword({
+			email,
+			password
+		});
+		if (error) return {
+			success: false,
+			message: "Email o contraseña incorrectos."
+		};
+		const { data } = await supabase.auth.getUser();
+		if (!isAdminUser(data.user)) {
+			await supabase.auth.signOut();
+			return {
+				success: false,
+				message: "No tienes permisos para acceder al panel."
+			};
+		}
+		return { success: true };
+	}, []);
+	const signOut = useCallback(async () => {
+		if (!isSupabaseConfigured || !supabase) return;
+		await supabase.auth.signOut();
+	}, []);
 	return {
 		user,
+		isAdmin: isAdminUser(user),
 		isLoading,
-		signIn: useCallback(async (email, password) => {
-			if (!isSupabaseConfigured || !supabase) return { success: true };
-			const { error } = await supabase.auth.signInWithPassword({
-				email,
-				password
-			});
-			if (error) return {
-				success: false,
-				errorKey: "admin.login.invalidCredentials"
-			};
-			return { success: true };
-		}, []),
-		signOut: useCallback(async () => {
-			if (!isSupabaseConfigured || !supabase) return;
-			await supabase.auth.signOut();
-		}, [])
+		signIn,
+		signOut
 	};
 };
 //#endregion
 //#region src/components/admin/AdminDashboard.tsx
-var AdminDashboard = ({ products, registrations, isLoadingProducts, productsError, isLoadingRegistrations, registrationsError, onAddProduct, onEditProduct, onEditEtsyMetadata, onDeleteProduct, onRefreshProducts, onRefreshRegistrations, onSetRegistrationStatus, onDeleteRegistration, onClose }) => {
-	const { t } = useTranslation();
-	const { user, isLoading, signIn, signOut } = useAdminAuth();
+var AdminDashboard = ({ products, registrations, isLoadingRegistrations, onAddProduct, onEditProduct, onEditEtsyMetadata, onDeleteProduct, onRefreshProducts, onSetRegistrationStatus, onDeleteRegistration, onClose }) => {
+	const { user, isAdmin, isLoading, signIn, signOut } = useAdminAuth();
 	const [authError, setAuthError] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 	const [feedbackMsg, setFeedbackMsg] = useState(null);
 	const [createdWorkshop, setCreatedWorkshop] = useState(null);
-	const isAuthenticated = !isSupabaseConfigured || user !== null;
+	const isAuthenticated = !isSupabaseConfigured || user !== null && isAdmin;
 	const handleLogin = async (email, password) => {
 		const result = await signIn(email, password);
-		setAuthError(result.success ? null : t(result.errorKey ?? "admin.login.unknownError"));
+		setAuthError(result.success ? null : result.message ?? "Error al iniciar sesión.");
 	};
 	const handleLogout = () => {
 		signOut();
@@ -3028,7 +2747,7 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 		setIsSubmitting(false);
 		if (success) {
 			setFeedbackMsg({
-				text: t(isEdit ? "admin.feedback.productUpdated" : "admin.feedback.productCreated"),
+				text: isEdit ? "Producto actualizado correctamente." : "Producto publicado con éxito.",
 				type: "success"
 			});
 			setEditingProduct(null);
@@ -3037,7 +2756,7 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 			return true;
 		}
 		setFeedbackMsg({
-			text: t("admin.feedback.productOperationError"),
+			text: "Error al procesar la operación.",
 			type: "error"
 		});
 		return false;
@@ -3050,7 +2769,7 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 		setIsSubmitting(false);
 		if (success) {
 			setFeedbackMsg({
-				text: t("admin.feedback.etsyUpdated"),
+				text: "Producto de Etsy actualizado correctamente.",
 				type: "success"
 			});
 			setEditingProduct(null);
@@ -3058,7 +2777,7 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 			return true;
 		}
 		setFeedbackMsg({
-			text: t("admin.feedback.etsyUpdateError"),
+			text: "Error al actualizar el producto de Etsy.",
 			type: "error"
 		});
 		return false;
@@ -3071,12 +2790,12 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 		if (success) {
 			if (editingProduct?.id === id) setEditingProduct(null);
 			setFeedbackMsg({
-				text: t("admin.feedback.productDeleted"),
+				text: "Producto eliminado correctamente.",
 				type: "success"
 			});
 			setTimeout(() => setFeedbackMsg(null), 3e3);
 		} else setFeedbackMsg({
-			text: t("admin.feedback.productDeleteError"),
+			text: "Error al eliminar el producto.",
 			type: "error"
 		});
 	};
@@ -3088,7 +2807,7 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 			"aria-hidden": "true"
 		}), /* @__PURE__ */ jsx("p", {
 			className: `${theme.colors.textMuted} text-sm`,
-			children: t("admin.loadingSession")
+			children: "Cargando sesión…"
 		})]
 	});
 	if (!isAuthenticated) return /* @__PURE__ */ jsx(AdminLoginForm, {
@@ -3098,9 +2817,36 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 	});
 	return /* @__PURE__ */ jsxs("div", {
 		className: `fixed inset-0 z-50 ${theme.colors.background} overflow-y-auto`,
-		children: [/* @__PURE__ */ jsx(AdminDashboardHeader, {
-			onClose,
-			onLogout: handleLogout
+		children: [/* @__PURE__ */ jsx("header", {
+			className: `sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b ${theme.colors.border}`,
+			children: /* @__PURE__ */ jsxs("div", {
+				className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between",
+				children: [/* @__PURE__ */ jsxs("div", {
+					className: "flex items-center gap-3",
+					children: [/* @__PURE__ */ jsx("img", {
+						src: Logo_default,
+						alt: "Logo",
+						className: "h-10 w-auto object-contain"
+					}), /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", {
+						className: "text-lg font-bold text-white uppercase tracking-wider",
+						children: "Panel de Administración"
+					}) })]
+				}), /* @__PURE__ */ jsxs("div", {
+					className: "flex items-center gap-3",
+					children: [/* @__PURE__ */ jsxs(Button, {
+						variant: "secondary",
+						size: "sm",
+						onClick: onClose,
+						children: [/* @__PURE__ */ jsx(ArrowLeft, { className: "w-3.5 h-3.5" }), "Volver a la Web"]
+					}), /* @__PURE__ */ jsx(Button, {
+						variant: "outline",
+						size: "sm",
+						onClick: handleLogout,
+						"aria-label": "Cerrar sesión",
+						children: /* @__PURE__ */ jsx(Unlock, { className: "w-3.5 h-3.5" })
+					})]
+				})]
+			})
 		}), /* @__PURE__ */ jsxs("main", {
 			className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8",
 			children: [
@@ -3131,17 +2877,12 @@ var AdminDashboard = ({ products, registrations, isLoadingProducts, productsErro
 							behavior: "smooth"
 						});
 					},
-					isDeleting,
-					isLoading: isLoadingProducts,
-					error: productsError,
-					onRetry: onRefreshProducts
+					isDeleting
 				}),
 				/* @__PURE__ */ jsx(AdminRegistrationsPanel, {
 					workshops: products,
 					registrations,
 					isLoading: isLoadingRegistrations,
-					error: registrationsError,
-					onRetry: onRefreshRegistrations,
 					onSetStatus: onSetRegistrationStatus,
 					onDelete: onDeleteRegistration
 				})
@@ -3363,7 +3104,6 @@ var updateEtsyProductMetadata = async (id, metadata) => {
 //#endregion
 //#region src/hooks/useProducts.ts
 var useProducts = () => {
-	const { t } = useTranslation();
 	const [products, setProducts] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -3375,12 +3115,12 @@ var useProducts = () => {
 			setProducts(data);
 		} catch (err) {
 			logError("useProducts.loadProducts", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.loadProducts");
+			const msg = err instanceof Error ? err.message : "Error desconocido al cargar productos";
 			setError(msg);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [t]);
+	}, []);
 	useEffect(() => {
 		let isCancelled = false;
 		const init = async () => {
@@ -3393,7 +3133,7 @@ var useProducts = () => {
 			} catch (err) {
 				if (!isCancelled) {
 					logError("useProducts.init", err);
-					const msg = err instanceof Error ? err.message : t("admin.errors.loadProducts");
+					const msg = err instanceof Error ? err.message : "Error desconocido al cargar productos";
 					setError(msg);
 					setIsLoading(false);
 				}
@@ -3403,7 +3143,7 @@ var useProducts = () => {
 		return () => {
 			isCancelled = true;
 		};
-	}, [t]);
+	}, []);
 	const addProduct = async (data) => {
 		try {
 			const created = await createProduct(data);
@@ -3411,7 +3151,7 @@ var useProducts = () => {
 			return true;
 		} catch (err) {
 			logError("useProducts.addProduct", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.saveProduct");
+			const msg = err instanceof Error ? err.message : "Error al guardar el producto";
 			setError(msg);
 			return false;
 		}
@@ -3423,7 +3163,7 @@ var useProducts = () => {
 			return true;
 		} catch (err) {
 			logError("useProducts.editProduct", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.updateProduct");
+			const msg = err instanceof Error ? err.message : "Error al actualizar el producto";
 			setError(msg);
 			return false;
 		}
@@ -3435,7 +3175,7 @@ var useProducts = () => {
 			return true;
 		} catch (err) {
 			logError("useProducts.editEtsyMetadata", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.updateProduct");
+			const msg = err instanceof Error ? err.message : "Error al actualizar el producto";
 			setError(msg);
 			return false;
 		}
@@ -3447,7 +3187,7 @@ var useProducts = () => {
 			return true;
 		} catch (err) {
 			logError("useProducts.removeProduct", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.deleteProduct");
+			const msg = err instanceof Error ? err.message : "Error al eliminar el producto";
 			setError(msg);
 			return false;
 		}
@@ -3463,17 +3203,6 @@ var useProducts = () => {
 		refreshProducts: loadProducts
 	};
 };
-//#endregion
-//#region src/errors/registrationError.ts
-var RegistrationError = class extends Error {
-	code;
-	constructor(code) {
-		super(code);
-		this.name = "RegistrationError";
-		this.code = code;
-	}
-};
-var getRegistrationErrorCode = (error) => error instanceof RegistrationError ? error.code : "unknown";
 //#endregion
 //#region src/services/registrationService.ts
 var LOCAL_STORAGE_KEY = "laurel_workshop_registrations";
@@ -3493,9 +3222,9 @@ var saveStoredLocalRegistrations = (items) => {
 	}
 };
 var mapRegistrationError = (code, message) => {
-	if (code === "23505") return new RegistrationError("alreadyRegistered");
-	if (message.includes("workshop_full")) return new RegistrationError("workshopFull");
-	return new RegistrationError("unknown");
+	if (code === "23505") return "Ya estás apuntado a este taller con este email.";
+	if (message.includes("workshop_full")) return "El taller está completo: no quedan plazas.";
+	return "No se pudo completar la inscripción. Inténtalo de nuevo.";
 };
 var fetchRegistrations = async () => {
 	{
@@ -3520,13 +3249,13 @@ var createRegistration = async (productId, formData, cupo) => {
 			name,
 			email
 		}]).select().single();
-		if (error) throw mapRegistrationError(error.code, error.message);
+		if (error) throw new Error(mapRegistrationError(error.code, error.message));
 		return data;
 	}
 	const localRegistrations = getStoredLocalRegistrations();
 	const isActiveForWorkshop = (registration) => registration.product_id === productId && registration.status !== "cancelado";
-	if (localRegistrations.some((registration) => isActiveForWorkshop(registration) && registration.email.toLowerCase() === email.toLowerCase())) throw new RegistrationError("alreadyRegistered");
-	if (cupo !== null && localRegistrations.filter(isActiveForWorkshop).length >= cupo) throw new RegistrationError("workshopFull");
+	if (localRegistrations.some((registration) => isActiveForWorkshop(registration) && registration.email.toLowerCase() === email.toLowerCase())) throw new Error("Ya estás apuntado a este taller con este email.");
+	if (cupo !== null && localRegistrations.filter(isActiveForWorkshop).length >= cupo) throw new Error("El taller está completo: no quedan plazas.");
 	const newRegistration = {
 		id: `local-${crypto.randomUUID()}`,
 		product_id: productId,
@@ -3541,7 +3270,7 @@ var createRegistration = async (productId, formData, cupo) => {
 var updateRegistrationStatus = async (id, status) => {
 	if (isSupabaseConfigured && supabase) {
 		const { data, error } = await supabase.from("workshop_registrations").update({ status }).eq("id", id).select().single();
-		if (error) throw mapRegistrationError(error.code, error.message);
+		if (error) throw new Error(mapRegistrationError(error.code, error.message));
 		return data;
 	}
 	const updated = getStoredLocalRegistrations().map((registration) => registration.id === id ? {
@@ -3550,13 +3279,13 @@ var updateRegistrationStatus = async (id, status) => {
 	} : registration);
 	saveStoredLocalRegistrations(updated);
 	const found = updated.find((registration) => registration.id === id);
-	if (!found) throw new RegistrationError("notFound");
+	if (!found) throw new Error("Inscripción no encontrada.");
 	return found;
 };
 var deleteRegistration = async (id) => {
 	if (isSupabaseConfigured && supabase) {
 		const { error } = await supabase.from("workshop_registrations").delete().eq("id", id);
-		if (error) throw mapRegistrationError(error.code, error.message);
+		if (error) throw new Error(mapRegistrationError(error.code, error.message));
 		return;
 	}
 	saveStoredLocalRegistrations(getStoredLocalRegistrations().filter((registration) => registration.id !== id));
@@ -3564,7 +3293,6 @@ var deleteRegistration = async (id) => {
 //#endregion
 //#region src/hooks/useRegistrations.ts
 var useRegistrations = () => {
-	const { t } = useTranslation();
 	const [registrations, setRegistrations] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -3576,12 +3304,12 @@ var useRegistrations = () => {
 			setRegistrations(data);
 		} catch (err) {
 			logError("useRegistrations.loadRegistrations", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.loadRegistrations");
+			const msg = err instanceof Error ? err.message : "Error desconocido al cargar inscripciones";
 			setError(msg);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [t]);
+	}, []);
 	useEffect(() => {
 		let isCancelled = false;
 		const init = async () => {
@@ -3594,7 +3322,7 @@ var useRegistrations = () => {
 			} catch (err) {
 				if (!isCancelled) {
 					logError("useRegistrations.init", err);
-					const msg = err instanceof Error ? err.message : t("admin.errors.loadRegistrations");
+					const msg = err instanceof Error ? err.message : "Error desconocido al cargar inscripciones";
 					setError(msg);
 					setIsLoading(false);
 				}
@@ -3604,7 +3332,7 @@ var useRegistrations = () => {
 		return () => {
 			isCancelled = true;
 		};
-	}, [t]);
+	}, []);
 	const setStatus = async (id, status) => {
 		try {
 			const updated = await updateRegistrationStatus(id, status);
@@ -3612,7 +3340,7 @@ var useRegistrations = () => {
 			return true;
 		} catch (err) {
 			logError("useRegistrations.setStatus", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.updateRegistration");
+			const msg = err instanceof Error ? err.message : "Error al actualizar la inscripción";
 			setError(msg);
 			return false;
 		}
@@ -3624,7 +3352,7 @@ var useRegistrations = () => {
 			return true;
 		} catch (err) {
 			logError("useRegistrations.remove", err);
-			const msg = err instanceof Error ? err.message : t("admin.errors.deleteRegistration");
+			const msg = err instanceof Error ? err.message : "Error al eliminar la inscripción";
 			setError(msg);
 			return false;
 		}
@@ -3641,24 +3369,18 @@ var useRegistrations = () => {
 //#endregion
 //#region src/pages/AdminPage.tsx
 var AdminPage = () => {
-	const { t } = useTranslation();
-	useDocumentTitle(`${t("admin.title")} | ${SITE_NAME}`);
 	const navigate = useNavigate();
-	const { products, isLoading: isLoadingProducts, error: productsError, addProduct, editProduct, editEtsyMetadata, removeProduct, refreshProducts } = useProducts();
-	const { registrations, isLoading: isLoadingRegistrations, error: registrationsError, setStatus, remove, refreshRegistrations } = useRegistrations();
+	const { products, addProduct, editProduct, editEtsyMetadata, removeProduct, refreshProducts } = useProducts();
+	const { registrations, isLoading, setStatus, remove } = useRegistrations();
 	return /* @__PURE__ */ jsx(AdminDashboard, {
 		products,
 		registrations,
-		isLoadingProducts,
-		productsError,
-		isLoadingRegistrations,
-		registrationsError,
+		isLoadingRegistrations: isLoading,
 		onAddProduct: addProduct,
 		onEditProduct: editProduct,
 		onEditEtsyMetadata: editEtsyMetadata,
 		onDeleteProduct: removeProduct,
 		onRefreshProducts: refreshProducts,
-		onRefreshRegistrations: refreshRegistrations,
 		onSetRegistrationStatus: setStatus,
 		onDeleteRegistration: remove,
 		onClose: () => navigate("/")
@@ -3737,33 +3459,32 @@ var useWindowScroll = (threshold = 20) => {
 //#region src/components/layout/Navbar.tsx
 var navLinks = [
 	{
-		labelKey: "nav.links.all",
+		name: "Todos",
 		category: "todas",
 		href: "#galeria"
 	},
 	{
-		labelKey: "nav.links.custom",
+		name: "Personalizados",
 		category: "personalizados",
 		href: "#galeria"
 	},
 	{
-		labelKey: "nav.links.tshirts",
+		name: "Camisetas",
 		category: "camisetas",
 		href: "#galeria"
 	},
 	{
-		labelKey: "nav.links.illustrations",
+		name: "Ilustraciones",
 		category: "ilustraciones",
 		href: "#galeria"
 	},
 	{
-		labelKey: "nav.links.workshops",
+		name: "Talleres",
 		category: "talleres",
 		href: "#galeria"
 	}
 ];
 var Navbar = ({ activeCategory, onSelectCategory }) => {
-	const { t } = useTranslation();
 	const [isOpen, setIsOpen] = useState(false);
 	const isScrolled = useWindowScroll(20);
 	const handleLinkClick = (category) => {
@@ -3774,7 +3495,7 @@ var Navbar = ({ activeCategory, onSelectCategory }) => {
 		className: `fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-neutral-950/90 backdrop-blur-md shadow-lg shadow-black/50 border-b border-neutral-800" : "bg-transparent"}`,
 		children: /* @__PURE__ */ jsxs("nav", {
 			className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
-			"aria-label": t("nav.ariaLabel"),
+			"aria-label": "Navegación principal",
 			children: [/* @__PURE__ */ jsxs(Box, {
 				className: "flex justify-between items-center h-20",
 				children: [
@@ -3782,44 +3503,44 @@ var Navbar = ({ activeCategory, onSelectCategory }) => {
 						href: "#",
 						onClick: () => handleLinkClick("todas"),
 						className: `flex-shrink-0 flex items-center gap-3 cursor-pointer focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} rounded-sm group`,
-						"aria-label": t("nav.homeAria"),
+						"aria-label": "Laurel en Lienzo - Inicio",
 						children: [/* @__PURE__ */ jsx("img", {
 							src: Logo_default,
-							alt: t("nav.logoAlt"),
+							alt: "Logo Laurel en Lienzo",
 							className: "h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105"
-						}), /* @__PURE__ */ jsx(Typography, {
+						}), /* @__PURE__ */ jsxs(Typography, {
 							variant: "h4",
 							as: "span",
 							className: "tracking-widest uppercase hidden sm:inline",
-							children: /* @__PURE__ */ jsx(Trans, {
-								i18nKey: "brand.name",
-								components: { highlight: /* @__PURE__ */ jsx("span", { className: theme.colors.primaryText }) }
-							})
+							children: ["Laurel", /* @__PURE__ */ jsx("span", {
+								className: theme.colors.primaryText,
+								children: "EnLienzo"
+							})]
 						})]
 					}),
-					/* @__PURE__ */ jsxs(Box, {
+					/* @__PURE__ */ jsx(Box, {
 						className: "hidden md:flex items-center space-x-6",
-						children: [navLinks.map((link) => {
+						children: navLinks.map((link) => {
 							const isActive = activeCategory === link.category;
 							return /* @__PURE__ */ jsx("a", {
 								href: link.href,
 								onClick: () => handleLinkClick(link.category),
 								className: `text-sm font-medium tracking-wide uppercase px-3 py-1.5 rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${isActive ? "text-orange-500 font-semibold" : "text-neutral-300 hover:text-white"}`,
 								"aria-current": isActive ? "page" : void 0,
-								children: t(link.labelKey)
-							}, link.category);
-						}), /* @__PURE__ */ jsx(LanguageSwitcher, {})]
+								children: link.name
+							}, link.name);
+						})
 					}),
-					/* @__PURE__ */ jsxs(Box, {
-						className: "md:hidden flex items-center gap-2",
-						children: [/* @__PURE__ */ jsx(LanguageSwitcher, { onSelect: () => setIsOpen(false) }), /* @__PURE__ */ jsx("button", {
+					/* @__PURE__ */ jsx(Box, {
+						className: "md:hidden flex items-center",
+						children: /* @__PURE__ */ jsx("button", {
 							type: "button",
 							onClick: () => setIsOpen((prev) => !prev),
 							className: `text-neutral-300 hover:text-white p-2 rounded-md focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus}`,
 							"aria-expanded": isOpen,
-							"aria-label": isOpen ? t("nav.closeMenu") : t("nav.openMenu"),
+							"aria-label": isOpen ? "Cerrar menú principal" : "Abrir menú principal",
 							children: isOpen ? /* @__PURE__ */ jsx(X, { className: "h-6 w-6" }) : /* @__PURE__ */ jsx(Menu, { className: "h-6 w-6" })
-						})]
+						})
 					})
 				]
 			}), /* @__PURE__ */ jsx(AnimatePresence, { children: isOpen && /* @__PURE__ */ jsx(motion.div, {
@@ -3846,8 +3567,8 @@ var Navbar = ({ activeCategory, onSelectCategory }) => {
 							onClick: () => handleLinkClick(link.category),
 							className: `block px-3 py-3 text-base font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${isActive ? "text-orange-500 bg-neutral-800/80 font-semibold" : "text-neutral-300 hover:text-white hover:bg-neutral-800"}`,
 							"aria-current": isActive ? "page" : void 0,
-							children: t(link.labelKey)
-						}, link.category);
+							children: link.name
+						}, link.name);
 					})
 				})
 			}) })]
@@ -3857,7 +3578,6 @@ var Navbar = ({ activeCategory, onSelectCategory }) => {
 //#endregion
 //#region src/components/layout/Footer.tsx
 var Footer = () => {
-	const { t } = useTranslation();
 	const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
 	const etsyUrl = "https://www.etsy.com/es/shop/Laurelenlienzo?etsrc=sdt";
 	const instagramUrl = "https://www.instagram.com/laurelenlienzo?cplk=Ynl4anVvemtlNzhw";
@@ -3870,7 +3590,7 @@ var Footer = () => {
 			as: "h2",
 			id: "footer-heading",
 			className: "sr-only",
-			children: t("footer.heading")
+			children: "Pie de página"
 		}), /* @__PURE__ */ jsxs(Box, {
 			className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
 			children: [/* @__PURE__ */ jsxs(Box, {
@@ -3879,15 +3599,15 @@ var Footer = () => {
 					className: "flex items-center gap-3",
 					children: [/* @__PURE__ */ jsx("img", {
 						src: Logo_default,
-						alt: t("nav.logoAlt"),
+						alt: "Logo Laurel en Lienzo",
 						className: "h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105"
-					}), /* @__PURE__ */ jsx(Typography, {
+					}), /* @__PURE__ */ jsxs(Typography, {
 						variant: "h4",
 						className: "tracking-widest uppercase",
-						children: /* @__PURE__ */ jsx(Trans, {
-							i18nKey: "brand.name",
-							components: { highlight: /* @__PURE__ */ jsx("span", { className: theme.colors.primaryText }) }
-						})
+						children: ["Laurel", /* @__PURE__ */ jsx("span", {
+							className: theme.colors.primaryText,
+							children: "EnLienzo"
+						})]
 					})]
 				}), /* @__PURE__ */ jsxs(Box, {
 					className: "flex items-center space-x-6",
@@ -3895,7 +3615,7 @@ var Footer = () => {
 						/* @__PURE__ */ jsxs("a", {
 							href: `mailto:${contactEmail}`,
 							className: "text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center gap-2 text-sm",
-							"aria-label": t("footer.emailAria", { email: contactEmail }),
+							"aria-label": `Enviar correo a ${contactEmail}`,
 							title: contactEmail,
 							children: [/* @__PURE__ */ jsx(Mail, {
 								className: "h-6 w-6",
@@ -3910,7 +3630,7 @@ var Footer = () => {
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: "text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center",
-							"aria-label": t("footer.etsyAria"),
+							"aria-label": "Visitar tienda oficial en Etsy",
 							children: /* @__PURE__ */ jsx(ShoppingBag, {
 								className: "h-6 w-6",
 								"aria-hidden": "true"
@@ -3921,7 +3641,7 @@ var Footer = () => {
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: "text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center",
-							"aria-label": t("footer.instagramAria"),
+							"aria-label": "Visitar perfil de Instagram",
 							children: /* @__PURE__ */ jsxs("svg", {
 								className: "h-6 w-6 fill-none stroke-current stroke-2",
 								viewBox: "0 0 24 24",
@@ -3952,7 +3672,7 @@ var Footer = () => {
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: "text-neutral-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm p-1 inline-flex items-center justify-center",
-							"aria-label": t("footer.tiktokAria"),
+							"aria-label": "Visitar perfil de TikTok",
 							children: /* @__PURE__ */ jsx("svg", {
 								className: "h-6 w-6 fill-none stroke-current stroke-2",
 								viewBox: "0 0 24 24",
@@ -3966,22 +3686,26 @@ var Footer = () => {
 				})]
 			}), /* @__PURE__ */ jsxs(Box, {
 				className: "mt-8 border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4",
-				children: [/* @__PURE__ */ jsx(Typography, {
+				children: [/* @__PURE__ */ jsxs(Typography, {
 					variant: "body",
 					className: "text-neutral-500 text-center md:text-left",
-					children: t("footer.copyright", { year: currentYear })
+					children: [
+						"© ",
+						currentYear,
+						" Laurel en Lienzo. Todos los derechos reservados."
+					]
 				}), /* @__PURE__ */ jsxs(Box, {
 					className: "flex gap-4 text-sm text-neutral-500",
 					children: [/* @__PURE__ */ jsx(Typography, {
 						as: "span",
 						variant: "caption",
 						className: "hover:text-neutral-300 transition-colors cursor-default",
-						children: t("footer.accessibility")
+						children: "Accesibilidad (WCAG)"
 					}), /* @__PURE__ */ jsx(Typography, {
 						as: "span",
 						variant: "caption",
 						className: "hover:text-neutral-300 transition-colors cursor-default",
-						children: t("footer.legal")
+						children: "Aviso Legal"
 					})]
 				})]
 			})]
@@ -3991,7 +3715,6 @@ var Footer = () => {
 //#endregion
 //#region src/components/HeroSection.tsx
 var HeroSection = () => {
-	const { t } = useTranslation();
 	return /* @__PURE__ */ jsxs("section", {
 		className: "relative min-h-[90vh] flex items-center justify-center bg-neutral-950 overflow-hidden px-4 pt-20",
 		children: [/* @__PURE__ */ jsx(Box, {
@@ -4015,16 +3738,13 @@ var HeroSection = () => {
 				children: [
 					/* @__PURE__ */ jsx(Typography, {
 						variant: "h1",
-						className: "mb-6 font-hero font-bold tracking-normal",
-						children: /* @__PURE__ */ jsx(Trans, {
-							i18nKey: "hero.title",
-							components: { highlight: /* @__PURE__ */ jsx("span", { className: theme.colors.primaryText }) }
-						})
+						className: "mb-6",
+						children: "CREAR, SENTIR, CONECTAR"
 					}),
 					/* @__PURE__ */ jsx(Typography, {
 						variant: "subtitle",
 						className: "mt-4 max-w-2xl mx-auto mb-10",
-						children: t("hero.subtitle")
+						children: "Ilustraciones únicas, talleres creativos y piezas exclusivas listas para conectar contigo."
 					}),
 					/* @__PURE__ */ jsxs(motion.div, {
 						className: "flex flex-col sm:flex-row justify-center gap-4",
@@ -4037,20 +3757,16 @@ var HeroSection = () => {
 						children: [/* @__PURE__ */ jsx("a", {
 							href: "#galeria",
 							className: `px-8 py-4 ${theme.colors.primary} font-bold tracking-widest uppercase rounded-sm transition-colors shadow-lg shadow-orange-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950`,
-							children: t("hero.catalogCta")
+							children: "Ver Catálogo"
 						}), /* @__PURE__ */ jsxs("a", {
 							href: "https://www.etsy.com/es/shop/Laurelenlienzo?etsrc=sdt",
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: `px-8 py-4 bg-transparent border border-neutral-700 hover:border-white text-white font-bold tracking-widest uppercase rounded-sm transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 flex items-center justify-center gap-2`,
-							children: [
-								/* @__PURE__ */ jsx(ShoppingBag, {
-									className: "w-5 h-5",
-									"aria-hidden": "true"
-								}),
-								" ",
-								t("hero.etsyCta")
-							]
+							children: [/* @__PURE__ */ jsx(ShoppingBag, {
+								className: "w-5 h-5",
+								"aria-hidden": "true"
+							}), " Tienda Etsy"]
 						})]
 					})
 				]
@@ -4061,7 +3777,6 @@ var HeroSection = () => {
 //#endregion
 //#region src/components/ui/Modal.tsx
 var Modal = ({ isOpen, onClose, title, children }) => {
-	const { t } = useTranslation();
 	const panelRef = useRef(null);
 	useEffect(() => {
 		if (!isOpen) return;
@@ -4084,7 +3799,7 @@ var Modal = ({ isOpen, onClose, title, children }) => {
 			type: "button",
 			className: "absolute inset-0 bg-neutral-950/85 backdrop-blur-sm cursor-default",
 			onClick: onClose,
-			"aria-label": t("a11y.closeDialog"),
+			"aria-label": "Cerrar diálogo",
 			tabIndex: -1
 		}), /* @__PURE__ */ jsxs("div", {
 			ref: panelRef,
@@ -4102,7 +3817,7 @@ var Modal = ({ isOpen, onClose, title, children }) => {
 				}), /* @__PURE__ */ jsx("button", {
 					type: "button",
 					onClick: onClose,
-					"aria-label": t("common.close"),
+					"aria-label": "Cerrar",
 					className: "p-1.5 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600",
 					children: /* @__PURE__ */ jsx(X, {
 						className: "w-5 h-5",
@@ -4117,25 +3832,24 @@ var Modal = ({ isOpen, onClose, title, children }) => {
 //#region src/components/WorkshopSignupForm.tsx
 var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
-	const { t } = useTranslation();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errorCode, setErrorCode] = useState(null);
+	const [errorMessage, setErrorMessage] = useState(null);
 	const [isSuccess, setIsSuccess] = useState(false);
 	const instagramUrl = "https://www.instagram.com/laurelenlienzo?cplk=Ynl4anVvemtlNzhw";
 	const tiktokUrl = "https://www.tiktok.com/@laurelenlienzo?_r=1&_t=ZN-9AgTExlNL7u";
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		setErrorCode(null);
+		setErrorMessage(null);
 		const trimmedName = name.trim();
 		const trimmedEmail = email.trim();
 		if (!trimmedName || !trimmedEmail) {
-			setErrorCode("required");
+			setErrorMessage("Por favor indica tu nombre y tu email.");
 			return;
 		}
 		if (!EMAIL_PATTERN.test(trimmedEmail)) {
-			setErrorCode("invalidEmail");
+			setErrorMessage("Introduce un email válido.");
 			return;
 		}
 		setIsSubmitting(true);
@@ -4146,12 +3860,11 @@ var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
 			});
 			setIsSuccess(true);
 		} catch (err) {
-			setErrorCode(getRegistrationErrorCode(err));
+			setErrorMessage(err instanceof Error ? err.message : "No se pudo completar la inscripción. Inténtalo de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
-	const socialNoticeKey = "workshop.social.both";
 	if (isSuccess) return /* @__PURE__ */ jsxs("div", {
 		className: "space-y-4",
 		children: [
@@ -4168,10 +3881,14 @@ var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
 					})
 				}), /* @__PURE__ */ jsxs("div", { children: [/* @__PURE__ */ jsx("p", {
 					className: "text-white font-semibold",
-					children: t("workshop.form.successTitle")
-				}), /* @__PURE__ */ jsx("p", {
+					children: "¡Inscripción completada!"
+				}), /* @__PURE__ */ jsxs("p", {
 					className: `${theme.colors.textMuted} text-sm mt-1`,
-					children: t("workshop.form.successBody", { title: workshop.title })
+					children: [
+						"Te has apuntado al taller «",
+						workshop.title,
+						"»."
+					]
 				})] })]
 			}),
 			/* @__PURE__ */ jsx(CalendarEventActions, {
@@ -4186,32 +3903,35 @@ var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
 				children: [/* @__PURE__ */ jsx(Bell, {
 					className: "w-4 h-4 mt-0.5 flex-shrink-0 text-orange-400",
 					"aria-hidden": "true"
-				}), /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(Trans, {
-					i18nKey: socialNoticeKey,
-					components: {
-						instagram: /* @__PURE__ */ jsx("a", {
-							href: instagramUrl,
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium",
-							"aria-label": t("workshop.social.instagramAria")
-						}),
-						tiktok: /* @__PURE__ */ jsx("a", {
-							href: tiktokUrl,
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium",
-							"aria-label": t("workshop.social.tiktokAria")
-						})
-					}
-				}) })]
+				}), /* @__PURE__ */ jsxs("span", { children: [
+					"Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre el taller",
+					" en ",
+					/* @__PURE__ */ jsx("a", {
+						href: instagramUrl,
+						target: "_blank",
+						rel: "noopener noreferrer",
+						className: "text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium",
+						"aria-label": "Ver novedades del taller en Instagram",
+						children: "Instagram"
+					}),
+					" y ",
+					/* @__PURE__ */ jsx("a", {
+						href: tiktokUrl,
+						target: "_blank",
+						rel: "noopener noreferrer",
+						className: "text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium",
+						"aria-label": "Ver novedades del taller en TikTok",
+						children: "TikTok"
+					}),
+					"."
+				] })]
 			}),
 			/* @__PURE__ */ jsx(Button, {
 				type: "button",
 				variant: "primary",
 				className: "w-full",
 				onClick: onClose,
-				children: t("common.close")
+				children: "Cerrar"
 			})
 		]
 	});
@@ -4220,37 +3940,41 @@ var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
 		className: "space-y-4",
 		noValidate: true,
 		children: [
-			/* @__PURE__ */ jsx("p", {
+			/* @__PURE__ */ jsxs("p", {
 				className: `${theme.colors.textMuted} text-sm`,
-				children: t("workshop.form.intro", { title: workshop.title })
+				children: [
+					"Deja tus datos para reservar tu plaza en «",
+					workshop.title,
+					"»."
+				]
 			}),
 			/* @__PURE__ */ jsx(Input, {
 				id: "signup-name",
-				label: t("workshop.form.nameLabel"),
+				label: "Tu nombre *",
 				required: true,
 				value: name,
 				onChange: (event) => setName(event.target.value),
-				placeholder: t("workshop.form.namePlaceholder"),
+				placeholder: "Nombre y apellidos",
 				autoComplete: "name",
 				autoFocus: true
 			}),
 			/* @__PURE__ */ jsx(Input, {
 				id: "signup-email",
-				label: t("workshop.form.emailLabel"),
+				label: "Tu email *",
 				type: "email",
 				required: true,
 				value: email,
 				onChange: (event) => setEmail(event.target.value),
-				placeholder: t("workshop.form.emailPlaceholder"),
+				placeholder: "tu@email.com",
 				autoComplete: "email"
 			}),
-			errorCode && /* @__PURE__ */ jsxs(Box, {
+			errorMessage && /* @__PURE__ */ jsxs(Box, {
 				className: "p-3 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-2 text-red-300 text-sm",
 				role: "alert",
 				children: [/* @__PURE__ */ jsx(AlertCircle, {
 					className: "w-4 h-4 flex-shrink-0 text-red-500",
 					"aria-hidden": "true"
-				}), /* @__PURE__ */ jsx("span", { children: t(`workshop.form.errors.${errorCode}`) })]
+				}), /* @__PURE__ */ jsx("span", { children: errorMessage })]
 			}),
 			/* @__PURE__ */ jsx(Button, {
 				type: "submit",
@@ -4260,10 +3984,10 @@ var WorkshopSignupForm = ({ workshop, onRegister, onClose }) => {
 				children: isSubmitting ? /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsx(LoaderCircle, {
 					className: "w-4 h-4 animate-spin",
 					"aria-hidden": "true"
-				}), t("workshop.form.submitting")] }) : /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsx(UserPlus, {
+				}), "Inscribiendo..."] }) : /* @__PURE__ */ jsxs(Fragment, { children: [/* @__PURE__ */ jsx(UserPlus, {
 					className: "w-4 h-4",
 					"aria-hidden": "true"
-				}), t("workshop.form.submit")] })
+				}), "Apuntarme al taller"] })
 			})
 		]
 	});
@@ -4284,22 +4008,29 @@ var itemVariants = {
 		}
 	}
 };
-var statusBadgeVariants = {
-	disponible: "primary",
-	reservado: "neutral",
-	vendido: "outline"
+var statusConfig = {
+	disponible: {
+		label: "Disponible",
+		badgeVariant: "primary"
+	},
+	reservado: {
+		label: "Reservado",
+		badgeVariant: "neutral"
+	},
+	vendido: {
+		label: "Vendido / Finalizado",
+		badgeVariant: "outline"
+	}
 };
 var ProductCard = ({ item, spotsCount, onRegister }) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.resolvedLanguage ?? i18n.language;
 	const currentStatus = item.status || "disponible";
-	const statusBadgeVariant = statusBadgeVariants[currentStatus];
+	const statusInfo = statusConfig[currentStatus];
 	const [isSignupOpen, setIsSignupOpen] = useState(false);
 	const isWorkshop = item.category === "talleres";
 	const hasOffer = isOfferActive(item);
 	const priceCents = item.priceCents ?? null;
-	const finalPrice = formatPriceForLanguage(hasOffer ? getDiscountedCents(priceCents, item.discountPercent) : priceCents, item.currency, language);
-	const originalPrice = formatPriceForLanguage(priceCents, item.currency, language);
+	const finalPrice = formatPrice(hasOffer ? getDiscountedCents(priceCents, item.discountPercent) : priceCents, item.currency);
+	const originalPrice = formatPrice(priceCents, item.currency);
 	const cupo = item.cupo ?? null;
 	const spotsLeft = cupo === null ? null : Math.max(cupo - (spotsCount ?? 0), 0);
 	const isFull = spotsLeft === 0;
@@ -4313,7 +4044,7 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 			children: [
 				/* @__PURE__ */ jsx("img", {
 					src: item.image,
-					alt: t("product.imageAlt", { title: item.title }),
+					alt: `Obra: ${item.title}`,
 					className: `w-full h-full object-cover object-center grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out ${currentStatus === "vendido" ? "opacity-50" : ""}`,
 					loading: "lazy"
 				}),
@@ -4323,7 +4054,7 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 				}),
 				item.featured && /* @__PURE__ */ jsxs(Box, {
 					className: "absolute top-3 left-3 bg-orange-600 text-white font-bold text-[10px] uppercase px-2 py-1 rounded shadow-md flex items-center gap-1",
-					children: [/* @__PURE__ */ jsx(Sparkles, { className: "w-3 h-3" }), t("product.featured")]
+					children: [/* @__PURE__ */ jsx(Sparkles, { className: "w-3 h-3" }), "Destacado"]
 				}),
 				/* @__PURE__ */ jsxs(Box, {
 					className: "absolute top-3 right-3 flex flex-col items-end gap-1.5",
@@ -4336,12 +4067,8 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 						]
 					}), /* @__PURE__ */ jsx("span", {
 						className: "bg-neutral-950/80 backdrop-blur-sm border border-neutral-700 text-orange-400 font-bold text-xs uppercase px-2.5 py-1 rounded-sm",
-						"aria-label": priceCents == null ? t("product.priceOnRequest") : hasOffer ? t("product.offerAria", {
-							finalPrice,
-							originalPrice,
-							discount: item.discountPercent
-						}) : t("product.priceAria", { price: finalPrice }),
-						children: priceCents == null ? t("product.consult") : hasOffer ? /* @__PURE__ */ jsxs("span", {
+						"aria-label": priceCents == null ? "Precio a consultar" : hasOffer ? `Precio ${finalPrice}, antes ${originalPrice}, ${item.discountPercent}% de descuento` : `Precio ${finalPrice}`,
+						children: priceCents == null ? "Consultar" : hasOffer ? /* @__PURE__ */ jsxs("span", {
 							className: "inline-flex items-center gap-1.5",
 							children: [/* @__PURE__ */ jsx("s", {
 								className: "text-neutral-400 font-medium normal-case",
@@ -4360,10 +4087,10 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 						className: "flex items-center gap-2 mb-1",
 						children: [/* @__PURE__ */ jsx(Badge, {
 							variant: "primary",
-							children: t(categoryTranslationKeys[item.category])
+							children: item.category
 						}), /* @__PURE__ */ jsx(Badge, {
-							variant: statusBadgeVariant,
-							children: t(availabilityTranslationKeys[currentStatus])
+							variant: statusInfo.badgeVariant,
+							children: statusInfo.label
 						})]
 					}), /* @__PURE__ */ jsx(Typography, {
 						variant: "h4",
@@ -4373,10 +4100,21 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 				}),
 				item.category === "talleres" && (item.eventDate || item.eventLocation) && /* @__PURE__ */ jsxs(Box, {
 					className: "my-2 p-2.5 rounded bg-neutral-950 border border-neutral-800 space-y-1 text-xs text-neutral-300",
-					children: [item.eventDate && /* @__PURE__ */ jsxs(Box, {
-						className: "flex items-center gap-2 text-orange-400 font-medium capitalize",
-						children: [/* @__PURE__ */ jsx(Calendar, { className: "w-3.5 h-3.5 flex-shrink-0" }), /* @__PURE__ */ jsx("span", { children: formatWorkshopDateForLanguage(item.eventDate, language) })]
-					}), item.eventLocation && /* @__PURE__ */ jsxs(Box, {
+					children: [item.eventDate && (() => {
+						const parsed = new Date(item.eventDate);
+						const formatted = isNaN(parsed.getTime()) ? item.eventDate : parsed.toLocaleString("es-ES", {
+							weekday: "long",
+							day: "numeric",
+							month: "long",
+							year: "numeric",
+							hour: "2-digit",
+							minute: "2-digit"
+						});
+						return /* @__PURE__ */ jsxs(Box, {
+							className: "flex items-center gap-2 text-orange-400 font-medium capitalize",
+							children: [/* @__PURE__ */ jsx(Calendar, { className: "w-3.5 h-3.5 flex-shrink-0" }), /* @__PURE__ */ jsx("span", { children: formatted })]
+						});
+					})(), item.eventLocation && /* @__PURE__ */ jsxs(Box, {
 						className: "flex items-center gap-2 text-neutral-400",
 						children: [/* @__PURE__ */ jsx(MapPin, { className: "w-3.5 h-3.5 flex-shrink-0" }), /* @__PURE__ */ jsx("span", { children: item.eventLocation })]
 					})]
@@ -4396,16 +4134,19 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 								"aria-hidden": "true"
 							}), cupo === null ? /* @__PURE__ */ jsx("span", {
 								className: "text-neutral-400",
-								children: t("product.spotsOpen")
+								children: "Inscripción abierta"
 							}) : isFull ? /* @__PURE__ */ jsx("span", {
 								className: "text-red-400",
-								children: t("product.spotsFull")
-							}) : /* @__PURE__ */ jsx("span", {
+								children: "Completo · no quedan plazas"
+							}) : /* @__PURE__ */ jsxs("span", {
 								className: "text-green-400",
-								children: t("product.spotsLeft", {
-									spots: spotsLeft,
-									total: cupo
-								})
+								children: [
+									"Quedan ",
+									spotsLeft,
+									" de ",
+									cupo,
+									" plazas"
+								]
 							})]
 						}),
 						canSignup && /* @__PURE__ */ jsxs(Button, {
@@ -4413,41 +4154,41 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 							variant: "outline",
 							className: "w-full",
 							onClick: () => setIsSignupOpen(true),
-							"aria-label": t("product.signupAria", { title: item.title }),
+							"aria-label": `Apuntarse al taller ${item.title}`,
 							children: [/* @__PURE__ */ jsx(UserPlus, {
 								className: "w-4 h-4",
 								"aria-hidden": "true"
-							}), t("product.signup")]
+							}), "Apuntarse al taller"]
 						}),
 						isWorkshop && isFull && !isFinished && /* @__PURE__ */ jsx(Box, {
 							className: "text-center py-2.5 text-xs text-red-400 font-semibold uppercase tracking-wider bg-red-950/30 rounded border border-red-900/50",
-							children: t("product.workshopFull")
+							children: "Taller completo"
 						}),
 						!isWorkshop && item.etsyLink && currentStatus !== "vendido" && /* @__PURE__ */ jsxs("a", {
 							href: item.etsyLink,
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: `w-full inline-flex justify-center items-center gap-2 ${theme.colors.primary} font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`,
-							"aria-label": t("product.buyEtsyAria", { title: item.title }),
+							"aria-label": `Comprar ${item.title} en Etsy`,
 							children: [/* @__PURE__ */ jsx(ShoppingBag, {
 								className: "w-4 h-4",
 								"aria-hidden": "true"
-							}), t("product.buyEtsy")]
+							}), "Comprar en Etsy"]
 						}),
 						!isWorkshop && item.vintedLink && currentStatus !== "vendido" && /* @__PURE__ */ jsxs("a", {
 							href: item.vintedLink,
 							target: "_blank",
 							rel: "noopener noreferrer",
 							className: `w-full inline-flex justify-center items-center gap-2 bg-transparent border border-neutral-700 hover:border-neutral-400 text-neutral-300 hover:text-white font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`,
-							"aria-label": t("product.viewVintedAria", { title: item.title }),
+							"aria-label": `Comprar ${item.title} en Vinted`,
 							children: [/* @__PURE__ */ jsx(Tag, {
 								className: "w-4 h-4",
 								"aria-hidden": "true"
-							}), t("product.viewVinted")]
+							}), "Ver en Vinted"]
 						}),
 						currentStatus === "vendido" && /* @__PURE__ */ jsx(Box, {
 							className: "text-center py-2.5 text-xs text-neutral-500 font-semibold uppercase tracking-wider bg-neutral-950 rounded border border-neutral-800",
-							children: t("product.unavailable")
+							children: "Pieza no disponible"
 						})
 					]
 				})
@@ -4456,7 +4197,7 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 	}), /* @__PURE__ */ jsx(Modal, {
 		isOpen: isSignupOpen,
 		onClose: () => setIsSignupOpen(false),
-		title: t("product.signupModalTitle"),
+		title: "Inscripción al taller",
 		children: onRegister && /* @__PURE__ */ jsx(WorkshopSignupForm, {
 			workshop: item,
 			onRegister,
@@ -4465,50 +4206,29 @@ var ProductCard = ({ item, spotsCount, onRegister }) => {
 	})] });
 };
 //#endregion
-//#region src/components/ProductCardSkeleton.tsx
-var ProductCardSkeleton = () => {
-	return /* @__PURE__ */ jsxs("div", {
-		className: `${theme.colors.surface}/90 rounded-lg overflow-hidden border ${theme.colors.border}`,
-		children: [/* @__PURE__ */ jsx(Skeleton, {
-			className: "aspect-square w-full",
-			rounded: "none"
-		}), /* @__PURE__ */ jsxs("div", {
-			className: "p-6 space-y-4",
-			children: [
-				/* @__PURE__ */ jsxs("div", {
-					className: "flex items-center gap-2",
-					children: [/* @__PURE__ */ jsx(Skeleton, {
-						className: "h-5 w-24",
-						rounded: "full"
-					}), /* @__PURE__ */ jsx(Skeleton, {
-						className: "h-5 w-20",
-						rounded: "full"
-					})]
-				}),
-				/* @__PURE__ */ jsx(Skeleton, { className: "h-6 w-3/4" }),
-				/* @__PURE__ */ jsxs("div", {
-					className: "space-y-2",
-					children: [
-						/* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-full" }),
-						/* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-5/6" }),
-						/* @__PURE__ */ jsx(Skeleton, { className: "h-4 w-2/3" })
-					]
-				}),
-				/* @__PURE__ */ jsx(Skeleton, { className: "h-11 w-full" })
-			]
-		})]
-	});
-};
-//#endregion
 //#region src/components/GallerySection.tsx
 var categories = [
-	"todas",
-	"ilustraciones",
-	"camisetas",
-	"talleres",
-	"personalizados"
+	{
+		label: "Todas las obras",
+		value: "todas"
+	},
+	{
+		label: "Ilustraciones",
+		value: "ilustraciones"
+	},
+	{
+		label: "Camisetas",
+		value: "camisetas"
+	},
+	{
+		label: "Talleres",
+		value: "talleres"
+	},
+	{
+		label: "Personalizados",
+		value: "personalizados"
+	}
 ];
-var SKELETON_ITEMS = 6;
 var containerVariants = {
 	hidden: { opacity: 0 },
 	show: {
@@ -4516,8 +4236,7 @@ var containerVariants = {
 		transition: { staggerChildren: .1 }
 	}
 };
-var GallerySection = ({ items, activeCategory, onSelectCategory, offersOnly = false, onToggleOffers, spotsCounts, onRegister, isLoading, error, onRetry, spotsError, onRetrySpots }) => {
-	const { t } = useTranslation();
+var GallerySection = ({ items, activeCategory, onSelectCategory, offersOnly = false, onToggleOffers, spotsCounts, onRegister }) => {
 	const visibleItems = items.filter((item) => item.isVisible !== false);
 	const offersCount = visibleItems.filter(isOfferActive).length;
 	const categoryItems = activeCategory === "todas" ? visibleItems : visibleItems.filter((item) => item.category === activeCategory);
@@ -4527,160 +4246,83 @@ var GallerySection = ({ items, activeCategory, onSelectCategory, offersOnly = fa
 		className: "py-24 bg-neutral-950 min-h-screen",
 		children: /* @__PURE__ */ jsxs(Box, {
 			className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
-			children: [
-				/* @__PURE__ */ jsxs(Box, {
-					className: "flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6",
-					children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs(Typography, {
-						variant: "h2",
-						className: "mb-3",
+			children: [/* @__PURE__ */ jsxs(Box, {
+				className: "flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6",
+				children: [/* @__PURE__ */ jsxs(Box, { children: [/* @__PURE__ */ jsxs(Typography, {
+					variant: "h2",
+					className: "mb-3",
+					children: ["Catálogo ", /* @__PURE__ */ jsx("span", {
+						className: theme.colors.textSubtle,
+						children: "Visual"
+					})]
+				}), /* @__PURE__ */ jsx(Box, { className: "h-1 w-20 bg-orange-600" })] }), /* @__PURE__ */ jsxs(Box, {
+					className: "flex flex-wrap gap-2",
+					role: "toolbar",
+					"aria-label": "Filtro de obras por categoría",
+					children: [categories.map((cat) => {
+						const isActive = activeCategory === cat.value;
+						return /* @__PURE__ */ jsx("button", {
+							type: "button",
+							onClick: () => onSelectCategory(cat.value),
+							className: `px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${isActive ? "bg-orange-600 text-white shadow-md shadow-orange-600/30" : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"}`,
+							"aria-pressed": isActive,
+							children: cat.label
+						}, cat.value);
+					}), onToggleOffers && /* @__PURE__ */ jsxs("button", {
+						type: "button",
+						onClick: onToggleOffers,
+						className: `inline-flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md border transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${offersOnly ? "bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-600/30" : "bg-neutral-900 border-orange-600/60 text-orange-400 hover:bg-orange-600/10"}`,
+						"aria-pressed": offersOnly,
 						children: [
-							t("catalog.heading"),
-							" ",
-							/* @__PURE__ */ jsx("span", {
-								className: theme.colors.textSubtle,
-								children: t("catalog.headingAccent")
+							/* @__PURE__ */ jsx(Tag, {
+								className: "w-3.5 h-3.5",
+								"aria-hidden": "true"
+							}),
+							"Ofertas",
+							offersCount > 0 && /* @__PURE__ */ jsx("span", {
+								className: `min-w-5 rounded-full px-1.5 py-0.5 text-[10px] leading-none ${offersOnly ? "bg-neutral-950/40 text-white" : "bg-orange-600/20 text-orange-300"}`,
+								children: offersCount
 							})
 						]
-					}), /* @__PURE__ */ jsx(Box, { className: "h-1 w-20 bg-orange-600" })] }), /* @__PURE__ */ jsxs(Box, {
-						className: "flex flex-wrap gap-2",
-						role: "toolbar",
-						"aria-label": t("catalog.filterAria"),
-						children: [categories.map((category) => {
-							const isActive = activeCategory === category;
-							return /* @__PURE__ */ jsx("button", {
-								type: "button",
-								onClick: () => onSelectCategory(category),
-								className: `px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${isActive ? "bg-orange-600 text-white shadow-md shadow-orange-600/30" : "bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"}`,
-								"aria-pressed": isActive,
-								children: t(categoryTranslationKeys[category])
-							}, category);
-						}), onToggleOffers && /* @__PURE__ */ jsxs("button", {
-							type: "button",
-							onClick: onToggleOffers,
-							className: `inline-flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md border transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${offersOnly ? "bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-600/30" : "bg-neutral-900 border-orange-600/60 text-orange-400 hover:bg-orange-600/10"}`,
-							"aria-pressed": offersOnly,
-							children: [
-								/* @__PURE__ */ jsx(Tag, {
-									className: "w-3.5 h-3.5",
-									"aria-hidden": "true"
-								}),
-								t("catalog.offers"),
-								offersCount > 0 && /* @__PURE__ */ jsx("span", {
-									className: `min-w-5 rounded-full px-1.5 py-0.5 text-[10px] leading-none ${offersOnly ? "bg-neutral-950/40 text-white" : "bg-orange-600/20 text-orange-300"}`,
-									children: offersCount
-								})
-							]
-						})]
 					})]
-				}),
-				spotsError && /* @__PURE__ */ jsxs(Box, {
-					role: "alert",
-					className: "mb-8 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-orange-900/60 bg-orange-950/20 p-4 text-sm text-orange-300",
-					children: [/* @__PURE__ */ jsx("span", { children: spotsError }), onRetrySpots && /* @__PURE__ */ jsx(Button, {
-						variant: "ghost",
-						size: "sm",
-						onClick: () => void onRetrySpots(),
-						children: t("common.retry")
-					})]
-				}),
-				/* @__PURE__ */ jsx(AnimatePresence, {
-					mode: "wait",
-					children: isLoading ? /* @__PURE__ */ jsxs(motion.div, {
-						initial: { opacity: 0 },
-						animate: { opacity: 1 },
-						exit: { opacity: 0 },
-						className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
-						role: "status",
-						"aria-label": t("catalog.loading"),
-						children: [/* @__PURE__ */ jsx("span", {
-							className: "sr-only",
-							children: t("catalog.loading")
-						}), Array.from({ length: SKELETON_ITEMS }, (_, index) => /* @__PURE__ */ jsx(ProductCardSkeleton, {}, index))]
-					}, "loading") : error ? /* @__PURE__ */ jsx(motion.div, {
-						initial: { opacity: 0 },
-						animate: { opacity: 1 },
-						exit: { opacity: 0 },
-						children: /* @__PURE__ */ jsx(ErrorState, {
-							title: t("catalog.errorTitle"),
-							description: t("catalog.errorDescription"),
-							onRetry,
-							retryLabel: t("common.retry")
-						})
-					}, "error") : filteredItems.length > 0 ? /* @__PURE__ */ jsx(motion.div, {
-						className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
-						variants: containerVariants,
-						initial: "hidden",
-						animate: "show",
-						children: filteredItems.map((item) => /* @__PURE__ */ jsx(ProductCard, {
-							item,
-							spotsCount: spotsCounts?.[item.id],
-							onRegister: onRegister ? (data) => onRegister(item, data) : void 0
-						}, item.id))
-					}, activeCategory) : /* @__PURE__ */ jsx(motion.div, {
-						initial: { opacity: 0 },
-						animate: { opacity: 1 },
-						exit: { opacity: 0 },
-						children: /* @__PURE__ */ jsx(Box, {
-							className: "text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800",
-							children: /* @__PURE__ */ jsx(Typography, {
-								variant: "body",
-								className: "text-lg",
-								children: offersOnly ? t("catalog.emptyOffers") : t("catalog.empty")
-							})
-						})
-					}, "empty")
+				})]
+			}), /* @__PURE__ */ jsx(AnimatePresence, {
+				mode: "wait",
+				children: filteredItems.length > 0 ? /* @__PURE__ */ jsx(motion.div, {
+					className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8",
+					variants: containerVariants,
+					initial: "hidden",
+					animate: "show",
+					children: filteredItems.map((item) => /* @__PURE__ */ jsx(ProductCard, {
+						item,
+						spotsCount: spotsCounts?.[item.id],
+						onRegister: onRegister ? (data) => onRegister(item, data) : void 0
+					}, item.id))
+				}, activeCategory) : /* @__PURE__ */ jsx(Box, {
+					className: "text-center py-20 bg-neutral-900/50 rounded-lg border border-neutral-800",
+					children: /* @__PURE__ */ jsx(Typography, {
+						variant: "body",
+						className: "text-lg",
+						children: offersOnly ? "No hay ofertas activas en esta categoría por el momento." : "No hay piezas disponibles en esta categoría por el momento."
+					})
 				})
-			]
+			})]
 		})
-	});
-};
-//#endregion
-//#region src/components/seo/JsonLd.tsx
-var JsonLd = ({ data }) => {
-	const frameworkContext = useContext(UNSAFE_FrameworkContext);
-	const documentNonce = typeof document !== "undefined" ? Array.from(document.scripts).find((script) => script.nonce)?.nonce : void 0;
-	const nonce = frameworkContext?.nonce ?? documentNonce;
-	const content = JSON.stringify(data).replace(/</g, "\\u003c");
-	return /* @__PURE__ */ jsx("script", {
-		type: "application/ld+json",
-		nonce,
-		dangerouslySetInnerHTML: { __html: content }
 	});
 };
 //#endregion
 //#region src/hooks/useWorkshopSpots.ts
 var useWorkshopSpots = () => {
-	const { t } = useTranslation();
 	const [counts, setCounts] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
-	const loadSpots = useCallback(async () => {
-		setIsLoading(true);
-		setError(null);
-		try {
-			const data = await fetchRegistrationCounts();
-			setCounts(data);
-		} catch (err) {
-			logError("useWorkshopSpots.loadSpots", err);
-			setError(t("catalog.spotsError"));
-		} finally {
-			setIsLoading(false);
-		}
-	}, [t]);
 	useEffect(() => {
 		let isCancelled = false;
 		const init = async () => {
 			try {
 				const data = await fetchRegistrationCounts();
-				if (!isCancelled) {
-					setCounts(data);
-					setError(null);
-				}
-			} catch (err) {
-				if (!isCancelled) {
-					logError("useWorkshopSpots.init", err);
-					setError(t("catalog.spotsError"));
-				}
+				if (!isCancelled) setCounts(data);
+			} catch {
+				if (!isCancelled) setCounts({});
 			} finally {
 				if (!isCancelled) setIsLoading(false);
 			}
@@ -4689,7 +4331,7 @@ var useWorkshopSpots = () => {
 		return () => {
 			isCancelled = true;
 		};
-	}, [t]);
+	}, []);
 	const register = async (productId, data, cupo) => {
 		await createRegistration(productId, data, cupo);
 		setCounts((prev) => ({
@@ -4700,80 +4342,23 @@ var useWorkshopSpots = () => {
 	return {
 		counts,
 		isLoading,
-		error,
-		register,
-		refreshSpots: loadSpots
-	};
-};
-//#endregion
-//#region src/seo/jsonLd.ts
-var absoluteUrl = (siteUrl, path) => {
-	return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
-};
-var getSocialLinks = () => [
-	"https://www.etsy.com/es/shop/Laurelenlienzo?etsrc=sdt",
-	"https://www.instagram.com/laurelenlienzo?cplk=Ynl4anVvemtlNzhw",
-	"https://www.tiktok.com/@laurelenlienzo?_r=1&_t=ZN-9AgTExlNL7u"
-].filter((value) => Boolean(value));
-var buildHomeStructuredData = (language, description, options) => {
-	const { siteUrl, socialLinks = [] } = options;
-	const organizationId = `${siteUrl}/#organization`;
-	const websiteId = `${siteUrl}/#website`;
-	return {
-		"@context": "https://schema.org",
-		"@graph": [
-			{
-				"@type": "Organization",
-				"@id": organizationId,
-				name: SITE_NAME,
-				url: `${siteUrl}/`,
-				logo: absoluteUrl(siteUrl, "/favicon.svg"),
-				...socialLinks.length > 0 ? { sameAs: socialLinks } : {}
-			},
-			{
-				"@type": "WebSite",
-				"@id": websiteId,
-				name: SITE_NAME,
-				url: absoluteUrl(siteUrl, `/${language}`),
-				description,
-				inLanguage: language,
-				publisher: { "@id": organizationId }
-			},
-			{
-				"@type": "WebPage",
-				"@id": `${absoluteUrl(siteUrl, `/${language}`)}#webpage`,
-				url: absoluteUrl(siteUrl, `/${language}`),
-				name: SITE_NAME,
-				description,
-				inLanguage: language,
-				isPartOf: { "@id": websiteId },
-				about: { "@id": organizationId },
-				primaryImageOfPage: absoluteUrl(siteUrl, DEFAULT_OG_IMAGE_PATH)
-			}
-		]
+		register
 	};
 };
 //#endregion
 //#region src/pages/CatalogPage.tsx
 var CatalogPage = () => {
-	const { t, i18n } = useTranslation();
-	const language = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language);
-	const structuredData = useMemo(() => buildHomeStructuredData(language, t("meta.description"), {
-		siteUrl: getSiteUrl(),
-		socialLinks: getSocialLinks()
-	}), [language, t]);
 	const [activeCategory, setActiveCategory] = useState("todas");
 	const [offersOnly, setOffersOnly] = useState(false);
-	const { products, isLoading, error, refreshProducts } = useProducts();
-	const { counts, register, error: spotsError, refreshSpots } = useWorkshopSpots();
+	const { products } = useProducts();
+	const { counts, register } = useWorkshopSpots();
 	return /* @__PURE__ */ jsxs("div", {
 		className: "bg-neutral-950 min-h-screen text-neutral-50 selection:bg-orange-600 selection:text-white font-sans overflow-x-hidden",
 		children: [
-			/* @__PURE__ */ jsx(JsonLd, { data: structuredData }),
 			/* @__PURE__ */ jsx("a", {
 				href: "#main-content",
 				className: "sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:p-4 focus:bg-orange-600 focus:text-white focus:top-4 focus:left-4 rounded-md shadow-lg",
-				children: t("a11y.skipToContent")
+				children: "Saltar al contenido principal"
 			}),
 			/* @__PURE__ */ jsx(Navbar, {
 				activeCategory,
@@ -4788,12 +4373,7 @@ var CatalogPage = () => {
 					offersOnly,
 					onToggleOffers: () => setOffersOnly((prev) => !prev),
 					spotsCounts: counts,
-					onRegister: (item, data) => register(item.id, data, item.cupo ?? null),
-					isLoading,
-					error,
-					onRetry: refreshProducts,
-					spotsError,
-					onRetrySpots: refreshSpots
+					onRegister: (item, data) => register(item.id, data, item.cupo ?? null)
 				})]
 			}),
 			/* @__PURE__ */ jsx(Footer, {})
@@ -4850,15 +4430,15 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": true,
-			"module": "/assets/root-zByw_EUN.js",
+			"module": "/assets/root-DOizfN42.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/logger-gpPTUsCN.js",
-				"/assets/NotFoundPage-CyKVA-pL.js",
-				"/assets/useDocumentTitle-D8lZ4Lhy.js"
+				"/assets/NotFoundPage-CVAAhL7H.js",
+				"/assets/meta-CG2-Ll5h.js",
+				"/assets/logger-D8WQBmHV.js",
+				"/assets/refresh-cw-ZMrmwvw4.js"
 			],
-			"css": ["/assets/root-Dnl5RjrS.css"],
+			"css": ["/assets/root-CbuplU9H.css"],
 			"clientActionModule": void 0,
 			"clientLoaderModule": void 0,
 			"clientMiddlewareModule": void 0,
@@ -4898,13 +4478,13 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/admin-DuiX96pV.js",
+			"module": "/assets/admin-DDtPDhVM.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/logger-gpPTUsCN.js",
-				"/assets/registrationService-DM0F47Ur.js",
-				"/assets/useDocumentTitle-D8lZ4Lhy.js"
+				"/assets/meta-CG2-Ll5h.js",
+				"/assets/logger-D8WQBmHV.js",
+				"/assets/registrationService-KmwRMP9y.js",
+				"/assets/refresh-cw-ZMrmwvw4.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -4967,12 +4547,12 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/catalog-IvTGZsrL.js",
+			"module": "/assets/catalog-DrRjLZ2F.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/logger-gpPTUsCN.js",
-				"/assets/registrationService-DM0F47Ur.js"
+				"/assets/meta-CG2-Ll5h.js",
+				"/assets/logger-D8WQBmHV.js",
+				"/assets/registrationService-KmwRMP9y.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -4993,12 +4573,11 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/not-found-CjpdWdpJ.js",
+			"module": "/assets/not-found-cM3t1S72.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/NotFoundPage-CyKVA-pL.js",
-				"/assets/useDocumentTitle-D8lZ4Lhy.js"
+				"/assets/NotFoundPage-CVAAhL7H.js",
+				"/assets/meta-CG2-Ll5h.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -5040,12 +4619,12 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/catalog-IvTGZsrL.js",
+			"module": "/assets/catalog-DrRjLZ2F.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/logger-gpPTUsCN.js",
-				"/assets/registrationService-DM0F47Ur.js"
+				"/assets/meta-CG2-Ll5h.js",
+				"/assets/logger-D8WQBmHV.js",
+				"/assets/registrationService-KmwRMP9y.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -5066,12 +4645,11 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/not-found-CjpdWdpJ.js",
+			"module": "/assets/not-found-cM3t1S72.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/NotFoundPage-CyKVA-pL.js",
-				"/assets/useDocumentTitle-D8lZ4Lhy.js"
+				"/assets/NotFoundPage-CVAAhL7H.js",
+				"/assets/meta-CG2-Ll5h.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -5092,12 +4670,11 @@ var server_manifest_default = {
 			"hasClientMiddleware": false,
 			"hasDefaultExport": true,
 			"hasErrorBoundary": false,
-			"module": "/assets/not-found-CjpdWdpJ.js",
+			"module": "/assets/not-found-cM3t1S72.js",
 			"imports": [
 				"/assets/jsx-runtime-yfTzyxww.js",
-				"/assets/meta-C_74IwXA.js",
-				"/assets/NotFoundPage-CyKVA-pL.js",
-				"/assets/useDocumentTitle-D8lZ4Lhy.js"
+				"/assets/NotFoundPage-CVAAhL7H.js",
+				"/assets/meta-CG2-Ll5h.js"
 			],
 			"css": [],
 			"clientActionModule": void 0,
@@ -5106,8 +4683,8 @@ var server_manifest_default = {
 			"hydrateFallbackModule": void 0
 		}
 	},
-	"url": "/assets/manifest-81dc849b.js",
-	"version": "81dc849b",
+	"url": "/assets/manifest-5efdb24b.js",
+	"version": "5efdb24b",
 	"sri": void 0
 };
 //#endregion
