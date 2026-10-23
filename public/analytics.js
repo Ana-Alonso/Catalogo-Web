@@ -1,5 +1,6 @@
 window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
+function gtag() {
+  window.dataLayer.push(arguments);
+}
 gtag('js', new Date());
-const gaId = window.__GA_MEASUREMENT_ID__ || 'G-XXXXXXXXXX';
-gtag('config', gaId);
+gtag('config', 'G-L9R421RJQB');

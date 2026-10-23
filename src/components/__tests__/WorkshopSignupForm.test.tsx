@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WorkshopSignupForm } from '../WorkshopSignupForm';
+import { RegistrationError } from '../../errors/registrationError';
+import i18n from '../../i18n';
 import type { CatalogItem } from '../../types/catalog';
 
 const workshop: CatalogItem = {
@@ -62,9 +64,7 @@ describe('WorkshopSignupForm', () => {
 
   it('muestra el mensaje del error devuelto por onRegister', async () => {
     const user = userEvent.setup();
-    setup(
-      vi.fn().mockRejectedValue(new Error('El taller está completo: no quedan plazas.'))
-    );
+    setup(vi.fn().mockRejectedValue(new RegistrationError('workshopFull')));
     await user.type(screen.getByLabelText(/tu nombre/i), 'Ana');
     await user.type(screen.getByLabelText(/tu email/i), 'ana@example.com');
     await user.click(screen.getByRole('button', { name: /apuntarme al taller/i }));
@@ -81,6 +81,18 @@ describe('WorkshopSignupForm', () => {
     await user.click(screen.getByRole('button', { name: /apuntarme al taller/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No se pudo completar la inscripción. Inténtalo de nuevo.'
+    );
+  });
+
+  it('traduce el formulario y los errores al inglés', async () => {
+    await i18n.changeLanguage('en');
+    const user = userEvent.setup();
+    setup(vi.fn().mockRejectedValue(new RegistrationError('workshopFull')));
+    await user.type(screen.getByLabelText(/your name/i), 'Ana');
+    await user.type(screen.getByLabelText(/your email/i), 'ana@example.com');
+    await user.click(screen.getByRole('button', { name: /join the workshop/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The workshop is full: no spots left.'
     );
   });
 });

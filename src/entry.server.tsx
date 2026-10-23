@@ -18,11 +18,11 @@ const buildContentSecurityPolicy = (nonce: string): string =>
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
-    `script-src 'self' 'nonce-${nonce}'`,
+    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://*.etsystatic.com",
+    "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://*.etsystatic.com https://*.google-analytics.com https://*.googletagmanager.com",
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
     "form-action 'self'",
   ].join('; ');
 

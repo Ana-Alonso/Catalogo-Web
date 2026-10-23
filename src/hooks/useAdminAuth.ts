@@ -4,7 +4,7 @@ import { supabase, isSupabaseConfigured } from '../utils/supabase';
 
 interface SignInResult {
   success: boolean;
-  message?: string;
+  errorKey?: 'admin.login.invalidCredentials' | 'admin.login.notAdmin';
 }
 
 interface UseAdminAuthReturn {
@@ -61,16 +61,18 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         return { success: true };
       }
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) {
-        return { success: false, message: 'Email o contraseña incorrectos.' };
+        return { success: false, errorKey: 'admin.login.invalidCredentials' };
       }
 
-      const { data } = await supabase.auth.getUser();
       if (!isAdminUser(data.user)) {
         await supabase.auth.signOut();
-        return { success: false, message: 'No tienes permisos para acceder al panel.' };
+        return { success: false, errorKey: 'admin.login.notAdmin' };
       }
 
       return { success: true };

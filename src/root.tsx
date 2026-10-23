@@ -11,6 +11,7 @@ import {
   type LoaderFunctionArgs,
 } from 'react-router';
 import { I18nextProvider } from 'react-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import '@fontsource-variable/yanone-kaffeesatz';
 import './index.css';
 import { createI18nInstance } from './i18n/createI18nInstance';
@@ -69,6 +70,11 @@ export function Layout({ children }: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="theme-color" content="#0a0a0a" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-L9R421RJQB"
+        />
+        <script src="/analytics.js" />
         <Meta />
         <Links />
       </head>
@@ -76,6 +82,7 @@ export function Layout({ children }: LayoutProps) {
         <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
         <ScrollRestoration />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );

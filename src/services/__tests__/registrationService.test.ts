@@ -51,7 +51,7 @@ describe('registrationService en modo mock (localStorage)', () => {
     await service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null);
     await expect(
       service.createRegistration('prod-1', { name: 'Ana Otra', email: 'ANA@example.com' }, null)
-    ).rejects.toThrow('Ya estás apuntado a este taller con este email.');
+    ).rejects.toMatchObject({ code: 'alreadyRegistered' });
   });
 
   it('permite el mismo email en talleres distintos', async () => {
@@ -70,7 +70,7 @@ describe('registrationService en modo mock (localStorage)', () => {
     await service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, 1);
     await expect(
       service.createRegistration('prod-1', { name: 'Luis', email: 'luis@example.com' }, 1)
-    ).rejects.toThrow('El taller está completo: no quedan plazas.');
+    ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
   it('cuenta solo inscripciones no canceladas', async () => {
@@ -89,7 +89,7 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     vi.clearAllMocks();
   });
 
-  it('mapea el error 23505 de duplicado a mensaje amigable', async () => {
+  it('mapea el error 23505 de duplicado al código alreadyRegistered', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
     supabaseMock.from.mockReturnValue({
       insert: () => ({
@@ -104,10 +104,10 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
-    ).rejects.toThrow('Ya estás apuntado a este taller con este email.');
+    ).rejects.toMatchObject({ code: 'alreadyRegistered' });
   });
 
-  it('mapea workshop_full a mensaje de taller completo', async () => {
+  it('mapea workshop_full al código workshopFull', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
     supabaseMock.from.mockReturnValue({
       insert: () => ({
@@ -122,10 +122,10 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
-    ).rejects.toThrow('El taller está completo: no quedan plazas.');
+    ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
-  it('devuelve mensaje genérico ante un error desconocido', async () => {
+  it('devuelve el código unknown ante un error desconocido', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
     supabaseMock.from.mockReturnValue({
       insert: () => ({
@@ -140,7 +140,7 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
-    ).rejects.toThrow('No se pudo completar la inscripción. Inténtalo de nuevo.');
+    ).rejects.toMatchObject({ code: 'unknown' });
   });
 
   it('inserta únicamente product_id, name y email (el status lo pone el servidor)', async () => {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AdminProductForm } from './AdminProductForm';
 import { AdminEtsyProductForm } from './AdminEtsyProductForm';
 import { AdminEtsySyncPanel } from './AdminEtsySyncPanel';
@@ -6,7 +7,7 @@ import { AdminProductTable } from './AdminProductTable';
 import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
 import { AdminLoginForm } from './AdminLoginForm';
-import { Button } from '../ui';
+import { AdminDashboardHeader } from './AdminDashboardHeader';
 import { theme } from '../../theme';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
@@ -16,18 +17,21 @@ import type {
   ProductFormData,
 } from '../../types/catalog';
 import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
-import { Unlock, AlertCircle, CheckCircle, ArrowLeft, LoaderCircle } from 'lucide-react';
-import logoImg from '../../assets/Logo.png';
+import { AlertCircle, CheckCircle, LoaderCircle } from 'lucide-react';
 
 interface AdminDashboardProps {
   products: CatalogItem[];
   registrations: WorkshopRegistration[];
+  isLoadingProducts: boolean;
+  productsError: string | null;
   isLoadingRegistrations: boolean;
+  registrationsError: string | null;
   onAddProduct: (data: ProductFormData) => Promise<boolean>;
   onEditProduct: (id: string, data: ProductFormData) => Promise<boolean>;
   onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   onDeleteProduct: (id: string) => Promise<boolean>;
   onRefreshProducts: () => Promise<void>;
+  onRefreshRegistrations: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onClose: () => void;
@@ -36,16 +40,21 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   products,
   registrations,
+  isLoadingProducts,
+  productsError,
   isLoadingRegistrations,
+  registrationsError,
   onAddProduct,
   onEditProduct,
   onEditEtsyMetadata,
   onDeleteProduct,
   onRefreshProducts,
+  onRefreshRegistrations,
   onSetRegistrationStatus,
   onDeleteRegistration,
   onClose
 }) => {
+  const { t } = useTranslation();
   const { user, isAdmin, isLoading, signIn, signOut } = useAdminAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +68,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleLogin = async (email: string, password: string) => {
     const result = await signIn(email, password);
-    setAuthError(result.success ? null : (result.message ?? 'Error al iniciar sesión.'));
+    setAuthError(
+      result.success
+        ? null
+        : t(result.errorKey ?? 'admin.login.unknownError')
+    );
   };
 
   const handleLogout = () => {
@@ -80,7 +93,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     if (success) {
       setFeedbackMsg({
-        text: isEdit ? 'Producto actualizado correctamente.' : 'Producto publicado con éxito.',
+        text: t(
+          isEdit
+            ? 'admin.feedback.productUpdated'
+            : 'admin.feedback.productCreated'
+        ),
         type: 'success'
       });
       setEditingProduct(null);
@@ -93,7 +110,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return true;
     }
 
-    setFeedbackMsg({ text: 'Error al procesar la operación.', type: 'error' });
+    setFeedbackMsg({ text: t('admin.feedback.productOperationError'), type: 'error' });
     return false;
   };
 
@@ -110,7 +127,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     if (success) {
       setFeedbackMsg({
-        text: 'Producto de Etsy actualizado correctamente.',
+        text: t('admin.feedback.etsyUpdated'),
         type: 'success',
       });
       setEditingProduct(null);
@@ -118,7 +135,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return true;
     }
 
-    setFeedbackMsg({ text: 'Error al actualizar el producto de Etsy.', type: 'error' });
+    setFeedbackMsg({ text: t('admin.feedback.etsyUpdateError'), type: 'error' });
     return false;
   };
 
@@ -132,10 +149,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (editingProduct?.id === id) {
         setEditingProduct(null);
       }
-      setFeedbackMsg({ text: 'Producto eliminado correctamente.', type: 'success' });
+      setFeedbackMsg({ text: t('admin.feedback.productDeleted'), type: 'success' });
       setTimeout(() => setFeedbackMsg(null), 3000);
     } else {
-      setFeedbackMsg({ text: 'Error al eliminar el producto.', type: 'error' });
+      setFeedbackMsg({ text: t('admin.feedback.productDeleteError'), type: 'error' });
     }
   };
 
@@ -146,7 +163,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         role="status"
       >
         <LoaderCircle className="w-6 h-6 text-orange-500 animate-spin" aria-hidden="true" />
-        <p className={`${theme.colors.textMuted} text-sm`}>Cargando sesión…</p>
+        <p className={`${theme.colors.textMuted} text-sm`}>{t('admin.loadingSession')}</p>
       </div>
     );
   }
@@ -163,35 +180,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className={`fixed inset-0 z-50 ${theme.colors.background} overflow-y-auto`}>
-      <header className={`sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b ${theme.colors.border}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logoImg} alt="Logo" className="h-10 w-auto object-contain" />
-            <div>
-              <h1 className="text-lg font-bold text-white uppercase tracking-wider">Panel de Administración</h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onClose}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Volver a la Web
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              aria-label="Cerrar sesión"
-            >
-              <Unlock className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AdminDashboardHeader onClose={onClose} onLogout={handleLogout} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {feedbackMsg && (
@@ -243,12 +232,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           isDeleting={isDeleting}
+          isLoading={isLoadingProducts}
+          error={productsError}
+          onRetry={onRefreshProducts}
         />
 
         <AdminRegistrationsPanel
           workshops={products}
           registrations={registrations}
           isLoading={isLoadingRegistrations}
+          error={registrationsError}
+          onRetry={onRefreshRegistrations}
           onSetStatus={onSetRegistrationStatus}
           onDelete={onDeleteRegistration}
         />

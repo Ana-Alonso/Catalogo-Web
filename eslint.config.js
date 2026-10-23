@@ -24,6 +24,12 @@ export default defineConfig([
     },
   },
   {
+    files: ['src/root.tsx', 'src/routes/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: ['api/**/*.ts'],
     languageOptions: {
       globals: globals.node,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   fetchProducts,
   createProduct,
@@ -25,6 +26,7 @@ interface UseProductsResult {
 }
 
 export const useProducts = (): UseProductsResult => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<CatalogItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,12 +39,12 @@ export const useProducts = (): UseProductsResult => {
       setProducts(data);
     } catch (err) {
       logError('useProducts.loadProducts', err);
-      const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
+      const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
       setError(msg);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -57,7 +59,7 @@ export const useProducts = (): UseProductsResult => {
       } catch (err) {
         if (!isCancelled) {
           logError('useProducts.init', err);
-          const msg = err instanceof Error ? err.message : 'Error desconocido al cargar productos';
+          const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
           setError(msg);
           setIsLoading(false);
         }
@@ -69,7 +71,7 @@ export const useProducts = (): UseProductsResult => {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const addProduct = async (data: ProductFormData): Promise<boolean> => {
     try {
@@ -78,7 +80,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.addProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al guardar el producto';
+      const msg = err instanceof Error ? err.message : t('admin.errors.saveProduct');
       setError(msg);
       return false;
     }
@@ -91,7 +93,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.editProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateProduct');
       setError(msg);
       return false;
     }
@@ -107,7 +109,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.editEtsyMetadata', err);
-      const msg = err instanceof Error ? err.message : 'Error al actualizar el producto';
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateProduct');
       setError(msg);
       return false;
     }
@@ -120,7 +122,7 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.removeProduct', err);
-      const msg = err instanceof Error ? err.message : 'Error al eliminar el producto';
+      const msg = err instanceof Error ? err.message : t('admin.errors.deleteProduct');
       setError(msg);
       return false;
     }

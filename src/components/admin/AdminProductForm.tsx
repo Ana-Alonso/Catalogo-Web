@@ -1,14 +1,22 @@
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
-import { Plus, Check, X, AlertCircle } from 'lucide-react';
-import { Button, Card, Box } from '../ui';
-import { theme } from '../../theme';
-import { validateImageFile } from '../../utils/imageValidation';
+import { useTranslation } from 'react-i18next';
+import { AlertCircle } from 'lucide-react';
+import { Card, Box } from '../ui';
+import {
+  validateImageFile,
+  type ImageValidationError,
+} from '../../utils/imageValidation';
 import { resolvePurchaseLinks } from '../../utils/productLinks';
-import { validateProductForm } from '../../utils/productFormValidation';
+import {
+  validateProductForm,
+  type ProductFormValidationError,
+} from '../../utils/productFormValidation';
 import { ImageField } from './product-form/ImageField';
 import { PriceFields } from './product-form/PriceFields';
 import { ProductDetailsFields } from './product-form/ProductDetailsFields';
 import { WorkshopFields } from './product-form/WorkshopFields';
+import { ProductFormHeader } from './ProductFormHeader';
+import { ProductFormActions } from './ProductFormActions';
 import type {
   AvailabilityStatus,
   CatalogItem,
@@ -25,12 +33,26 @@ interface AdminProductFormProps {
 
 type FormCategory = Exclude<CategoryType, 'todas'>;
 
+const validationErrorKeys = {
+  titleDescription: 'validation.titleDescription',
+  image: 'validation.image',
+  price: 'validation.price',
+  discountRange: 'validation.discountRange',
+  discountRequiresPrice: 'validation.discountRequiresPrice',
+} as const satisfies Record<ProductFormValidationError, string>;
+
+const imageValidationKeys = {
+  format: 'admin.productForm.imageFormatError',
+  size: 'admin.productForm.imageSizeError',
+} as const satisfies Record<ImageValidationError, string>;
+
 export const AdminProductForm: React.FC<AdminProductFormProps> = ({
   onSubmit,
   isSubmitting,
   editingProduct,
   onCancelEdit,
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(editingProduct?.title || '');
   const [description, setDescription] = useState(editingProduct?.description || '');
   const [category, setCategory] = useState<FormCategory>(
@@ -78,7 +100,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     if (validationError) {
       setImageFile(null);
       setPreviewUrl(editingProduct?.image || '');
-      setFormError(validationError);
+      setFormError(t(imageValidationKeys[validationError]));
       event.target.value = '';
       return;
     }
@@ -135,7 +157,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     });
 
     if (validationError) {
-      setFormError(validationError);
+      setFormError(t(validationErrorKeys[validationError]));
       return;
     }
 
@@ -164,24 +186,11 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
 
   return (
     <Card className="p-6 sm:p-8 space-y-6">
-      <Box className={`flex items-center justify-between border-b ${theme.colors.border} pb-4`}>
-        <Box>
-          <h3 className="text-xl font-bold text-white uppercase tracking-wider">
-            {editingProduct ? 'Modificar Producto' : 'Añadir Nuevo Producto'}
-          </h3>
-          <p className={`${theme.colors.textMuted} text-sm`}>
-            {editingProduct
-              ? `Editando los datos de "${editingProduct.title}"`
-              : 'Sube nuevas obras, camisetas o talleres al catálogo.'}
-          </p>
-        </Box>
-        {editingProduct && onCancelEdit && (
-          <Button variant="secondary" size="sm" onClick={onCancelEdit}>
-            <X className="w-3.5 h-3.5" />
-            Cancelar Edición
-          </Button>
-        )}
-      </Box>
+      <ProductFormHeader
+        isEditing={Boolean(editingProduct)}
+        productTitle={editingProduct?.title}
+        onCancelEdit={onCancelEdit}
+      />
 
       {formError && (
         <Box className="p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-3 text-red-300 text-sm">
@@ -237,21 +246,11 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           onExternalUrlChange={handleExternalUrlChange}
         />
 
-        <Box className={`pt-4 border-t ${theme.colors.border} flex justify-end gap-3`}>
-          {editingProduct && onCancelEdit && (
-            <Button variant="outline" onClick={onCancelEdit}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {editingProduct ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            {isSubmitting
-              ? 'Guardando...'
-              : editingProduct
-                ? 'Guardar Modificación'
-                : 'Publicar Producto'}
-          </Button>
-        </Box>
+        <ProductFormActions
+          isEditing={Boolean(editingProduct)}
+          isSubmitting={isSubmitting}
+          onCancelEdit={onCancelEdit}
+        />
       </form>
     </Card>
   );

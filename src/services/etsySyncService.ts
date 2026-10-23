@@ -7,6 +7,22 @@ export interface EtsySyncResult {
   total: number;
 }
 
+export type EtsySyncErrorCode =
+  | 'notConfigured'
+  | 'unauthorized'
+  | 'unexpectedResponse'
+  | 'unknown';
+
+export class EtsySyncError extends Error {
+  readonly code: EtsySyncErrorCode;
+
+  constructor(code: EtsySyncErrorCode) {
+    super(code);
+    this.name = 'EtsySyncError';
+    this.code = code;
+  }
+}
+
 const isEtsySyncResult = (value: unknown): value is EtsySyncResult => {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -20,19 +36,17 @@ const isEtsySyncResult = (value: unknown): value is EtsySyncResult => {
   );
 };
 
-const readErrorMessage = (value: unknown): string => {
+const readErrorMessage = (value: unknown): string | null => {
   if (typeof value !== 'object' || value === null) {
-    return 'No se pudo sincronizar con Etsy.';
+    return null;
   }
   const record = value as Record<string, unknown>;
-  return typeof record.error === 'string'
-    ? record.error
-    : 'No se pudo sincronizar con Etsy.';
+  return typeof record.error === 'string' ? record.error : null;
 };
 
 export const triggerEtsySync = async (): Promise<EtsySyncResult> => {
   if (!supabase) {
-    throw new Error('Supabase no está configurado.');
+    throw new EtsySyncError('notConfigured');
   }
 
   const { data, error } = await supabase.auth.getSession();
@@ -42,7 +56,7 @@ export const triggerEtsySync = async (): Promise<EtsySyncResult> => {
   }
 
   if (!data.session) {
-    throw new Error('Debes iniciar sesión para sincronizar con Etsy.');
+    throw new EtsySyncError('unauthorized');
   }
 
   const response = await fetch('/api/etsy-sync', {
@@ -55,11 +69,12 @@ export const triggerEtsySync = async (): Promise<EtsySyncResult> => {
   const payload: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(readErrorMessage(payload));
+    const message = readErrorMessage(payload);
+    throw message ? new Error(message) : new EtsySyncError('unknown');
   }
 
   if (!isEtsySyncResult(payload)) {
-    throw new Error('Respuesta inesperada del servidor.');
+    throw new EtsySyncError('unexpectedResponse');
   }
 
   return payload;

@@ -1,7 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Card, Badge, Button, Box } from '../ui';
+import { Card, Badge, Button, Box, ErrorState } from '../ui';
+import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { theme } from '../../theme';
+import { getIntlLocale } from '../../i18n/languages';
+import { registrationStatusTranslationKeys } from '../../i18n/labels';
 import type { CatalogItem } from '../../types/catalog';
 import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
 
@@ -9,6 +13,8 @@ interface AdminRegistrationsPanelProps {
   workshops: CatalogItem[];
   registrations: WorkshopRegistration[];
   isLoading: boolean;
+  error: string | null;
+  onRetry: () => void | Promise<void>;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
 }
@@ -19,18 +25,12 @@ const statusBadgeVariant: Record<RegistrationStatus, 'primary' | 'neutral' | 'ou
   cancelado: 'outline',
 };
 
-const statusLabel: Record<RegistrationStatus, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  cancelado: 'Cancelado',
-};
-
-const formatRegistrationDate = (value: string): string => {
+const formatRegistrationDate = (value: string, language: string): string => {
   const parsed = new Date(value);
   if (isNaN(parsed.getTime())) {
     return value;
   }
-  return parsed.toLocaleDateString('es-ES', {
+  return parsed.toLocaleDateString(getIntlLocale(language), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -43,9 +43,13 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
   workshops,
   registrations,
   isLoading,
+  error,
+  onRetry,
   onSetStatus,
   onDelete,
 }) => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const workshopsWithRegistrations = workshops
     .filter((workshop) => workshop.category === 'talleres')
     .map((workshop) => ({
@@ -61,26 +65,37 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
         <ClipboardList className="w-5 h-5 text-orange-500" aria-hidden="true" />
         <Box>
           <h3 className="text-xl font-bold text-white uppercase tracking-wider">
-            Inscripciones a Talleres ({registrations.length})
+            {t('admin.registrations.title', { count: registrations.length })}
           </h3>
           <p className={`${theme.colors.textMuted} text-sm`}>
-            Confirma, cancela o elimina las plazas solicitadas.
+            {t('admin.registrations.subtitle')}
           </p>
         </Box>
       </Box>
 
       <Box className="p-6 space-y-8">
         {isLoading && (
-          <p className={`${theme.colors.textMuted} text-sm`}>Cargando inscripciones...</p>
+          <div role="status" aria-label={t('admin.registrations.loading')}>
+            <AdminRegistrationsSkeleton />
+          </div>
         )}
 
-        {!isLoading && workshopsWithRegistrations.length === 0 && (
+        {!isLoading && error && (
+          <ErrorState
+            title={t('admin.registrations.errorTitle')}
+            description={error}
+            onRetry={onRetry}
+            retryLabel={t('common.retry')}
+          />
+        )}
+
+        {!isLoading && !error && workshopsWithRegistrations.length === 0 && (
           <p className={`${theme.colors.textMuted} text-sm text-center py-4`}>
-            No hay talleres publicados en el catálogo.
+            {t('admin.registrations.emptyWorkshops')}
           </p>
         )}
 
-        {!isLoading &&
+        {!isLoading && !error &&
           workshopsWithRegistrations.map(({ workshop, list }) => {
             const activeCount = list.filter(
               (registration) => registration.status !== 'cancelado'
@@ -95,14 +110,21 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                   </h4>
                   <Badge variant={cupo !== null && activeCount >= cupo ? 'outline' : 'primary'}>
                     <Users className="w-3 h-3 mr-1" aria-hidden="true" />
-                    {cupo !== null ? `${activeCount} / ${cupo} plazas` : `${activeCount} inscritos`}
+                    {cupo !== null
+                      ? t('admin.registrations.spots', {
+                          active: activeCount,
+                          cupo,
+                        })
+                      : activeCount === 1
+                        ? t('admin.registrations.attendee', { count: activeCount })
+                        : t('admin.registrations.attendees', { count: activeCount })}
                   </Badge>
                 </Box>
 
                 <Box className={`rounded-lg border ${theme.colors.border} divide-y ${theme.colors.borderSubtle}`}>
                   {list.length === 0 && (
                     <p className={`${theme.colors.textMuted} text-sm p-4`}>
-                      Sin inscripciones todavía.
+                      {t('admin.registrations.empty')}
                     </p>
                   )}
 
@@ -122,17 +144,19 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
                       <Box className="flex flex-wrap items-center gap-2">
                         <span className={`text-xs ${theme.colors.textSubtle}`}>
-                          {formatRegistrationDate(registration.created_at)}
+                          {formatRegistrationDate(registration.created_at, language)}
                         </span>
                         <Badge variant={statusBadgeVariant[registration.status]}>
-                          {statusLabel[registration.status]}
+                          {t(registrationStatusTranslationKeys[registration.status])}
                         </Badge>
                         {registration.status !== 'confirmado' && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => void onSetStatus(registration.id, 'confirmado')}
-                            aria-label={`Confirmar inscripción de ${registration.name}`}
+                            aria-label={t('admin.registrations.confirmAria', {
+                              name: registration.name,
+                            })}
                           >
                             <Check className="w-4 h-4 text-green-400" />
                           </Button>
@@ -142,7 +166,9 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                             variant="ghost"
                             size="sm"
                             onClick={() => void onSetStatus(registration.id, 'cancelado')}
-                            aria-label={`Cancelar inscripción de ${registration.name}`}
+                            aria-label={t('admin.registrations.cancelAria', {
+                              name: registration.name,
+                            })}
                           >
                             <X className="w-4 h-4 text-orange-400" />
                           </Button>
@@ -153,13 +179,17 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                           onClick={() => {
                             if (
                               window.confirm(
-                                `¿Seguro que deseas eliminar la inscripción de "${registration.name}"?`
+                                t('admin.registrations.deleteConfirm', {
+                                  name: registration.name,
+                                })
                               )
                             ) {
                               void onDelete(registration.id);
                             }
                           }}
-                          aria-label={`Eliminar inscripción de ${registration.name}`}
+                          aria-label={t('admin.registrations.deleteAria', {
+                            name: registration.name,
+                          })}
                         >
                           <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
