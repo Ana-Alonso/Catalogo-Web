@@ -11,6 +11,7 @@ import {
   type LoaderFunctionArgs,
 } from 'react-router';
 import { I18nextProvider } from 'react-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import '@fontsource-variable/yanone-kaffeesatz';
 import './index.css';
 import { createI18nInstance } from './i18n/createI18nInstance';
@@ -76,6 +77,7 @@ export function Layout({ children }: LayoutProps) {
         <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
         <ScrollRestoration />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );
