@@ -128,6 +128,7 @@ Open `http://localhost:5173`. Development mode uses local mock data (`VITE_USE_M
 | `VITE_SUPABASE_ANON_KEY` | Supabase public (anon) key. |
 | `VITE_USE_MOCKS` | `true` uses local mock data; `false` uses Supabase. |
 | `VITE_ETSY_SHOP_URL` | Etsy shop URL shown in the footer. |
+| `VITE_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID (e.g. `G-XXXXXXXXXX`). |
 | `VITE_INSTAGRAM_URL` / `VITE_TIKTOK_URL` | Social media links. |
 | `VITE_CONTACT_EMAIL` | Contact email shown in the footer. |
 | `ETSY_KEYSTRING` / `ETSY_SHARED_SECRET` | Etsy app credentials (server only). |
