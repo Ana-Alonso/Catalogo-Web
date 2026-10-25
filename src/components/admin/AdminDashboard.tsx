@@ -8,6 +8,7 @@ import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
 import { AdminLoginForm } from './AdminLoginForm';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
+import { Container } from '../ui';
 import { theme } from '../../theme';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
@@ -182,7 +183,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     <div className={`fixed inset-0 z-50 ${theme.colors.background} overflow-y-auto`}>
       <AdminDashboardHeader onClose={onClose} onLogout={handleLogout} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <Container as="main" className="py-10 space-y-8">
         {feedbackMsg && (
           <div
             className={`p-4 rounded-xl border flex items-center gap-3 text-sm ${
@@ -246,7 +247,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onSetStatus={onSetRegistrationStatus}
           onDelete={onDeleteRegistration}
         />
-      </main>
+      </Container>
     </div>
   );
 };
