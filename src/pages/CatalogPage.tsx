@@ -56,7 +56,20 @@ export const CatalogPage: React.FC = () => {
       />
       
       <main id="main-content">
-        <HeroSection />
+        <HeroSection 
+          items={products}
+          onShowNew={() => {
+            setNewOnly(true);
+            setActiveCategory('todas');
+            setOffersOnly(false);
+            const gallery = document.getElementById('galeria');
+            if (gallery) {
+              const navbarHeight = 80;
+              const y = gallery.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+          }}
+        />
         <BookShowcase />
         <GallerySection 
           items={products} 
@@ -75,14 +88,17 @@ export const CatalogPage: React.FC = () => {
               setOffersOnly(false);
             }
           }}
-          hasNewItems={useMemo(() => products.some((item) => {
-            if (item.isVisible === false) return false;
-            if (!item.created_at) return false;
-            const createdAt = new Date(item.created_at);
-            if (Number.isNaN(createdAt.getTime())) return false;
-            const diffHours = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
-            return diffHours >= 0 && diffHours <= 24;
-          }), [products])}
+          hasNewItems={useMemo(() => {
+            const now = Date.now();
+            return products.some((item) => {
+              if (item.isVisible === false) return false;
+              if (!item.created_at) return false;
+              const createdAt = new Date(item.created_at);
+              if (Number.isNaN(createdAt.getTime())) return false;
+              const diffHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
+              return diffHours >= 0 && diffHours <= 24;
+            });
+          }, [products])}
           spotsCounts={counts}
           onRegister={(item, data) => register(item.id, data, item.cupo ?? null)}
           isLoading={isLoading}

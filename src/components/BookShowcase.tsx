@@ -17,31 +17,69 @@ export const BookShowcase: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="py-12 md:py-16 bg-neutral-950">
-      <Box className="w-full">
-        <Box className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 sm:px-6 lg:px-8">
-          {images.map((img, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="snap-center flex-shrink-0 w-[280px] sm:w-[320px] md:w-[340px] lg:w-[360px]"
-            >
-              <Box className={`relative aspect-[3/4] rounded-lg overflow-hidden ${theme.card.base}`}>
-                <img
-                  src={img}
-                  alt={`${t('book.imageAlt')} ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                />
-              </Box>
-            </motion.div>
-          ))}
-        </Box>
+    <section className="py-12 md:py-16 bg-neutral-950 overflow-hidden">
+      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="relative flex items-center justify-center mb-12"
+        >
+          <div className="relative w-full max-w-[900px] h-[380px] sm:h-[460px] md:h-[520px]">
+            {images.map((img, index) => {
+              const radius = 300;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    width: '180px',
+                    height: '252px',
+                    marginLeft: '-90px',
+                    marginTop: '-126px',
+                    transformOrigin: `50% ${radius}px`,
+                    animation: 'orbit 36s linear infinite',
+                    animationDelay: `-${(36 / images.length) * index}s`,
+                  }}
+                  className="will-change-transform"
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      animation: 'orbit-counter 36s linear infinite',
+                      animationDelay: `-${(36 / images.length) * index}s`,
+                    }}
+                    className="rounded-lg overflow-hidden shadow-2xl shadow-black/60"
+                  >
+                    <img
+                      src={img}
+                      alt={`${t('book.imageAlt')} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[280px] rounded-lg overflow-hidden shadow-[0_0_90px_rgba(234,88,12,0.35)] z-10">
+              <img
+                src={libro1}
+                alt={t('book.imageAlt')}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </motion.div>
 
-        <Box className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center mt-10">
+        <Box className="max-w-3xl mx-auto text-center">
           <Typography variant="h2" className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mb-3">
             {t('book.title')}
           </Typography>
@@ -60,6 +98,16 @@ export const BookShowcase: React.FC = () => {
           </a>
         </Box>
       </Box>
+      <style>{`
+        @keyframes orbit {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes orbit-counter {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(-360deg); }
+        }
+      `}</style>
     </section>
   );
 };
