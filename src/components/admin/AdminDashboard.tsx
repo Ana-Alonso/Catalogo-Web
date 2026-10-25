@@ -9,6 +9,7 @@ import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
 import { AdminLoginForm } from './AdminLoginForm';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
 import { Container } from '../ui';
+import { Typography } from '../ui';
 import { theme } from '../../theme';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
@@ -164,7 +165,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         role="status"
       >
         <LoaderCircle className="w-6 h-6 text-orange-500 animate-spin" aria-hidden="true" />
-        <p className={`${theme.colors.textMuted} text-sm`}>{t('admin.loadingSession')}</p>
+        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>{t('admin.loadingSession')}</Typography>
       </div>
     );
   }

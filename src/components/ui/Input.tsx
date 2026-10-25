@@ -1,6 +1,7 @@
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Typography } from './Typography';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -40,7 +41,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+        {error && <Typography variant="body" className="mt-1 text-xs text-red-400">{error}</Typography>}
       </div>
     );
   }

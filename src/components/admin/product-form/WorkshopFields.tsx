@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Input } from '../../ui';
+import { Typography } from '../../ui';
 import { theme } from '../../../theme';
 
 interface WorkshopFieldsProps {
@@ -58,9 +59,9 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
           className={theme.inputs.base}
           placeholder={t('admin.workshopFields.capacityPlaceholder')}
         />
-        <p className="mt-1 text-xs text-neutral-500">
+        <Typography variant="body" className="mt-1 text-xs text-neutral-500">
           {t('admin.workshopFields.capacityHint')}
-        </p>
+        </Typography>
       </Box>
     </Box>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Download, Globe } from 'lucide-react';
-import { Button, Box } from './index';
+import { Button, Box, Typography } from './index';
 import {
   parseWorkshopDate,
   getGoogleCalendarUrl,
@@ -52,10 +52,10 @@ export const CalendarEventActions: React.FC<CalendarEventActionsProps> = ({
 
   return (
     <Box className={className}>
-      <p className="text-xs uppercase font-semibold tracking-wider text-neutral-400 flex items-center gap-1.5 mb-2">
+      <Typography variant="body" className="text-xs uppercase font-semibold tracking-wider text-neutral-400 flex items-center gap-1.5 mb-2">
         <Calendar className="w-3.5 h-3.5 text-orange-400" aria-hidden="true" />
         {t('calendar.heading')}
-      </p>
+      </Typography>
       <div className="flex flex-col sm:flex-row gap-2">
         <a
           href={googleUrl}

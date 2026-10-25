@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button, Card, Box } from '../ui';
+import { Typography } from '../ui';
 import { theme } from '../../theme';
 import {
   EtsySyncError,
@@ -66,9 +67,9 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
           <h3 className="text-lg font-bold text-white uppercase tracking-wider">
             {t('admin.etsySync.title')}
           </h3>
-          <p className={`${theme.colors.textMuted} text-sm`}>
+          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
             {t('admin.etsySync.description')}
-          </p>
+          </Typography>
         </Box>
         <Button variant="secondary" onClick={handleSync} disabled={isSyncing}>
           <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />

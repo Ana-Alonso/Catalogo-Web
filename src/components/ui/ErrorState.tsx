@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Typography } from './Typography';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Button } from './Button';
@@ -31,9 +32,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       <AlertTriangle className="w-8 h-8 text-orange-500" aria-hidden="true" />
       <div className="space-y-2">
         <h3 className="text-lg font-bold text-white">{title}</h3>
-        <p className={`${theme.colors.textMuted} text-sm max-w-md mx-auto`}>
+        <Typography variant="body" className={`${theme.colors.textMuted} text-sm max-w-md mx-auto`}>
           {description}
-        </p>
+        </Typography>
       </div>
       {onRetry && retryLabel && (
         <Button variant="outline" onClick={() => void onRetry()}>

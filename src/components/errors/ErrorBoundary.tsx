@@ -1,5 +1,6 @@
 import React, { type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Typography } from '../ui/Typography';
 import { useTranslation } from 'react-i18next';
 import { useNoindex } from '../../hooks/useNoindex';
 import { logError } from '../../utils/logger';
@@ -30,9 +31,9 @@ export const ErrorFallback: React.FC = () => {
         <h1 className="mt-4 text-3xl font-bold tracking-wide uppercase">
           {t('errors.boundary.title')}
         </h1>
-        <p className={`${theme.colors.textMuted} mt-4 text-base`}>
+        <Typography variant="body" className={`${theme.colors.textMuted} mt-4 text-base`}>
           {t('errors.boundary.description')}
-        </p>
+        </Typography>
         <button
           type="button"
           onClick={() => window.location.reload()}

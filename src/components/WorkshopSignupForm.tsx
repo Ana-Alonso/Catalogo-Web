@@ -2,6 +2,7 @@ import React, { useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
 import { Button, Input, Box, CalendarEventActions } from './ui';
+import { Typography } from './ui';
 import { theme } from '../theme';
 import {
   getRegistrationErrorCode,
@@ -84,12 +85,12 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
             </div>
           </div>
           <div>
-            <p className="text-white font-semibold">
+            <Typography variant="body" className="text-white font-semibold">
               {t('workshop.form.successTitle')}
-            </p>
-            <p className={`${theme.colors.textMuted} text-sm mt-1`}>
+            </Typography>
+            <Typography variant="body" className={`${theme.colors.textMuted} text-sm mt-1`}>
               {t('workshop.form.successBody', { title: workshop.title })}
-            </p>
+            </Typography>
           </div>
         </div>
 
@@ -133,9 +134,9 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      <p className={`${theme.colors.textMuted} text-sm`}>
+      <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
         {t('workshop.form.intro', { title: workshop.title })}
-      </p>
+      </Typography>
 
       <Input
         id="signup-name"

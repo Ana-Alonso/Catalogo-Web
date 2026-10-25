@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Box, ErrorState } from '../ui';
+import { Typography } from '../ui';
 import { AdminProductTableRow } from './AdminProductTableRow';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
 import { theme } from '../../theme';
@@ -49,7 +50,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   if (products.length === 0) {
     return (
       <Card className="text-center py-12">
-        <p className={theme.colors.textMuted}>{t('admin.productTable.empty')}</p>
+        <Typography variant="body" className={theme.colors.textMuted}>{t('admin.productTable.empty')}</Typography>
       </Card>
     );
   }
@@ -60,9 +61,9 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
         <h3 className="text-xl font-bold text-white uppercase tracking-wider">
           {t('admin.productTable.title', { count: products.length })}
         </h3>
-        <p className={`${theme.colors.textMuted} text-sm`}>
+        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
           {t('admin.productTable.subtitle')}
-        </p>
+        </Typography>
       </Box>
 
       <Box className="overflow-x-auto">

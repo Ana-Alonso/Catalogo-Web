@@ -2,6 +2,7 @@ import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button, Card, Box } from '../ui';
+import { Typography } from '../ui';
 import { theme } from '../../theme';
 import { formatPriceForLanguage } from '../../i18n/formatters';
 import { categoryTranslationKeys } from '../../i18n/labels';
@@ -55,9 +56,9 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           <h3 className="text-xl font-bold text-white uppercase tracking-wider">
             {t('admin.etsyForm.title')}
           </h3>
-          <p className={`${theme.colors.textMuted} text-sm`}>
+          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
             {t('admin.etsyForm.subtitle')}
-          </p>
+          </Typography>
         </Box>
         <Button variant="secondary" size="sm" onClick={onCancelEdit}>
           <X className="w-3.5 h-3.5" />
@@ -72,11 +73,11 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           className="w-full sm:w-40 h-40 rounded-lg object-cover bg-neutral-800 border border-neutral-800"
         />
         <Box className="space-y-2">
-          <p className="text-lg font-bold text-white">{product.title}</p>
-          <p className={`${theme.colors.textMuted} text-sm line-clamp-3`}>
+          <Typography variant="body" className="text-lg font-bold text-white">{product.title}</Typography>
+          <Typography variant="body" className={`${theme.colors.textMuted} text-sm line-clamp-3`}>
             {product.description}
-          </p>
-          <p className="text-sm text-neutral-300">
+          </Typography>
+          <Typography variant="body" className="text-sm text-neutral-300">
             {product.priceCents != null
               ? formatPriceForLanguage(
                   product.priceCents,
@@ -84,7 +85,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
                   language
                 )
               : t('admin.etsyForm.priceOnRequest')}
-          </p>
+          </Typography>
           <Box className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
             <span className="inline-flex items-center gap-1">
               <RefreshCw className="w-3 h-3" />

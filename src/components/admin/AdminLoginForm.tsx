@@ -2,6 +2,7 @@ import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
 import { Button, Card, Input, PasswordInput } from '../ui';
+import { Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import { theme } from '../../theme';
 import logoImg from '../../assets/Logo.png';
@@ -52,9 +53,9 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
         <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-wider">
           {t('admin.login.title')}
         </h2>
-        <p className={`${theme.colors.textMuted} text-sm mb-6`}>
+        <Typography variant="body" className={`${theme.colors.textMuted} text-sm mb-6`}>
           {t('admin.login.subtitle')}
-        </p>
+        </Typography>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -78,9 +79,9 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
             required
           />
           {errorMessage && (
-            <p className="text-xs text-red-400" role="alert">
+            <Typography variant="body" className="text-xs text-red-400" role="alert">
               {errorMessage}
-            </p>
+            </Typography>
           )}
           <div className="flex gap-3 pt-2">
             <Button variant="secondary" className="w-1/2" onClick={onClose}>

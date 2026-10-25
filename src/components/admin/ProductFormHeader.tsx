@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { Button, Box } from '../ui';
+import { Typography } from '../ui';
 import { theme } from '../../theme';
 
 interface ProductFormHeaderProps {
@@ -29,13 +30,13 @@ export const ProductFormHeader: React.FC<ProductFormHeaderProps> = ({
               : 'admin.productForm.createTitle'
           )}
         </h3>
-        <p className={`${theme.colors.textMuted} text-sm`}>
+        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
           {isEditing
             ? t('admin.productForm.editDescription', {
                 title: productTitle ?? '',
               })
             : t('admin.productForm.createDescription')}
-        </p>
+        </Typography>
       </Box>
       {isEditing && onCancelEdit && (
         <Button variant="secondary" size="sm" onClick={onCancelEdit}>

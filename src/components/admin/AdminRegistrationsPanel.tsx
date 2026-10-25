@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
 import { Card, Badge, Button, Box, ErrorState } from '../ui';
+import { Typography } from '../ui';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { theme } from '../../theme';
 import { getIntlLocale } from '../../i18n/languages';
@@ -67,9 +68,9 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
           <h3 className="text-xl font-bold text-white uppercase tracking-wider">
             {t('admin.registrations.title', { count: registrations.length })}
           </h3>
-          <p className={`${theme.colors.textMuted} text-sm`}>
+          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
             {t('admin.registrations.subtitle')}
-          </p>
+          </Typography>
         </Box>
       </Box>
 
@@ -90,9 +91,9 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
         )}
 
         {!isLoading && !error && workshopsWithRegistrations.length === 0 && (
-          <p className={`${theme.colors.textMuted} text-sm text-center py-4`}>
+          <Typography variant="body" className={`${theme.colors.textMuted} text-sm text-center py-4`}>
             {t('admin.registrations.emptyWorkshops')}
-          </p>
+          </Typography>
         )}
 
         {!isLoading && !error &&
@@ -123,9 +124,9 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
                 <Box className={`rounded-lg border ${theme.colors.border} divide-y ${theme.colors.borderSubtle}`}>
                   {list.length === 0 && (
-                    <p className={`${theme.colors.textMuted} text-sm p-4`}>
+                    <Typography variant="body" className={`${theme.colors.textMuted} text-sm p-4`}>
                       {t('admin.registrations.empty')}
-                    </p>
+                    </Typography>
                   )}
 
                   {list.map((registration) => (

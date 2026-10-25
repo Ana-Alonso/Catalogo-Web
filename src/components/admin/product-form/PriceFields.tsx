@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input } from '../../ui';
+import { Box, Input, Typography } from '../../ui';
 import { theme } from '../../../theme';
 import { formatPriceForLanguage } from '../../../i18n/formatters';
 import {
@@ -83,30 +83,30 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
           onChange={(event) => onDiscountChange(event.target.value)}
           placeholder={t('admin.priceFields.discountPlaceholder')}
         />
-        <p className={`mt-2 text-xs ${theme.colors.textMuted}`}>
+        <Typography variant="caption" className={`mt-2 ${theme.colors.textMuted}`}>
           {t('admin.priceFields.discountHint')}
-        </p>
+        </Typography>
       </Box>
 
       <Box className="rounded-lg border border-neutral-800 bg-neutral-950/60 p-4">
-        <span className="block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+        <Typography as="span" variant="caption" className="block text-xs font-semibold uppercase tracking-wider text-neutral-400">
           {t('admin.priceFields.preview')}
-        </span>
+        </Typography>
         {finalCents == null ? (
-          <p className="mt-2 text-sm text-neutral-300">{t('admin.priceFields.onRequest')}</p>
+          <Typography variant="body" className="mt-2 text-sm text-neutral-300">{t('admin.priceFields.onRequest')}</Typography>
         ) : (
           <Box className="mt-2 space-y-1">
-            <p className="text-lg font-bold text-orange-400">
+            <Typography variant="body" className="text-lg font-bold text-orange-400">
               {formatPriceForLanguage(finalCents, 'EUR', language)}
-            </p>
+            </Typography>
             {hasValidDiscount && priceCents != null && (
-              <p className="text-xs text-neutral-400">
+              <Typography variant="caption" className="text-xs text-neutral-400">
                 {t('admin.priceFields.before')}{' '}
                 <s className="text-neutral-500">
                   {formatPriceForLanguage(priceCents, 'EUR', language)}
                 </s>{' '}
                 · -{parsedDiscount}%
-              </p>
+              </Typography>
             )}
           </Box>
         )}
