@@ -16,7 +16,6 @@ const buildWorkshopItem = (data: ProductFormData): CatalogItem => ({
   image: '',
   category: 'talleres',
   status: data.status,
-  featured: data.featured,
   eventDate: data.eventDate,
   eventLocation: data.eventLocation,
   priceCents: parsePriceToCents(data.price),

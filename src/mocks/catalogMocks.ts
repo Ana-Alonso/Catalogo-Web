@@ -19,7 +19,6 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: false,
     created_at: twoDaysAgo
   },
   {
@@ -35,7 +34,6 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: false
   },
   {
     id: "mock-3",
@@ -48,7 +46,6 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: false,
     eventDate: "15 Nov 2026 - 18:00h",
     eventLocation: "Estudio Laurel / Presencial",
     created_at: twoDaysAgo
@@ -65,7 +62,6 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "reservado",
-    featured: false
   },
   {
     id: "mock-5",
@@ -80,7 +76,6 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: false,
     created_at: oneHourAgo
   }
 ];

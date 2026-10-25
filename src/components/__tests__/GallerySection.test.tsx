@@ -65,7 +65,6 @@ describe('GallerySection', () => {
               image: '/obra.jpg',
               category: 'ilustraciones',
               status: 'disponible',
-              featured: false,
             },
           ],
           spotsError: 'No se pudieron actualizar las plazas.',

@@ -37,13 +37,12 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
       ? product.category
       : 'ilustraciones'
   );
-  const [featured, setFeatured] = useState(product.featured);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setFormError(null);
-    const success = await onSubmit({ category, featured });
+    const success = await onSubmit({ category });
     if (!success) {
       setFormError(t('admin.etsyForm.saveError'));
     }
@@ -138,21 +137,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
             </select>
           </Box>
 
-          <Box className="flex items-center gap-3 pt-6">
-            <input
-              id="etsy-featured"
-              type="checkbox"
-              checked={featured}
-              onChange={(event) => setFeatured(event.target.checked)}
-              className="w-4 h-4 text-orange-600 bg-neutral-950 border-neutral-800 rounded focus:ring-orange-600"
-            />
-            <label
-              htmlFor="etsy-featured"
-              className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
-            >
-              {t('admin.etsyForm.featuredLabel')}
-            </label>
-          </Box>
+
         </Box>
 
         <Box className={`pt-4 border-t ${theme.colors.border} flex justify-end gap-3`}>

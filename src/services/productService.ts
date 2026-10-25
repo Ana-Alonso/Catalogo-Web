@@ -81,7 +81,6 @@ export const fetchProducts = async (): Promise<CatalogItem[]> => {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .order('featured', { ascending: false })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -156,7 +155,6 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
     source: 'local',
     isVisible: true,
     status: formData.status,
-    featured: formData.featured,
     eventDate: formData.eventDate?.trim() || undefined,
     eventLocation: formData.eventLocation?.trim() || undefined,
     cupo: parseCupo(formData.cupo),
@@ -180,7 +178,6 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
           source: 'local',
           isVisible: true,
           status: newProduct.status,
-          featured: newProduct.featured,
           eventDate: newProduct.eventDate || null,
           eventLocation: newProduct.eventLocation || null,
           cupo: newProduct.cupo ?? null
@@ -227,7 +224,6 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      featured: formData.featured,
       eventDate: formData.eventDate?.trim() || undefined,
       eventLocation: formData.eventLocation?.trim() || undefined,
       cupo: parseCupo(formData.cupo)
@@ -268,7 +264,6 @@ export const updateProduct = async (
         vintedLink: purchaseLinks.vintedLink ?? null,
         ...priceFields,
         status: formData.status,
-        featured: formData.featured,
         eventDate: formData.eventDate?.trim() || undefined,
         eventLocation: formData.eventLocation?.trim() || undefined,
         cupo: parseCupo(formData.cupo)
@@ -290,7 +285,6 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      featured: formData.featured,
       eventDate: formData.eventDate?.trim() || undefined,
       eventLocation: formData.eventLocation?.trim() || undefined,
       cupo: parseCupo(formData.cupo)
@@ -336,7 +330,6 @@ export const updateEtsyProductMetadata = async (
       .from('products')
       .update({
         category: metadata.category,
-        featured: metadata.featured,
       })
       .eq('id', id)
       .eq('source', 'etsy')
@@ -360,7 +353,6 @@ export const updateEtsyProductMetadata = async (
     updatedProduct = {
       ...item,
       category: metadata.category,
-      featured: metadata.featured,
     };
     return updatedProduct;
   });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, type Variants } from 'framer-motion';
-import { ShoppingBag, Tag, Calendar, MapPin, Sparkles, Users, UserPlus } from 'lucide-react';
+import { ShoppingBag, Tag, Calendar, MapPin, Users, UserPlus } from 'lucide-react';
 import { Badge, Box, Typography, Button } from './ui';
 import { Modal } from './ui/Modal';
 import { WorkshopSignupForm } from './WorkshopSignupForm';
@@ -65,9 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
     <>
     <motion.article 
       variants={itemVariants}
-      className={`group ${theme.colors.surface}/90 rounded-lg overflow-hidden flex flex-col hover:shadow-2xl hover:shadow-orange-950/20 transition-all duration-300 border ${
-        item.featured ? 'border-orange-500/60 ring-1 ring-orange-500/40' : theme.colors.border
-      } hover:border-neutral-700 focus-within:ring-2 ${theme.colors.primaryFocus}`}
+      className={`group ${theme.colors.surface}/90 rounded-lg overflow-hidden flex flex-col hover:shadow-2xl hover:shadow-orange-950/20 transition-all duration-300 border ${theme.colors.border} hover:border-neutral-700 focus-within:ring-2 ${theme.colors.primaryFocus}`}
     >
       <Box className="relative aspect-square overflow-hidden bg-neutral-800">
         <img 
@@ -83,12 +81,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           aria-hidden="true"
         />
 
-        {item.featured && (
-          <Box className="absolute top-3 left-3 bg-orange-600 text-white font-bold text-[10px] uppercase px-2 py-1 rounded shadow-md flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            {t('product.featured')}
-          </Box>
-        )}
+
         
         <Box className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
           {hasOffer && (

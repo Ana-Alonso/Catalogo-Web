@@ -18,7 +18,6 @@ interface ProductDetailsFieldsProps {
   description: string;
   category: FormCategory;
   status: AvailabilityStatus;
-  featured: boolean;
   etsyLink: string;
   vintedLink: string;
   showLinks: boolean;
@@ -26,7 +25,6 @@ interface ProductDetailsFieldsProps {
   onDescriptionChange: (value: string) => void;
   onCategoryChange: (value: FormCategory) => void;
   onStatusChange: (value: AvailabilityStatus) => void;
-  onFeaturedChange: (value: boolean) => void;
   onEtsyLinkChange: (value: string) => void;
   onVintedLinkChange: (value: string) => void;
 }
@@ -49,7 +47,6 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
   description,
   category,
   status,
-  featured,
   etsyLink,
   vintedLink,
   showLinks,
@@ -57,7 +54,6 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
   onDescriptionChange,
   onCategoryChange,
   onStatusChange,
-  onFeaturedChange,
   onEtsyLinkChange,
   onVintedLinkChange,
 }) => {
@@ -95,40 +91,22 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
         </Box>
       </Box>
 
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Box>
-          <label htmlFor="prod-status" className={theme.inputs.label}>
-            {t('admin.productFields.statusLabel')}
-          </label>
-          <select
-            id="prod-status"
-            value={status}
-            onChange={(event) => onStatusChange(event.target.value as AvailabilityStatus)}
-            className={theme.inputs.base}
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {t(availabilityTranslationKeys[option])}
-              </option>
-            ))}
-          </select>
-        </Box>
-
-        <Box className="flex items-center gap-3 pt-6">
-          <input
-            id="prod-featured"
-            type="checkbox"
-            checked={featured}
-            onChange={(event) => onFeaturedChange(event.target.checked)}
-            className="w-4 h-4 text-orange-600 bg-neutral-950 border-neutral-800 rounded focus:ring-orange-600"
-          />
-          <label
-            htmlFor="prod-featured"
-            className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
-          >
-            {t('admin.productFields.featuredLabel')}
-          </label>
-        </Box>
+      <Box>
+        <label htmlFor="prod-status" className={theme.inputs.label}>
+          {t('admin.productFields.statusLabel')}
+        </label>
+        <select
+          id="prod-status"
+          value={status}
+          onChange={(event) => onStatusChange(event.target.value as AvailabilityStatus)}
+          className={theme.inputs.base}
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {t(availabilityTranslationKeys[option])}
+            </option>
+          ))}
+        </select>
       </Box>
 
       <Box>

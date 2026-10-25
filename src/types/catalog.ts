@@ -21,7 +21,6 @@ export interface CatalogItem {
   etsySyncedAt?: string | null;
   isVisible?: boolean;
   status: AvailabilityStatus;
-  featured: boolean;
   eventDate?: string;
   eventLocation?: string;
   cupo?: number | null;
@@ -45,7 +44,6 @@ export interface ProductFormData {
   price?: string;
   discountPercent?: string;
   status: AvailabilityStatus;
-  featured: boolean;
   eventDate?: string;
   eventLocation?: string;
   cupo?: string;
@@ -53,5 +51,4 @@ export interface ProductFormData {
 
 export interface EtsyProductMetadata {
   category: Exclude<CategoryType, 'todas'>;
-  featured: boolean;
 }

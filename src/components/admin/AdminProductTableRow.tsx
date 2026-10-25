@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, Sparkles, Trash2, Edit3 } from 'lucide-react';
+import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
 import { Badge, Box, Button } from '../ui';
 import { theme } from '../../theme';
 import { formatPriceForLanguage } from '../../i18n/formatters';
@@ -55,11 +55,6 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
           <Box>
             <Box className="flex flex-wrap items-center gap-1.5">
               <span className="font-semibold text-white">{item.title}</span>
-              {item.featured && (
-                <span title={t('admin.productTable.featuredTitle')}>
-                  <Sparkles className="w-3.5 h-3.5 text-orange-500 fill-orange-500/20" />
-                </span>
-              )}
               {item.source === 'etsy' && (
                 <Badge variant="neutral">{t('admin.productTable.etsy')}</Badge>
               )}

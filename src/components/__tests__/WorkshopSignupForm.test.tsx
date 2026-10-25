@@ -13,7 +13,6 @@ const workshop: CatalogItem = {
   category: 'talleres',
   image: 'https://example.com/img.png',
   status: 'disponible',
-  featured: false,
 };
 
 const setup = (onRegister = vi.fn().mockResolvedValue(undefined)) => {

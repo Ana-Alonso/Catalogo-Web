@@ -17,7 +17,6 @@ const workshop: CatalogItem = {
   category: 'talleres',
   image: 'https://example.com/img.png',
   status: 'disponible',
-  featured: false,
   eventDate: '2026-11-20T10:00',
   eventLocation: 'Madrid, Plaza Mayor 1',
   priceCents: 2500,

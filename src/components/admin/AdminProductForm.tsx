@@ -78,7 +78,6 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
   const [status, setStatus] = useState<AvailabilityStatus>(
     editingProduct?.status || 'disponible'
   );
-  const [featured, setFeatured] = useState<boolean>(editingProduct?.featured || false);
   const [eventDate, setEventDate] = useState<string>(editingProduct?.eventDate || '');
   const [eventLocation, setEventLocation] = useState<string>(
     editingProduct?.eventLocation || ''
@@ -132,7 +131,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     setEtsyLink('');
     setVintedLink('');
     setStatus('disponible');
-    setFeatured(false);
+
     setEventDate('');
     setEventLocation('');
     setCupo('');
@@ -171,7 +170,6 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       discountPercent: priceOnRequest ? '' : discountPercent,
       ...purchaseLinks,
       status,
-      featured,
       eventDate: category === 'talleres' ? eventDate : undefined,
       eventLocation: category === 'talleres' ? eventLocation : undefined,
       cupo: category === 'talleres' ? cupo : '',
@@ -205,7 +203,6 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           description={description}
           category={category}
           status={status}
-          featured={featured}
           etsyLink={etsyLink}
           vintedLink={vintedLink}
           showLinks={category !== 'talleres'}
@@ -213,7 +210,6 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           onDescriptionChange={setDescription}
           onCategoryChange={setCategory}
           onStatusChange={setStatus}
-          onFeaturedChange={setFeatured}
           onEtsyLinkChange={setEtsyLink}
           onVintedLinkChange={setVintedLink}
         />
