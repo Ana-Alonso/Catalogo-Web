@@ -36,8 +36,10 @@ export const buildHomeStructuredData = (
   options: HomeStructuredDataOptions
 ): LdJsonObject => {
   const { siteUrl, socialLinks = [] } = options;
-  const organizationId = `${siteUrl}/#organization`;
-  const websiteId = `${siteUrl}/#website`;
+  const rootUrl = `${siteUrl.replace(/\/+$/, '')}/`;
+  const organizationId = `${rootUrl}#organization`;
+  const websiteId = `${rootUrl}#website`;
+  const pageUrl = absoluteUrl(siteUrl, `/${language}`);
 
   return {
     '@context': 'https://schema.org',
@@ -46,7 +48,7 @@ export const buildHomeStructuredData = (
         '@type': 'Organization',
         '@id': organizationId,
         name: SITE_NAME,
-        url: `${siteUrl}/`,
+        url: rootUrl,
         logo: absoluteUrl(siteUrl, '/favicon.svg'),
         ...(socialLinks.length > 0 ? { sameAs: socialLinks } : {}),
       },
@@ -54,15 +56,16 @@ export const buildHomeStructuredData = (
         '@type': 'WebSite',
         '@id': websiteId,
         name: SITE_NAME,
-        url: absoluteUrl(siteUrl, `/${language}`),
+        alternateName: ['Laurelenlienzo', 'Laurel en Lienzo'],
+        url: rootUrl, 
         description,
         inLanguage: language,
         publisher: { '@id': organizationId },
       },
       {
         '@type': 'WebPage',
-        '@id': `${absoluteUrl(siteUrl, `/${language}`)}#webpage`,
-        url: absoluteUrl(siteUrl, `/${language}`),
+        '@id': `${pageUrl}#webpage`,
+        url: pageUrl,
         name: SITE_NAME,
         description,
         inLanguage: language,
