@@ -28,7 +28,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
   const [nowMs, setNowMs] = useState(0);
 
   useEffect(() => {
-    setNowMs(Date.now());
+    const id = requestAnimationFrame(() => setNowMs(Date.now()));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   const hasNewItems = useMemo(() => {

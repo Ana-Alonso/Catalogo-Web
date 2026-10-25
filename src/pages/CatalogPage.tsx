@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
@@ -28,6 +28,12 @@ export const CatalogPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
   const [offersOnly, setOffersOnly] = useState(false);
   const [newOnly, setNewOnly] = useState(false);
+  const [nowMs, setNowMs] = useState(0);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setNowMs(Date.now()));
+    return () => cancelAnimationFrame(id);
+  }, []);
   const {
     products,
     isLoading,
@@ -91,16 +97,16 @@ export const CatalogPage: React.FC = () => {
             }
           }}
           hasNewItems={useMemo(() => {
-            const now = Date.now();
+            if (!nowMs) return false;
             return products.some((item) => {
               if (item.isVisible === false) return false;
               if (!item.created_at) return false;
               const createdAt = new Date(item.created_at);
               if (Number.isNaN(createdAt.getTime())) return false;
-              const diffHours = (now - createdAt.getTime()) / (1000 * 60 * 60);
+              const diffHours = (nowMs - createdAt.getTime()) / (1000 * 60 * 60);
               return diffHours >= 0 && diffHours <= 24;
             });
-          }, [products])}
+          }, [products, nowMs])}
           spotsCounts={counts}
           onRegister={(item, data) => register(item.id, data, item.cupo ?? null)}
           isLoading={isLoading}
