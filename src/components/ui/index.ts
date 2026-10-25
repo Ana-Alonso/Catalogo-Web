@@ -8,3 +8,6 @@ export { Typography, type TypographyProps, type TypographyVariant } from './Typo
 export { CalendarEventActions } from './CalendarEventActions';
 export { Skeleton, type SkeletonProps } from './Skeleton';
 export { ErrorState } from './ErrorState';
+export { Footer, type FooterProps } from './Footer';
+export { Header, type HeaderProps } from './Header';
+export { Container, type ContainerProps } from './Container';
