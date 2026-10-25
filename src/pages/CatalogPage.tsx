@@ -56,7 +56,12 @@ export const CatalogPage: React.FC = () => {
       
       <main id="main-content">
         <HeroSection />
-        <FeaturedStrip items={products} />
+        <FeaturedStrip 
+          items={products} 
+          onSelectCategory={setActiveCategory}
+          onToggleOffers={() => setOffersOnly((prev) => !prev)}
+          offersOnly={offersOnly}
+        />
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 
