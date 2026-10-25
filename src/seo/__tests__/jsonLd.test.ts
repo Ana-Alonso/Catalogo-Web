@@ -40,11 +40,15 @@ describe('buildHomeStructuredData', () => {
     );
   });
 
-  it('usa la URL y el idioma de la versión española', () => {
-    const website = findNode(buildGraph(), 'WebSite');
+ it('usa la URL y el idioma de la versión española', () => {
+    const graph = buildGraph();
+    const website = findNode(graph, 'WebSite');
+    const webpage = findNode(graph, 'WebPage');
 
-    expect(website.url).toBe('https://example.com/es');
+    expect(website.url).toBe('https://example.com/');
     expect(website.inLanguage).toBe('es');
+
+    expect(webpage.url).toBe('https://example.com/es');
   });
 
   it('omite sameAs cuando no hay redes sociales', () => {
