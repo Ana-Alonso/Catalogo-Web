@@ -1,10 +1,14 @@
 import type { CatalogItem } from '../types/catalog';
 
+const now = new Date();
+const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString();
+const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+
 export const mockCatalogItems: CatalogItem[] = [
   {
     id: "mock-1",
-    title: "Obra de Prueba I",
-    description: "Pieza de muestra para desarrollo y previsualización de catálogo.",
+    title: "Ilustración en Acuarela - Oferta",
+    description: "Pieza original en acuarela con descuento para ver el bloque de ofertas.",
     category: "ilustraciones",
     image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&q=80&w=800",
     etsyLink: "https://www.etsy.com",
@@ -15,7 +19,8 @@ export const mockCatalogItems: CatalogItem[] = [
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: true
+    featured: false,
+    created_at: twoDaysAgo
   },
   {
     id: "mock-2",
@@ -40,13 +45,13 @@ export const mockCatalogItems: CatalogItem[] = [
     image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&q=80&w=800",
     priceCents: 4500,
     currency: "EUR",
-    discountPercent: 10,
     source: "local",
     isVisible: true,
     status: "disponible",
-    featured: true,
+    featured: false,
     eventDate: "15 Nov 2026 - 18:00h",
-    eventLocation: "Estudio Laurel / Presencial"
+    eventLocation: "Estudio Laurel / Presencial",
+    created_at: twoDaysAgo
   },
   {
     id: "mock-4",
@@ -61,5 +66,21 @@ export const mockCatalogItems: CatalogItem[] = [
     isVisible: true,
     status: "reservado",
     featured: false
+  },
+  {
+    id: "mock-5",
+    title: "Novedad - Ilustración Botánica",
+    description: "Acaba de llegar al catálogo. Nueva pieza ilustrada a mano.",
+    category: "ilustraciones",
+    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&q=80&w=800",
+    etsyLink: "https://www.etsy.com",
+    vintedLink: "https://www.vinted.es",
+    priceCents: 2200,
+    currency: "EUR",
+    source: "local",
+    isVisible: true,
+    status: "disponible",
+    featured: false,
+    created_at: oneHourAgo
   }
 ];
