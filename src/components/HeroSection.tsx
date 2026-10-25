@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { ArrowRight, ShoppingBag } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { Box, Typography } from './ui';
 import { theme } from '../theme';
 import type { CatalogItem } from '../types/catalog';
@@ -88,9 +88,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
               <button
                 type="button"
                 onClick={onShowNew}
-                className="group inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 rounded-sm"
+                className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide uppercase rounded-sm border border-orange-600 text-orange-500 hover:bg-orange-600 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
               >
-                <span className="uppercase tracking-widest text-xs font-semibold">
+                <Sparkles className="w-4 h-4" aria-hidden="true" />
+                <span>
                   {t('gallery.newButton', 'No te pierdas nuestras novedades')}
                 </span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />

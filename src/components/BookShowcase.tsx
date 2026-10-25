@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { ShoppingBag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
 import { Box, Typography } from './ui';
 import { theme } from '../theme';
 import libro1 from '../assets/book/Libro1.jpeg';
@@ -15,71 +15,101 @@ const AMAZON_BOOK_URL = import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu
 
 export const BookShowcase: React.FC = () => {
   const { t } = useTranslation();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(goToNext, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (isLightboxOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isLightboxOpen]);
 
   return (
-    <section className="py-12 md:py-16 bg-neutral-950 overflow-hidden">
+    <section className="pt-8 pb-12 md:pt-10 md:pb-16 bg-neutral-950">
       <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative flex items-center justify-center mb-12"
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center justify-center mb-8"
         >
-          <div className="relative w-full max-w-[900px] h-[380px] sm:h-[460px] md:h-[520px]">
-            {images.map((img, index) => {
-              const radius = 300;
-              return (
-                <motion.div
+          <div className="relative w-full max-w-[600px] h-[320px] sm:h-[380px] md:h-[440px] flex items-center justify-center">
+            <button
+              type="button"
+              onClick={goToPrevious}
+              className="absolute left-0 sm:-left-12 z-30 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={goToNext}
+              className="absolute right-0 sm:-right-12 z-30 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            <AnimatePresence mode="wait">
+              <motion.button
+                key={currentIndex}
+                initial={{ opacity: 0, scale: 0.95, x: 40 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.95, x: -40 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="relative w-[200px] sm:w-[240px] md:w-[280px] h-[280px] sm:h-[336px] md:h-[392px] cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                aria-label={t('book.imageAlt')}
+              >
+                <Box className="relative w-full h-full rounded-lg overflow-hidden shadow-2xl shadow-black/70">
+                  <img
+                    src={images[currentIndex]}
+                    alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                </Box>
+              </motion.button>
+            </AnimatePresence>
+
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, index) => (
+                <button
                   key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: '50%',
-                    width: '180px',
-                    height: '252px',
-                    marginLeft: '-90px',
-                    marginTop: '-126px',
-                    transformOrigin: `50% ${radius}px`,
-                    animation: 'orbit 36s linear infinite',
-                    animationDelay: `-${(36 / images.length) * index}s`,
-                  }}
-                  className="will-change-transform"
-                >
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      animation: 'orbit-counter 36s linear infinite',
-                      animationDelay: `-${(36 / images.length) * index}s`,
-                    }}
-                    className="rounded-lg overflow-hidden shadow-2xl shadow-black/60"
-                  >
-                    <img
-                      src={img}
-                      alt={`${t('book.imageAlt')} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[280px] rounded-lg overflow-hidden shadow-[0_0_90px_rgba(234,88,12,0.35)] z-10">
-              <img
-                src={libro1}
-                alt={t('book.imageAlt')}
-                className="w-full h-full object-cover"
-              />
+                  type="button"
+                  onClick={() => setCurrentIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentIndex ? 'bg-orange-600 w-6' : 'bg-neutral-700 hover:bg-neutral-500'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         </motion.div>
 
-        <Box className="max-w-3xl mx-auto text-center">
+        <Box className="max-w-3xl mx-auto text-center mt-12">
           <Typography variant="h2" className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mb-3">
             {t('book.title')}
           </Typography>
@@ -98,16 +128,61 @@ export const BookShowcase: React.FC = () => {
           </a>
         </Box>
       </Box>
-      <style>{`
-        @keyframes orbit {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes orbit-counter {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(-360deg); }
-        }
-      `}</style>
+
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+            onClick={() => setIsLightboxOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              aria-label="Close"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
+              }}
+              className="absolute left-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+              className="absolute right-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            <motion.img
+              key={currentIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              src={images[currentIndex]}
+              alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
