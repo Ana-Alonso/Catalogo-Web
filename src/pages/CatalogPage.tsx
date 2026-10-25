@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import HeroSection from '../components/HeroSection';
+import FeaturedStrip from '../components/FeaturedStrip';
 import GallerySection from '../components/GallerySection';
 import JsonLd from '../components/seo/JsonLd';
 import { useProducts } from '../hooks/useProducts';
@@ -55,6 +56,7 @@ export const CatalogPage: React.FC = () => {
       
       <main id="main-content">
         <HeroSection />
+        <FeaturedStrip items={products} />
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 

@@ -40,6 +40,21 @@
     "catalogCta": "Ver Catálogo",
     "etsyCta": "Tienda Etsy"
   },
+  "book": {
+    "sectionHeading": "Libro Destacado",
+    "badge": "Nuevo",
+    "title": "Mi libro",
+    "description": "Descubre mi nuevo libro con ilustraciones únicas y relatos que conectan con el alma. Una obra para disfrutar página a página.",
+    "cta": "Comprar en Amazon",
+    "imageAlt": "Portada del libro"
+  },
+  "featured": {
+    "newArrivals": "Novedades",
+    "newOffers": "Nuevas ofertas",
+    "new": "Nuevo",
+    "offer": "Oferta",
+    "viewInCatalog": "Ver en catálogo"
+  },
   "catalog": {
     "heading": "Catálogo",
     "headingAccent": "Visual",
@@ -124,6 +139,7 @@
   "footer": {
     "heading": "Pie de página",
     "emailAria": "Enviar correo a {{email}}",
+    "amazonAria": "Comprar libro en Amazon",
     "etsyAria": "Visitar tienda oficial en Etsy",
     "instagramAria": "Visitar perfil de Instagram",
     "tiktokAria": "Visitar perfil de TikTok",

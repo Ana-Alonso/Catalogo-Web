@@ -40,6 +40,21 @@
     "catalogCta": "View Catalog",
     "etsyCta": "Etsy Shop"
   },
+  "book": {
+    "sectionHeading": "Featured Book",
+    "badge": "New",
+    "title": "My Book",
+    "description": "Discover my new book with unique illustrations and stories that connect with the soul. A work to enjoy page by page.",
+    "cta": "Buy on Amazon",
+    "imageAlt": "Book cover"
+  },
+  "featured": {
+    "newArrivals": "New arrivals",
+    "newOffers": "New offers",
+    "new": "New",
+    "offer": "Offer",
+    "viewInCatalog": "View in catalog"
+  },
   "catalog": {
     "heading": "Visual",
     "headingAccent": "Catalog",
@@ -124,6 +139,7 @@
   "footer": {
     "heading": "Footer",
     "emailAria": "Send email to {{email}}",
+    "amazonAria": "Buy book on Amazon",
     "etsyAria": "Visit official Etsy shop",
     "instagramAria": "Visit Instagram profile",
     "tiktokAria": "Visit TikTok profile",
