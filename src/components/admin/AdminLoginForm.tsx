@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
-import { Button, Input, Card, PasswordInput } from '../ui';
+import { Button, Card, Input, PasswordInput } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import { theme } from '../../theme';
 import logoImg from '../../assets/Logo.png';
@@ -37,7 +37,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 ${theme.colors.background} flex flex-col justify-center items-center px-4`}
+      className={`fixed inset-0 z-50 bg-neutral-950 flex flex-col justify-center items-center px-4`}
     >
       <div className="absolute top-6 right-6">
         <LanguageSwitcher />
