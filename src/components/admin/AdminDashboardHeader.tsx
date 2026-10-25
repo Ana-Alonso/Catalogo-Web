@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Unlock } from 'lucide-react';
-import { Button } from '../ui';
+import { Button, Container } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import { theme } from '../../theme';
 import logoImg from '../../assets/Logo.png';
@@ -21,7 +21,7 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
     <header
       className={`sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b ${theme.colors.border}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <Container as="div" className="h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
             src={logoImg}
@@ -50,7 +50,7 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
             <Unlock className="w-3.5 h-3.5" />
           </Button>
         </div>
-      </div>
+      </Container>
     </header>
   );
 };
