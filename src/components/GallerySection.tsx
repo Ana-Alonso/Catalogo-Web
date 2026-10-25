@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Tag } from 'lucide-react';
+import { ArrowRight, Tag } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { ProductCardSkeleton } from './ProductCardSkeleton';
 import { Box, Typography, Button, ErrorState } from './ui';
@@ -17,6 +17,9 @@ export interface GallerySectionProps {
   onSelectCategory: (category: CategoryType) => void;
   offersOnly?: boolean;
   onToggleOffers?: () => void;
+  newOnly?: boolean;
+  onToggleNew?: () => void;
+  hasNewItems?: boolean;
   spotsCounts?: Record<string, number>;
   onRegister?: (item: CatalogItem, data: RegistrationFormData) => Promise<void>;
   isLoading: boolean;
@@ -44,12 +47,25 @@ const containerVariants: Variants = {
   }
 };
 
+const isWithin24Hours = (dateString?: string) => {
+  if (!dateString) return false;
+  const createdAt = new Date(dateString);
+  if (Number.isNaN(createdAt.getTime())) return false;
+  const now = new Date();
+  const diffMs = now.getTime() - createdAt.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  return diffHours >= 0 && diffHours <= 24;
+};
+
 export const GallerySection: React.FC<GallerySectionProps> = ({ 
   items, 
   activeCategory, 
   onSelectCategory,
   offersOnly = false,
   onToggleOffers,
+  newOnly = false,
+  onToggleNew,
+  hasNewItems = false,
   spotsCounts,
   onRegister,
   isLoading,
@@ -64,14 +80,17 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
   const categoryItems = activeCategory === 'todas'
     ? visibleItems
     : visibleItems.filter(item => item.category === activeCategory);
-  const filteredItems = offersOnly
+  const afterOffers = offersOnly
     ? categoryItems.filter(isOfferActive)
     : categoryItems;
+  const filteredItems = newOnly
+    ? afterOffers.filter((item) => isWithin24Hours(item.created_at))
+    : afterOffers;
 
   return (
     <section id="galeria" className="py-24 bg-neutral-950 min-h-screen">
       <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Box className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <Box className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <Box>
             <Typography variant="h2" className="mb-3">
               {t('catalog.heading')} <span className={theme.colors.textSubtle}>{t('catalog.headingAccent')}</span>
@@ -90,7 +109,12 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                 <button
                   key={category}
                   type="button"
-                  onClick={() => onSelectCategory(category)}
+                  onClick={() => {
+                    if (newOnly && onToggleNew) {
+                      onToggleNew();
+                    }
+                    onSelectCategory(category);
+                  }}
                   className={`px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
                     isActive
                       ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
@@ -105,7 +129,12 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             {onToggleOffers && (
               <button
                 type="button"
-                onClick={onToggleOffers}
+                onClick={() => {
+                  if (newOnly && onToggleNew) {
+                    onToggleNew();
+                  }
+                  onToggleOffers();
+                }}
                 className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-md border transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
                   offersOnly
                     ? 'bg-orange-600 border-orange-600 text-white shadow-md shadow-orange-600/30'
@@ -128,6 +157,24 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             )}
           </Box>
         </Box>
+
+        {hasNewItems && onToggleNew && (
+          <Box className="mb-8">
+            <button
+              type="button"
+              onClick={onToggleNew}
+              className={`group inline-flex items-center gap-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} rounded-sm ${
+                newOnly ? 'text-orange-500' : 'text-neutral-400 hover:text-white'
+              }`}
+              aria-pressed={newOnly}
+            >
+              <span className="uppercase tracking-widest text-xs font-semibold">
+                {t('gallery.newButton', 'No te pierdas nuestras novedades')}
+              </span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </button>
+          </Box>
+        )}
 
         {spotsError && (
           <Box

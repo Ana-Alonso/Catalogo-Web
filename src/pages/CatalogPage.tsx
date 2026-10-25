@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import HeroSection from '../components/HeroSection';
-import FeaturedStrip from '../components/FeaturedStrip';
+import BookShowcase from '../components/BookShowcase';
 import GallerySection from '../components/GallerySection';
 import JsonLd from '../components/seo/JsonLd';
 import { useProducts } from '../hooks/useProducts';
@@ -26,6 +26,7 @@ export const CatalogPage: React.FC = () => {
   );
   const [activeCategory, setActiveCategory] = useState<CategoryType>('todas');
   const [offersOnly, setOffersOnly] = useState(false);
+  const [newOnly, setNewOnly] = useState(false);
   const {
     products,
     isLoading,
@@ -56,18 +57,32 @@ export const CatalogPage: React.FC = () => {
       
       <main id="main-content">
         <HeroSection />
-        <FeaturedStrip 
-          items={products} 
-          onSelectCategory={setActiveCategory}
-          onToggleOffers={() => setOffersOnly((prev) => !prev)}
-          offersOnly={offersOnly}
-        />
+        <BookShowcase />
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 
-          onSelectCategory={setActiveCategory} 
+          onSelectCategory={(cat) => {
+            setNewOnly(false);
+            setActiveCategory(cat);
+          }} 
           offersOnly={offersOnly}
           onToggleOffers={() => setOffersOnly((prev) => !prev)}
+          newOnly={newOnly}
+          onToggleNew={() => {
+            setNewOnly((prev) => !prev);
+            if (!newOnly) {
+              setActiveCategory('todas');
+              setOffersOnly(false);
+            }
+          }}
+          hasNewItems={useMemo(() => products.some((item) => {
+            if (item.isVisible === false) return false;
+            if (!item.created_at) return false;
+            const createdAt = new Date(item.created_at);
+            if (Number.isNaN(createdAt.getTime())) return false;
+            const diffHours = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
+            return diffHours >= 0 && diffHours <= 24;
+          }), [products])}
           spotsCounts={counts}
           onRegister={(item, data) => register(item.id, data, item.cupo ?? null)}
           isLoading={isLoading}
