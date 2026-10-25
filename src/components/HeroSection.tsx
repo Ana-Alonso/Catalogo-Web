@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
@@ -25,8 +25,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
   const { t } = useTranslation();
   const etsyUrl = import.meta.env.VITE_ETSY_SHOP_URL;
 
-  const nowMs = useMemo(() => Date.now(), [items]);
+  const [nowMs, setNowMs] = useState(0);
+
+  useEffect(() => {
+    setNowMs(Date.now());
+  }, []);
+
   const hasNewItems = useMemo(() => {
+    if (!nowMs) return false;
     return items.some((item) => {
       if (item.isVisible === false) return false;
       return isWithin24Hours(item.created_at, nowMs);
