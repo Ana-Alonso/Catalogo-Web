@@ -6,6 +6,7 @@ import HeroSection from '../components/HeroSection';
 import BookShowcase from '../components/BookShowcase';
 import GallerySection from '../components/GallerySection';
 import JsonLd from '../components/seo/JsonLd';
+import { Container } from '../components/ui';
 import { useProducts } from '../hooks/useProducts';
 import { useWorkshopSpots } from '../hooks/useWorkshopSpots';
 import { normalizeLanguage } from '../i18n/languages';
@@ -71,6 +72,7 @@ export const CatalogPage: React.FC = () => {
           }}
         />
         <BookShowcase />
+        <Container>
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 
@@ -107,6 +109,7 @@ export const CatalogPage: React.FC = () => {
           spotsError={spotsError}
           onRetrySpots={refreshSpots}
         />
+        </Container>
       </main>
 
       <Footer />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
-import { Box, Typography } from './ui';
+import { Box, Container, IconButton, Section, Typography } from './ui';
 import { theme } from '../theme';
 import libro1 from '../assets/book/Libro1.jpeg';
 import libro2 from '../assets/book/Libro2.jpeg';
@@ -43,8 +43,8 @@ export const BookShowcase: React.FC = () => {
   }, [isLightboxOpen]);
 
   return (
-    <section className="pt-8 pb-12 md:pt-10 md:pb-16 bg-neutral-950">
-      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <Section paddingY="lg" background="neutral" overflow="hidden">
+      <Container>
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -53,22 +53,20 @@ export const BookShowcase: React.FC = () => {
           className="flex flex-col items-center justify-center mb-8"
         >
           <div className="relative w-full max-w-[600px] h-[320px] sm:h-[380px] md:h-[440px] flex items-center justify-center">
-            <button
-              type="button"
+            <IconButton
               onClick={goToPrevious}
-              className="absolute left-0 sm:-left-12 z-30 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              className="absolute left-0 sm:-left-12 z-30"
               aria-label="Previous"
             >
               <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
+            </IconButton>
+            <IconButton
               onClick={goToNext}
-              className="absolute right-0 sm:-right-12 z-30 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              className="absolute right-0 sm:-right-12 z-30"
               aria-label="Next"
             >
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </IconButton>
 
             <AnimatePresence mode="wait">
               <motion.button
@@ -127,7 +125,7 @@ export const BookShowcase: React.FC = () => {
             {t('book.cta')}
           </a>
         </Box>
-      </Box>
+      </Container>
 
       <AnimatePresence>
         {isLightboxOpen && (
@@ -139,36 +137,33 @@ export const BookShowcase: React.FC = () => {
             className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
             onClick={() => setIsLightboxOpen(false)}
           >
-            <button
-              type="button"
+            <IconButton
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              className="absolute top-4 right-4"
               aria-label="Close"
             >
               <X className="w-6 h-6" />
-            </button>
-            <button
-              type="button"
+            </IconButton>
+            <IconButton
               onClick={(e) => {
                 e.stopPropagation();
                 goToPrevious();
               }}
-              className="absolute left-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              className="absolute left-4"
               aria-label="Previous"
             >
               <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              type="button"
+            </IconButton>
+            <IconButton
               onClick={(e) => {
                 e.stopPropagation();
                 goToNext();
               }}
-              className="absolute right-4 p-2 rounded-full bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+              className="absolute right-4"
               aria-label="Next"
             >
               <ChevronRight className="w-6 h-6" />
-            </button>
+            </IconButton>
             <motion.img
               key={currentIndex}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -183,7 +178,7 @@ export const BookShowcase: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </Section>
   );
 };
 

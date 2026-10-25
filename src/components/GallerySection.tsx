@@ -4,7 +4,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { ArrowRight, Tag } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { ProductCardSkeleton } from './ProductCardSkeleton';
-import { Box, Typography, Button, ErrorState } from './ui';
+import { Box, Container, Section, Typography, Button, ErrorState } from './ui';
 import { theme } from '../theme';
 import { categoryTranslationKeys } from '../i18n/labels';
 import { isOfferActive } from '../utils/price';
@@ -88,8 +88,8 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
     : afterOffers;
 
   return (
-    <section id="galeria" className="py-24 bg-neutral-950 min-h-screen">
-      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <Section id="galeria" paddingY="xl" background="neutral" overflow="visible" className="min-h-screen">
+      <Container>
         <Box className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <Box>
             <Typography variant="h2" className="mb-3">
@@ -259,8 +259,8 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           )}
         </AnimatePresence>
 
-      </Box>
-    </section>
+      </Container>
+    </Section>
   );
 };
 

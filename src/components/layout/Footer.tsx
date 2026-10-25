@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { ShoppingBag, Mail } from 'lucide-react';
-import { Box, Typography } from '../ui';
+import { Box, Container, Footer as UIFooter, Stack, Typography } from '../ui';
 import logoImg from '../../assets/Logo.png';
 import { theme } from '../../theme';
 
@@ -15,10 +15,10 @@ export const Footer: React.FC = () => {
   const amazonBookUrl = import.meta.env.VITE_AMAZON_BOOK_URL;
 
   return (
-    <footer className="bg-neutral-950 border-t border-neutral-900 pt-16 pb-8" aria-labelledby="footer-heading">
+    <UIFooter variant="main" padding="md" container={false} className="border-neutral-900 pt-16 pb-8" aria-labelledby="footer-heading">
       <Typography as="h2" id="footer-heading" className="sr-only">{t('footer.heading')}</Typography>
-      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Box className="flex flex-col md:flex-row justify-between items-center gap-6">
+      <Container>
+        <Stack direction="column" align="center" justify="between" gap="lg" className="md:flex-row">
           <Box className="flex items-center gap-3">
             <img 
               src={logoImg} 
@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
               </svg>
             </a>
           </Box>
-        </Box>
+        </Stack>
         
         <Box className="mt-8 border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <Typography variant="body" className="text-neutral-500 text-center md:text-left">
@@ -115,8 +115,8 @@ export const Footer: React.FC = () => {
             </Typography>
           </Box>
         </Box>
-      </Box>
-    </footer>
+      </Container>
+    </UIFooter>
   );
 };
 

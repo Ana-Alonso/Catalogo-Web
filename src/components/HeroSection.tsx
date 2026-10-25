@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
-import { Box, Typography } from './ui';
+import { Box, Container, Section, Typography } from './ui';
 import { theme } from '../theme';
 import type { CatalogItem } from '../types/catalog';
 
@@ -40,13 +40,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
   }, [items, nowMs]);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center bg-neutral-950 overflow-hidden px-4 pt-20">
+    <Section paddingY="none" background="neutral" overflow="hidden" className="relative min-h-[90vh] flex items-center justify-center pt-20">
       <Box 
         className="absolute inset-0 z-0 opacity-25 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neutral-800 via-neutral-950 to-neutral-950" 
         aria-hidden="true"
       />
       
-      <Box className="relative z-10 text-center max-w-5xl mx-auto">
+      <Container size="md" className="relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,8 +105,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
             </motion.div>
           )}
         </motion.div>
-      </Box>
-    </section>
+      </Container>
+    </Section>
   );
 };
 

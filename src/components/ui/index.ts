@@ -11,3 +11,6 @@ export { ErrorState } from './ErrorState';
 export { Footer, type FooterProps } from './Footer';
 export { Header, type HeaderProps } from './Header';
 export { Container, type ContainerProps } from './Container';
+export { Section, type SectionProps } from './Section';
+export { IconButton, type IconButtonProps } from './IconButton';
+export { Stack, type StackProps } from './Stack';

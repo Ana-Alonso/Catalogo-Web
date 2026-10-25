@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useWindowScroll } from '../../hooks/useWindowScroll';
-import { Box, Typography } from '../ui';
+import { Box, Container, Header as UIHeader, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import { theme } from '../../theme';
 import type { CategoryType, NavLinkItem } from '../../types/catalog';
@@ -36,14 +36,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-neutral-950/90 backdrop-blur-md shadow-lg shadow-black/50 border-b border-neutral-800' 
-          : 'bg-transparent'
+    <UIHeader 
+      variant={isScrolled ? 'default' : 'transparent'}
+      className={`fixed top-0 left-0 transition-all duration-300 ${
+        isScrolled ? 'shadow-lg shadow-black/50' : ''
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label={t('nav.ariaLabel')}>
+      <Container as="nav" aria-label={t('nav.ariaLabel')}>
         <Box className="flex justify-between items-center h-20">
           <a 
             href="#" 
@@ -132,8 +131,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </nav>
-    </header>
+      </Container>
+    </UIHeader>
   );
 };
 
