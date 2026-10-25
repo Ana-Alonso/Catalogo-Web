@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Sparkles, Tag } from 'lucide-react';
-import { Box, Typography } from './ui';
+import { Box, Container, Typography } from './ui';
 import { theme } from '../theme';
 import { isOfferActive } from '../utils/price';
 import type { CatalogItem, CategoryType } from '../types/catalog';
@@ -77,7 +77,7 @@ export const FeaturedStrip: React.FC<FeaturedStripProps> = ({
 
   return (
     <section className="py-10 md:py-12 bg-neutral-950">
-      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <Container className="space-y-10">
         {newProducts.length > 0 && (
           <Box>
             <motion.div
@@ -206,7 +206,7 @@ export const FeaturedStrip: React.FC<FeaturedStripProps> = ({
             </Box>
           </motion.a>
         </Box>
-      </Box>
+      </Container>
     </section>
   );
 };

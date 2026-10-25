@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
-import { Box, Typography } from './ui';
+import { Box, Container, Typography } from './ui';
 import { theme } from '../theme';
 import libro1 from '../assets/book/Libro1.jpeg';
 import libro2 from '../assets/book/Libro2.jpeg';
@@ -50,7 +50,7 @@ export const BookHighlight: React.FC = () => {
 
   return (
     <section id="libro" className="py-12 md:py-16 bg-neutral-950">
-      <Box className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -185,7 +185,7 @@ export const BookHighlight: React.FC = () => {
             </a>
           </Box>
         </motion.div>
-      </Box>
+      </Container>
     </section>
   );
 };
