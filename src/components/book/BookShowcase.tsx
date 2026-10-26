@@ -4,14 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
 import { Box, Container, IconButton, Section, Typography } from '../ui';
 import { theme } from '../../theme';
-import libro1 from '../assets/book/Libro1.jpeg';
-import libro2 from '../assets/book/Libro2.jpeg';
-import libro3 from '../assets/book/Libro3.jpeg';
-import libro4 from '../assets/book/Libro4.jpeg';
+import libro1 from '../../assets/book/Libro1.jpeg';
+import libro2 from '../../assets/book/Libro2.jpeg';
+import libro3 from '../../assets/book/Libro3.jpeg';
+import libro4 from '../../assets/book/Libro4.jpeg';
 
 const images = [libro1, libro2, libro3, libro4];
 
-const AMAZON_BOOK_URL = import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu/d/0dU00KQa';
+const AMAZON_BOOK_URL = import.meta.env.VITE_AMAZON_BOOK_URL;
 
 export const BookShowcase: React.FC = () => {
   const { t } = useTranslation();
