@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Badge, Box, Button, Card, ErrorState, Icon, Typography } from '../ui';
+import { Badge, Box, Button, Card, ErrorState, Icon, Typography } from '../../ui';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
-import { getIntlLocale } from '../../i18n/languages';
-import { registrationStatusTranslationKeys } from '../../i18n/labels';
-import type { CatalogItem } from '../../types/catalog';
-import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
+import { getIntlLocale } from '../../../i18n/languages';
+import { registrationStatusTranslationKeys } from '../../../i18n/labels';
+import type { CatalogItem } from '../../../types/catalog';
+import type { WorkshopRegistration, RegistrationStatus } from '../../../types/registrations';
 
 interface AdminRegistrationsPanelProps {
   workshops: CatalogItem[];

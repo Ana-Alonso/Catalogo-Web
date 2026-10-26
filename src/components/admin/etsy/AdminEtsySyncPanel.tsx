@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
-import { Box, Button, Card, Icon, Typography } from '../ui';
+import { Box, Button, Card, Icon, Typography } from '../../ui';
 import {
   EtsySyncError,
   triggerEtsySync,
   type EtsySyncErrorCode,
-} from '../../services/etsySyncService';
+} from '../../../services/etsySyncService';
 
 interface AdminEtsySyncPanelProps {
   onSynced: () => Promise<void>;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box } from '../ui';
-import { Skeleton } from '../ui/Skeleton';
+import { Box } from '../../ui';
+import { Skeleton } from '../../ui/Skeleton';
 
 const SKELETON_ROWS = 3;
 

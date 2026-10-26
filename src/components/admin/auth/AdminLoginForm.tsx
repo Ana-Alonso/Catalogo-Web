@@ -1,9 +1,9 @@
 import React, { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
-import { Box, Button, Icon, Image, Input, PasswordInput, Typography } from '../ui';
-import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
-import logoImg from '../../assets/Logo.png';
+import { Box, Button, Icon, Image, Input, PasswordInput, Typography } from '../../ui';
+import { LanguageSwitcher } from '../../i18n/LanguageSwitcher';
+import logoImg from '../../../assets/Logo.png';
 
 interface AdminLoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;

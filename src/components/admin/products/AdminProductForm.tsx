@@ -1,20 +1,20 @@
 import React, { useState, type ChangeEvent, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { Box, Icon, Typography } from '../ui';
+import { Box, Icon, Typography } from '../../ui';
 import {
   validateImageFile,
   type ImageValidationError,
-} from '../../utils/imageValidation';
-import { resolvePurchaseLinks } from '../../utils/productLinks';
+} from '../../../utils/imageValidation';
+import { resolvePurchaseLinks } from '../../../utils/productLinks';
 import {
   validateProductForm,
   type ProductFormValidationError,
-} from '../../utils/productFormValidation';
-import { ImageField } from './product-form/ImageField';
-import { PriceFields } from './product-form/PriceFields';
-import { ProductDetailsFields } from './product-form/ProductDetailsFields';
-import { WorkshopFields } from './product-form/WorkshopFields';
+} from '../../../utils/productFormValidation';
+import { ImageField } from './form/ImageField';
+import { PriceFields } from './form/PriceFields';
+import { ProductDetailsFields } from './form/ProductDetailsFields';
+import { WorkshopFields } from './form/WorkshopFields';
 import { ProductFormHeader } from './ProductFormHeader';
 import { ProductFormActions } from './ProductFormActions';
 import type {
@@ -22,7 +22,7 @@ import type {
   CatalogItem,
   CategoryType,
   ProductFormData,
-} from '../../types/catalog';
+} from '../../../types/catalog';
 
 interface AdminProductFormProps {
   onSubmit: (data: ProductFormData) => Promise<boolean>;

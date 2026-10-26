@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { Box, Button, Icon, Typography } from '../ui';
+import { Box, Button, Icon, Typography } from '../../ui';
 
 interface ProductFormHeaderProps {
   isEditing: boolean;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
-import { Badge, Box, Button, Icon, Image, TableCell, TableRow, TextLink, Typography } from '../ui';
-import { formatPriceForLanguage } from '../../i18n/formatters';
+import { Badge, Box, Button, Icon, Image, TableCell, TableRow, TextLink, Typography } from '../../ui';
+import { formatPriceForLanguage } from '../../../i18n/formatters';
 import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
-} from '../../i18n/labels';
-import { getDiscountedCents, isOfferActive } from '../../utils/price';
-import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
+} from '../../../i18n/labels';
+import { getDiscountedCents, isOfferActive } from '../../../utils/price';
+import type { CatalogItem, AvailabilityStatus } from '../../../types/catalog';
 
 interface AdminProductTableRowProps {
   item: CatalogItem;

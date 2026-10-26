@@ -1,8 +1,8 @@
 import React, { type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
-import { Box, Icon, Image, Input, Typography } from '../../ui';
-import { ACCEPTED_IMAGE_INPUT } from '../../../utils/imageValidation';
+import { Box, Icon, Image, Input, Typography } from '../../../ui';
+import { ACCEPTED_IMAGE_INPUT } from '../../../../utils/imageValidation';
 
 interface ImageFieldProps {
   previewUrl: string;

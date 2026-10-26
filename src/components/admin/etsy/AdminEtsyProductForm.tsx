@@ -1,14 +1,14 @@
 import React, { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
-import { Box, Button, Icon, Image, Select, Typography } from '../ui';
-import { formatPriceForLanguage } from '../../i18n/formatters';
-import { categoryTranslationKeys } from '../../i18n/labels';
+import { Box, Button, Icon, Image, Select, Typography } from '../../ui';
+import { formatPriceForLanguage } from '../../../i18n/formatters';
+import { categoryTranslationKeys } from '../../../i18n/labels';
 import type {
   CategoryType,
   CatalogItem,
   EtsyProductMetadata,
-} from '../../types/catalog';
+} from '../../../types/catalog';
 
 interface AdminEtsyProductFormProps {
   product: CatalogItem;

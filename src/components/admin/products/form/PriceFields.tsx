@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input, Checkbox, Typography } from '../../ui';
-import { formatPriceForLanguage } from '../../../i18n/formatters';
+import { Box, Input, Checkbox, Typography } from '../../../ui';
+import { formatPriceForLanguage } from '../../../../i18n/formatters';
 import {
   getDiscountedCents,
   parsePriceToCents,
-} from '../../../utils/price';
+} from '../../../../utils/price';
 
 interface PriceFieldsProps {
   price: string;

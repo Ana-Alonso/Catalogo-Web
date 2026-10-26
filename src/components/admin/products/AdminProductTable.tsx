@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Box, ErrorState, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../ui';
+import { Card, Box, ErrorState, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../../ui';
 import { AdminProductTableRow } from './AdminProductTableRow';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
-import type { CatalogItem } from '../../types/catalog';
+import type { CatalogItem } from '../../../types/catalog';
 
 interface AdminProductTableProps {
   products: CatalogItem[];

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input, Typography } from '../../ui';
+import { Box, Input, Typography } from '../../../ui';
 
 interface WorkshopFieldsProps {
   eventDate: string;

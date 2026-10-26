@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle } from 'lucide-react';
-import { Box, CalendarEventActions, Icon, Typography } from '../ui';
-import { parsePriceToCents } from '../../utils/price';
-import type { CatalogItem, ProductFormData } from '../../types/catalog';
+import { Box, CalendarEventActions, Icon, Typography } from '../../ui';
+import { parsePriceToCents } from '../../../utils/price';
+import type { CatalogItem, ProductFormData } from '../../../types/catalog';
 
 interface AdminWorkshopCalendarPanelProps {
   workshopData: ProductFormData;

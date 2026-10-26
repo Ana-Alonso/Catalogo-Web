@@ -1,14 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input, Select, Textarea } from '../../ui';
+import { Box, Input, Select, Textarea } from '../../../ui';
 import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
-} from '../../../i18n/labels';
+} from '../../../../i18n/labels';
 import type {
   AvailabilityStatus,
   CategoryType,
-} from '../../../types/catalog';
+} from '../../../../types/catalog';
 
 type FormCategory = Exclude<CategoryType, 'todas'>;
 

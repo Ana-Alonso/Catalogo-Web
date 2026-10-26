@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Card } from '../ui';
-import { Skeleton } from '../ui/Skeleton';
+import { Box, Card } from '../../ui';
+import { Skeleton } from '../../ui/Skeleton';
 
 const SKELETON_ROWS = 5;
 
