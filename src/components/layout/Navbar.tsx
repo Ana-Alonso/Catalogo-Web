@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Animated, Box, Container, Header as UIHeader, IconButton, Image, NavLink, Presence, Typography } from '../ui';
+import { Animated, Box, Container, Header as UIHeader, Icon, IconButton, Image, NavLink, Presence, Typography } from '../ui';
 import { Menu, X } from 'lucide-react';
 import { useWindowScroll } from '../../hooks/useWindowScroll';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-expanded={isOpen}
               aria-label={isOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <Icon as={X} size="xl" /> : <Icon as={Menu} size="xl" />}
             </IconButton>
           </Box>
         </Box>

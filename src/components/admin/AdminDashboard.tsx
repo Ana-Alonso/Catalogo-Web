@@ -8,7 +8,7 @@ import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
 import { AdminLoginForm } from './AdminLoginForm';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
-import { Container, Typography, Box } from '../ui';
+import { Box, Container, Icon, Typography } from '../ui';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import type {
@@ -170,7 +170,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         gap="tight"
         role="status"
       >
-        <LoaderCircle className="w-6 h-6 text-orange-500 animate-spin" aria-hidden="true" />
+        <Icon as={LoaderCircle} size="xl" tone="accent" spin />
         <Typography variant="body">{t('admin.loadingSession')}</Typography>
       </Box>
     );
@@ -215,9 +215,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             borderTone={feedbackMsg.type === 'success' ? 'success' : 'danger'}
           >
             {feedbackMsg.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <Icon as={CheckCircle} size="lg" tone="success" />
             ) : (
-              <AlertCircle className="w-5 h-5 text-red-400" />
+              <Icon as={AlertCircle} size="lg" tone="danger" />
             )}
             <Typography
               variant="body"

@@ -3,7 +3,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNoindex } from '../../hooks/useNoindex';
 import { logError } from '../../utils/logger';
-import { Box, Button, Typography } from '../ui';
+import { Box, Button, Icon, Typography } from '../ui';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -30,10 +30,7 @@ export const ErrorFallback: React.FC = () => {
       paddingX="md"
     >
       <Box maxWidth="xl" textAlign="center">
-        <AlertTriangle
-          className="w-10 h-10 text-orange-500 mx-auto"
-          aria-hidden="true"
-        />
+        <Icon as={AlertTriangle} size="3xl" tone="accent" center />
         <Typography
           as="h1"
           variant="plain"
@@ -54,7 +51,7 @@ export const ErrorFallback: React.FC = () => {
           marginTop="xl"
           onClick={() => window.location.reload()}
         >
-          <RefreshCw className="w-4 h-4" aria-hidden="true" />
+          <Icon as={RefreshCw} />
           {t('common.reload')}
         </Button>
       </Box>

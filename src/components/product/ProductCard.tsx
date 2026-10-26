@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Variants } from 'framer-motion';
 import { ShoppingBag, Tag, Calendar, MapPin, Users, UserPlus } from 'lucide-react';
-import { AnimatedCard, Badge, Box, Button, Image, Typography } from '../ui';
+import { AnimatedCard, Badge, Box, Button, Image, Typography, Icon } from '../ui';
 import { Modal } from '../ui/Modal';
 import { WorkshopSignupForm } from '../workshop/WorkshopSignupForm';
 import {
@@ -140,7 +140,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           <Box marginY="sm" padding="sm" rounded="sm" background="neutral" border>
             {item.eventDate && (
               <Box display="flex" align="center" gap="sm" marginBottom="xs">
-                <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
+                <Icon as={Calendar} size="sm" tone="warning" shrink={false} />
                 <Typography
                   as="span"
                   variant="body"
@@ -155,7 +155,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             )}
             {item.eventLocation && (
               <Box display="flex" align="center" gap="sm">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" aria-hidden="true" />
+                <Icon as={MapPin} size="sm" tone="muted" shrink={false} />
                 <Typography as="span" variant="body" size="xs" tone="muted">
                   {item.eventLocation}
                 </Typography>
@@ -171,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
         <Box display="flex" direction="column" gap="sm" marginTop="auto">
           {isWorkshop && !isFinished && (
             <Box display="flex" align="center" gap="sm">
-              <Users className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
+              <Icon as={Users} size="sm" tone="warning" shrink={false} />
               {cupo === null ? (
                 <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
               ) : isFull ? (
@@ -191,7 +191,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               onClick={() => setIsSignupOpen(true)}
               aria-label={t('product.signupAria', { title: item.title })}
             >
-              <UserPlus className="w-4 h-4" aria-hidden="true" />
+              <Icon as={UserPlus} />
               {t('product.signup')}
             </Button>
           )}
@@ -209,7 +209,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               fullWidth
               aria-label={t('product.buyEtsyAria', { title: item.title })}
             >
-              <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+              <Icon as={ShoppingBag} />
               {t('product.buyEtsy')}
             </Button>
           )}
@@ -223,7 +223,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               fullWidth
               aria-label={t('product.viewVintedAria', { title: item.title })}
             >
-              <Tag className="w-4 h-4" aria-hidden="true" />
+              <Icon as={Tag} />
               {t('product.viewVinted')}
             </Button>
           )}

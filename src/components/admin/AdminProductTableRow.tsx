@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
-import { Badge, Box, Button, Typography, Image, TableCell, TableRow, TextLink } from '../ui';
+import { Badge, Box, Button, Icon, Image, TableCell, TableRow, TextLink, Typography } from '../ui';
 import { formatPriceForLanguage } from '../../i18n/formatters';
 import {
   availabilityTranslationKeys,
@@ -123,7 +123,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
               size="xs"
               hover="underline"
             >
-              Etsy <ExternalLink className="w-3 h-3" />
+              Etsy <Icon as={ExternalLink} size="xs" />
             </TextLink>
           )}
           {item.category !== 'talleres' && item.vintedLink && (
@@ -135,7 +135,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
               size="xs"
               hover="bright"
             >
-              Vinted <ExternalLink className="w-3 h-3" />
+              Vinted <Icon as={ExternalLink} size="xs" />
             </TextLink>
           )}
         </Box>
@@ -150,7 +150,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
               title: item.title,
             })}
           >
-            <Edit3 className="w-4 h-4 text-orange-500" />
+            <Icon as={Edit3} tone="accent" />
           </Button>
           <Button
             variant="ghost"
@@ -182,7 +182,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
                   })
             }
           >
-            <Trash2 className="w-4 h-4 text-red-400" />
+            <Icon as={Trash2} tone="danger" />
           </Button>
         </Box>
       </TableCell>

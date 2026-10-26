@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button, Card, Box, Typography } from '../ui';
+import { Box, Button, Card, Icon, Typography } from '../ui';
 import {
   EtsySyncError,
   triggerEtsySync,
@@ -77,7 +77,7 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
           </Typography>
         </Box>
         <Button variant="secondary" onClick={handleSync} disabled={isSyncing}>
-          <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+          <Icon as={RefreshCw} spin={isSyncing} />
           {isSyncing
             ? t('admin.etsySync.syncing')
             : t('admin.etsySync.syncNow')}
@@ -97,9 +97,9 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
           borderTone={feedback.type === 'success' ? 'success' : 'danger'}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-400" />
+            <Icon as={CheckCircle} tone="success" shrink={false} />
           ) : (
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
+            <Icon as={AlertCircle} tone="danger" shrink={false} />
           )}
           <Typography
             variant="body"

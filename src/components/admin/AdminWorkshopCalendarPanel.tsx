@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle } from 'lucide-react';
-import { Box, CalendarEventActions, Typography } from '../ui';
+import { Box, CalendarEventActions, Icon, Typography } from '../ui';
 import { parsePriceToCents } from '../../utils/price';
 import type { CatalogItem, ProductFormData } from '../../types/catalog';
 
@@ -40,7 +40,7 @@ export const AdminWorkshopCalendarPanel: React.FC<AdminWorkshopCalendarPanelProp
       gap="tight"
     >
       <Box display="flex" align="center" gap="tight">
-        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" aria-hidden="true" />
+        <Icon as={CheckCircle} size="lg" tone="success" shrink={false} />
         <Typography variant="body" size="sm" tone="soft">
           {t('admin.calendarPanel.published', { title: workshop.title })}
         </Typography>

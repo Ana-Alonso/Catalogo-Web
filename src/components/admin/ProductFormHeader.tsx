@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { Button, Box, Typography } from '../ui';
+import { Box, Button, Icon, Typography } from '../ui';
 
 interface ProductFormHeaderProps {
   isEditing: boolean;
@@ -42,7 +42,7 @@ export const ProductFormHeader: React.FC<ProductFormHeaderProps> = ({
       </Box>
       {isEditing && onCancelEdit && (
         <Button variant="secondary" size="sm" onClick={onCancelEdit}>
-          <X className="w-3.5 h-3.5" />
+          <Icon as={X} size="sm" />
           {t('admin.productForm.cancelEdit')}
         </Button>
       )}

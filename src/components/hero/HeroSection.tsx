@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Animated, Box, Button, Container, Section, Typography } from '../ui';
+import { Animated, Box, Button, Container, Section, Typography, Icon } from '../ui';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import type { CatalogItem } from '../../types/catalog';
 
@@ -93,7 +93,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
                 variant="outline"
                 size="lg"
               >
-                <ShoppingBag className="w-5 h-5" aria-hidden="true" /> {t('hero.etsyCta')}
+                <Icon as={ShoppingBag} size="lg" /> {t('hero.etsyCta')}
               </Button>
             </Animated>
 
@@ -106,9 +106,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
                 transition={{ delay: 0.5, duration: 0.6 }}
               >
                 <Button variant="accent" onClick={onShowNew}>
-                  <Sparkles className="w-4 h-4" aria-hidden="true" />
+                  <Icon as={Sparkles} />
                   {t('gallery.newButton', 'No te pierdas nuestras novedades')}
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  <Icon as={ArrowRight} hoverTranslate />
                 </Button>
               </Animated>
             )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Card, Badge, Button, Box, ErrorState, Typography } from '../ui';
+import { Badge, Box, Button, Card, ErrorState, Icon, Typography } from '../ui';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { getIntlLocale } from '../../i18n/languages';
 import { registrationStatusTranslationKeys } from '../../i18n/labels';
@@ -61,7 +61,7 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
   return (
     <Card>
       <Box padding="lg" divider="bottom" display="flex" align="center" gap="tight">
-        <ClipboardList className="w-5 h-5 text-orange-500" aria-hidden="true" />
+        <Icon as={ClipboardList} size="lg" tone="accent" />
         <Box>
           <Typography variant="h3">
             {t('admin.registrations.title', { count: registrations.length })}
@@ -118,7 +118,7 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                     {workshop.title}
                   </Typography>
                   <Badge variant={cupo !== null && activeCount >= cupo ? 'outline' : 'primary'}>
-                    <Users className="w-3 h-3 mr-1" aria-hidden="true" />
+                    <Icon as={Users} size="xs" marginRight="xs" />
                     {cupo !== null
                       ? t('admin.registrations.spots', {
                           active: activeCount,
@@ -172,7 +172,7 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                               name: registration.name,
                             })}
                           >
-                            <Check className="w-4 h-4 text-green-400" />
+                            <Icon as={Check} tone="success" />
                           </Button>
                         )}
                         {registration.status !== 'cancelado' && (
@@ -184,7 +184,7 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                               name: registration.name,
                             })}
                           >
-                            <X className="w-4 h-4 text-orange-400" />
+                            <Icon as={X} tone="warning" />
                           </Button>
                         )}
                         <Button
@@ -205,7 +205,7 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                             name: registration.name,
                           })}
                         >
-                          <Trash2 className="w-4 h-4 text-red-400" />
+                          <Icon as={Trash2} tone="danger" />
                         </Button>
                       </Box>
                     </Box>

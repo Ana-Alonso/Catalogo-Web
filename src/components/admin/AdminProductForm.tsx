@@ -1,7 +1,7 @@
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { Box, Typography } from '../ui';
+import { Box, Icon, Typography } from '../ui';
 import {
   validateImageFile,
   type ImageValidationError,
@@ -211,7 +211,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           borderTone="danger"
           rounded="lg"
         >
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
+          <Icon as={AlertCircle} size="lg" tone="dangerStrong" shrink={false} />
           <Typography variant="body" size="sm" tone="dangerSoft">{formError}</Typography>
         </Box>
       )}

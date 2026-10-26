@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
-import { Box, Button, Image, Input, PasswordInput, Typography } from '../ui';
+import { Box, Button, Icon, Image, Input, PasswordInput, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import logoImg from '../../assets/Logo.png';
 
@@ -74,7 +74,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
           center
           marginBottom="md"
         >
-          <Lock className="w-6 h-6 text-orange-600" aria-hidden="true" />
+          <Icon as={Lock} size="xl" tone="primary" />
         </Box>
         <Typography variant="h2" size="heading-sm" weight="bold" marginBottom="sm">
           {t('admin.login.title')}

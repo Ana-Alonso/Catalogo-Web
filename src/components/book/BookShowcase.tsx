@@ -1,20 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
-import {
-  Animated,
-  AnimatedButton,
-  AnimatedImage,
-  Box,
-  Button,
-  Container,
-  Dot,
-  IconButton,
-  Image,
-  Presence,
-  Section,
-  Typography,
-} from '../ui';
+import { Animated, AnimatedButton, AnimatedImage, Box, Button, Container, Dot, IconButton, Image, Presence, Section, Typography, Icon } from '../ui';
 import libro1 from '../../assets/book/Libro1.jpeg';
 import libro2 from '../../assets/book/Libro2.jpeg';
 import libro3 from '../../assets/book/Libro3.jpeg';
@@ -80,12 +67,12 @@ export const BookShowcase: React.FC = () => {
           >
             <Box position="absolute" edge="left-out" zIndex={30}>
               <IconButton onClick={goToPrevious} aria-label="Previous">
-                <ChevronLeft className="w-5 h-5" />
+                <Icon as={ChevronLeft} size="lg" />
               </IconButton>
             </Box>
             <Box position="absolute" edge="right-out" zIndex={30}>
               <IconButton onClick={goToNext} aria-label="Next">
-                <ChevronRight className="w-5 h-5" />
+                <Icon as={ChevronRight} size="lg" />
               </IconButton>
             </Box>
 
@@ -161,7 +148,7 @@ export const BookShowcase: React.FC = () => {
             variant="accent"
             size="md"
           >
-            <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+            <Icon as={ShoppingBag} />
             {t('book.cta')}
           </Button>
         </Box>
@@ -186,7 +173,7 @@ export const BookShowcase: React.FC = () => {
           >
             <Box position="absolute" corner="top-right-md">
               <IconButton onClick={() => setIsLightboxOpen(false)} aria-label="Close">
-                <X className="w-6 h-6" />
+                <Icon as={X} size="xl" />
               </IconButton>
             </Box>
             <Box position="absolute" edge="left-md">
@@ -197,7 +184,7 @@ export const BookShowcase: React.FC = () => {
                 }}
                 aria-label="Previous"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <Icon as={ChevronLeft} size="xl" />
               </IconButton>
             </Box>
             <Box position="absolute" edge="right-md">
@@ -208,7 +195,7 @@ export const BookShowcase: React.FC = () => {
                 }}
                 aria-label="Next"
               >
-                <ChevronRight className="w-6 h-6" />
+                <Icon as={ChevronRight} size="xl" />
               </IconButton>
             </Box>
             <AnimatedImage

@@ -4,17 +4,7 @@ import { type Variants } from 'framer-motion';
 import { ArrowRight, Tag } from 'lucide-react';
 import { ProductCard } from '../product/ProductCard';
 import { ProductCardSkeleton } from '../product/ProductCardSkeleton';
-import {
-  Animated,
-  Box,
-  Button,
-  Chip,
-  Container,
-  ErrorState,
-  Presence,
-  Section,
-  Typography,
-} from '../ui';
+import { Animated, Box, Button, Chip, Container, ErrorState, Presence, Section, Typography, Icon } from '../ui';
 import { categoryTranslationKeys } from '../../i18n/labels';
 import { isOfferActive } from '../../utils/price';
 import type { CatalogItem, CategoryType } from '../../types/catalog';
@@ -144,7 +134,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                   onToggleOffers();
                 }}
               >
-                <Tag className="w-3.5 h-3.5" aria-hidden="true" />
+                <Icon as={Tag} size="sm" />
                 {t('catalog.offers')}
               </Chip>
             )}
@@ -157,10 +147,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
               <Typography as="span" variant="caption" tracking="widest">
                 {t('gallery.newButton', 'No te pierdas nuestras novedades')}
               </Typography>
-              <ArrowRight
-                className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
+              <Icon as={ArrowRight} hoverTranslate />
             </Chip>
           </Box>
         )}

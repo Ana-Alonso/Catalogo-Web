@@ -2,21 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
-import {
-  Animated,
-  AnimatedImage,
-  AnimatedText,
-  Badge,
-  Box,
-  Button,
-  Container,
-  Dot,
-  IconButton,
-  Image,
-  Presence,
-  Section,
-  Typography,
-} from '../ui';
+import { Animated, AnimatedImage, AnimatedText, Badge, Box, Button, Container, Dot, IconButton, Image, Presence, Section, Typography, Icon } from '../ui';
 import libro1 from '../../assets/book/Libro1.jpeg';
 import libro2 from '../../assets/book/Libro2.jpeg';
 import libro3 from '../../assets/book/Libro3.jpeg';
@@ -133,7 +119,7 @@ export const BookHighlight: React.FC = () => {
                   onClick={goToPrevious}
                   aria-label="Previous image"
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  <Icon as={ChevronLeft} size="lg" />
                 </IconButton>
               </Box>
 
@@ -144,7 +130,7 @@ export const BookHighlight: React.FC = () => {
                   onClick={goToNext}
                   aria-label="Next image"
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  <Icon as={ChevronRight} size="lg" />
                 </IconButton>
               </Box>
 
@@ -215,7 +201,7 @@ export const BookHighlight: React.FC = () => {
               rel="noopener noreferrer"
               size="lg"
             >
-              <ShoppingBag className="w-5 h-5" aria-hidden="true" />
+              <Icon as={ShoppingBag} size="lg" />
               {t('book.cta')}
             </Button>
           </Box>

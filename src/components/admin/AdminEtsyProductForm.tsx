@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
-import { Box, Button, Typography, Image, Select } from '../ui';
+import { Box, Button, Icon, Image, Select, Typography } from '../ui';
 import { formatPriceForLanguage } from '../../i18n/formatters';
 import { categoryTranslationKeys } from '../../i18n/labels';
 import type {
@@ -73,7 +73,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           <Typography variant="body">{t('admin.etsyForm.subtitle')}</Typography>
         </Box>
         <Button variant="secondary" size="sm" onClick={onCancelEdit}>
-          <X className="w-3.5 h-3.5" />
+          <Icon as={X} size="sm" />
           {t('admin.etsyForm.close')}
         </Button>
       </Box>
@@ -106,7 +106,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           </Typography>
           <Box display="flex" wrap align="center" gap="sm" tone="subtle" size="xs">
             <Typography as="span" size="xs" tone="subtle" icon>
-              <RefreshCw className="w-3 h-3" />
+              <Icon as={RefreshCw} size="xs" />
               {t('admin.etsyForm.listing', {
                 id: product.etsyListingId ?? '—',
               })}
@@ -138,7 +138,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           borderTone="danger"
           rounded="lg"
         >
-          <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
+          <Icon as={AlertCircle} size="lg" tone="dangerStrong" shrink={false} />
           <Typography variant="body" size="sm" tone="dangerSoft">{formError}</Typography>
         </Box>
       )}
@@ -174,7 +174,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
             {t('admin.etsyForm.cancel')}
           </Button>
           <Button type="submit" variant="primary" disabled={isSubmitting}>
-            <Check className="w-4 h-4" />
+            <Icon as={Check} />
             {isSubmitting
               ? t('admin.etsyForm.saving')
               : t('admin.etsyForm.saveChanges')}

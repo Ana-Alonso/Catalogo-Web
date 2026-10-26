@@ -1,17 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Animated,
-  AnimatedButton,
-  AnimatedLink,
-  Badge,
-  Box,
-  Container,
-  Image,
-  Section,
-  Stack,
-  Typography,
-} from '../ui';
+import { Animated, AnimatedButton, AnimatedLink, Badge, Box, Container, Image, Section, Stack, Typography, Icon } from '../ui';
 import { isOfferActive } from '../../utils/price';
 import type { CatalogItem, CategoryType } from '../../types/catalog';
 import libro1 from '../assets/book/Libro1.jpeg';
@@ -97,7 +86,7 @@ export const FeaturedStrip: React.FC<FeaturedStripProps> = ({
                 marginBottom="lg"
               >
                 <Box display="flex" align="center" gap="sm" marginBottom="xs">
-                  <Sparkles className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                  <Icon as={Sparkles} tone="accent" />
                   <Typography variant="h3">
                     {t('featured.newArrivals', 'Novedades')}
                   </Typography>
@@ -159,7 +148,7 @@ export const FeaturedStrip: React.FC<FeaturedStripProps> = ({
                 marginBottom="lg"
               >
                 <Box display="flex" align="center" gap="sm" marginBottom="xs">
-                  <Tag className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                  <Icon as={Tag} tone="accent" />
                   <Typography variant="h3">
                     {t('featured.offers', 'Ofertas')}
                   </Typography>
@@ -245,7 +234,7 @@ export const FeaturedStrip: React.FC<FeaturedStripProps> = ({
                 </Typography>
               </Box>
               <Box display="inline-flex" align="center" justify="center" gap="sm" paddingX="lg" paddingY="md" background="primary" rounded="sm" shrink={false}>
-                <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+                <Icon as={ShoppingBag} />
                 <Typography as="span" variant="plain" weight="semibold" tracking="wide" transform="uppercase">
                   {t('book.cta')}
                 </Typography>

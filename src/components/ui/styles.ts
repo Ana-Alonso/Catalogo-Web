@@ -42,6 +42,7 @@ export type PaddingToken = keyof typeof PADDING;
 
 export const MARGIN = {
   none: { m: 'm-0', mx: 'mx-0', my: 'my-0', mt: 'mt-0', mb: 'mb-0', ml: 'ml-0', mr: 'mr-0' },
+  half: { m: 'm-0.5', mx: 'mx-0.5', my: 'my-0.5', mt: 'mt-0.5', mb: 'mb-0.5', ml: 'ml-0.5', mr: 'mr-0.5' },
   xs: { m: 'm-1', mx: 'mx-1', my: 'my-1', mt: 'mt-1', mb: 'mb-1', ml: 'ml-1', mr: 'mr-1' },
   sm: { m: 'm-2', mx: 'mx-2', my: 'my-2', mt: 'mt-2', mb: 'mb-2', ml: 'ml-2', mr: 'mr-2' },
   tight: { m: 'm-3', mx: 'mx-3', my: 'my-3', mt: 'mt-3', mb: 'mb-3', ml: 'ml-3', mr: 'mr-3' },
@@ -50,7 +51,7 @@ export const MARGIN = {
   xl: { m: 'm-8', mx: 'mx-8', my: 'my-8', mt: 'mt-8', mb: 'mb-8', ml: 'ml-8', mr: 'mr-8' },
   '2xl': { m: 'm-10', mx: 'mx-10', my: 'my-10', mt: 'mt-10', mb: 'mb-10', ml: 'ml-10', mr: 'mr-10' },
   '3xl': { m: 'm-12', mx: 'mx-12', my: 'my-12', mt: 'mt-12', mb: 'mb-12', ml: 'ml-12', mr: 'mr-12' },
-  auto: { m: '', mx: 'mx-auto', my: 'my-auto', mt: 'mt-auto', mb: 'mb-auto', ml: 'ml-auto', mr: 'mr-auto' },
+  'auto': { m: '', mx: 'mx-auto', my: 'my-auto', mt: 'mt-auto', mb: 'mb-auto', ml: 'ml-auto', mr: 'mr-auto' },
   'auto-start-lg': { m: '', mx: 'mx-auto lg:mx-0', my: '', mt: '', mb: '', ml: '', mr: '' },
 } as const;
 
@@ -577,6 +578,7 @@ export const TONE = {
   warningSoft: 'text-orange-300',
   warningFaint: 'text-orange-200',
   danger: 'text-red-400',
+  dangerStrong: 'text-red-500',
   dangerSoft: 'text-red-300',
   success: 'text-green-400',
   successSoft: 'text-green-300',

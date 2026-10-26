@@ -1,7 +1,7 @@
 import React, { type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
-import { Box, Image, Input, Typography } from '../../ui';
+import { Box, Icon, Image, Input, Typography } from '../../ui';
 import { ACCEPTED_IMAGE_INPUT } from '../../../utils/imageValidation';
 
 interface ImageFieldProps {
@@ -52,7 +52,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
           group
           cssTransition="colors"
         >
-          <Upload className="w-8 h-8 text-neutral-500 mb-2 group-hover:text-orange-600" />
+          <Icon as={Upload} size="2xl" tone="subtle" marginBottom="sm" hoverTone="primary" />
           <Typography variant="body" size="sm" tone="muted" weight="medium">
             {t('admin.imageField.upload')}
           </Typography>

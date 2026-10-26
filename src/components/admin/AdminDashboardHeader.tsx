@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Unlock } from 'lucide-react';
-import { Box, Button, Container, Image, Typography } from '../ui';
+import { Box, Button, Container, Icon, Image, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 import logoImg from '../../assets/Logo.png';
 
@@ -40,7 +40,7 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
         <Box display="flex" align="center" gap="tight">
           <LanguageSwitcher />
           <Button variant="secondary" size="sm" onClick={onClose}>
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <Icon as={ArrowLeft} size="sm" />
             {t('admin.backToSite')}
           </Button>
           <Button
@@ -49,7 +49,7 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
             onClick={onLogout}
             aria-label={t('admin.logout')}
           >
-            <Unlock className="w-3.5 h-3.5" />
+            <Icon as={Unlock} size="sm" />
           </Button>
         </Box>
       </Container>

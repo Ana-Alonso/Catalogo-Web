@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
-import { Button, Input, Box, CalendarEventActions, TextLink, Typography } from '../ui';
+import { Button, Input, Box, CalendarEventActions, TextLink, Typography, Icon } from '../ui';
 import {
   getRegistrationErrorCode,
   type RegistrationErrorCode,
@@ -89,7 +89,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
               align="center"
               justify="center"
             >
-              <CheckCircle className="w-6 h-6 text-green-400" aria-hidden="true" />
+              <Icon as={CheckCircle} size="xl" tone="success" />
             </Box>
           </Box>
           <Box>
@@ -113,7 +113,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
           border
           rounded="lg"
         >
-          <Bell className="w-4 h-4 mt-0.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
+          <Icon as={Bell} tone="warning" shrink={false} marginTop="half" />
           <Typography as="span" variant="body" size="sm" tone="muted">
             <Trans
               i18nKey={socialNoticeKey}
@@ -194,7 +194,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
           borderTone="danger"
           role="alert"
         >
-          <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" aria-hidden="true" />
+          <Icon as={AlertCircle} tone="dangerStrong" shrink={false} />
           <Typography as="span" variant="body" size="sm" tone="dangerSoft">
             {t(`workshop.form.errors.${errorCode}`)}
           </Typography>
@@ -204,12 +204,12 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
       <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
         {isSubmitting ? (
           <>
-            <LoaderCircle className="w-4 h-4 animate-spin" aria-hidden="true" />
+            <Icon as={LoaderCircle} spin />
             {t('workshop.form.submitting')}
           </>
         ) : (
           <>
-            <UserPlus className="w-4 h-4" aria-hidden="true" />
+            <Icon as={UserPlus} />
             {t('workshop.form.submit')}
           </>
         )}

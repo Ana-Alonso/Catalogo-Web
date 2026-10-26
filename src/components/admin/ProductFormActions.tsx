@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Plus } from 'lucide-react';
-import { Button, Box } from '../ui';
+import { Box, Button, Icon } from '../ui';
 
 interface ProductFormActionsProps {
   isEditing: boolean;
@@ -30,7 +30,7 @@ export const ProductFormActions: React.FC<ProductFormActionsProps> = ({
         </Button>
       )}
       <Button type="submit" variant="primary" disabled={isSubmitting}>
-        {isEditing ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+        {isEditing ? <Icon as={Check} /> : <Icon as={Plus} />}
         {isSubmitting
           ? t('admin.productForm.saving')
           : isEditing
