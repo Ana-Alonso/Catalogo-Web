@@ -121,9 +121,9 @@ export const BookShowcase: React.FC = () => {
               display="flex"
               gap="sm"
             >
-              {images.map((_, index) => (
+              {images.map((src, index) => (
                 <Dot
-                  key={index}
+                  key={src}
                   onClick={() => setCurrentIndex(index)}
                   active={index === currentIndex}
                   aria-label={`Go to slide ${index + 1}`}
