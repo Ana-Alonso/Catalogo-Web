@@ -1,12 +1,12 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
+import { NavLink, Option, OptionList } from '../ui';
 import { useTranslation } from 'react-i18next';
 import { persistLanguage } from '../../i18n/persistLanguage';
 import { normalizeLanguage, type SupportedLanguage } from '../../i18n/languages';
 import { buildLocalizedPath } from '../../i18n/paths';
 
 interface LanguageSwitcherProps {
-  className?: string;
   onSelect?: () => void;
 }
 
@@ -16,7 +16,6 @@ const languages: Array<{ code: SupportedLanguage; label: string }> = [
 ];
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
-  className = '',
   onSelect,
 }) => {
   const { t, i18n } = useTranslation();
@@ -28,8 +27,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   return (
-    <nav aria-label={t('language.label')} className={className}>
-      <ul className="flex items-center gap-1">
+    <OptionList label={t('language.label')}>
         {languages.map((language) => {
           const isActive = currentLanguage === language.code;
           const ariaLabel =
@@ -38,8 +36,10 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               : t('language.switchToEnglish');
 
           return (
-            <li key={language.code}>
-              <Link
+            <Option key={language.code}>
+              <NavLink
+                variant="pill"
+                active={isActive}
                 to={buildLocalizedPath(
                   location.pathname,
                   location.search,
@@ -57,19 +57,13 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   }
                   onSelect?.();
                 }}
-                className={`inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
-                  isActive
-                    ? 'bg-orange-600 text-white'
-                    : 'text-neutral-400 hover:text-white'
-                }`}
               >
                 {language.label}
-              </Link>
-            </li>
+              </NavLink>
+            </Option>
           );
         })}
-      </ul>
-    </nav>
+    </OptionList>
   );
 };
 

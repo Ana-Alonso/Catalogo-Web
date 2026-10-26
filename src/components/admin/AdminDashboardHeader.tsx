@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Unlock } from 'lucide-react';
-import { Button, Container } from '../ui';
+import { Box, Button, Container, Image, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
-import { theme } from '../../theme';
 import logoImg from '../../assets/Logo.png';
 
 interface AdminDashboardHeaderProps {
@@ -18,24 +17,27 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
   const { t } = useTranslation();
 
   return (
-    <header
-      className={`sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b ${theme.colors.border}`}
+    <Box
+      as="header"
+      position="sticky"
+      top={0}
+      zIndex={40}
+      background="headerTranslucent"
+      backdrop="blur"
+      border
+      divider="bottom"
     >
-      <Container as="div" className="h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img
-            src={logoImg}
-            alt={t('nav.logoAlt')}
-            className="h-10 w-auto object-contain"
-          />
-          <div>
-            <h1 className="text-lg font-bold text-white uppercase tracking-wider">
+      <Container as="div" height="nav" display="flex" align="center" justify="between">
+        <Box display="flex" align="center" gap="tight">
+          <Image src={logoImg} alt={t('nav.logoAlt')} height={10} fit="contain" />
+          <Box>
+            <Typography as="h1" variant="h4" transform="uppercase" tracking="wider">
               {t('admin.title')}
-            </h1>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
 
-        <div className="flex items-center gap-3">
+        <Box display="flex" align="center" gap="tight">
           <LanguageSwitcher />
           <Button variant="secondary" size="sm" onClick={onClose}>
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -49,9 +51,9 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
           >
             <Unlock className="w-3.5 h-3.5" />
           </Button>
-        </div>
+        </Box>
       </Container>
-    </header>
+    </Box>
   );
 };
 

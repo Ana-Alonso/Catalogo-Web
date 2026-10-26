@@ -1,9 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { Button, Box } from '../ui';
-import { Typography } from '../ui';
-import { theme } from '../../theme';
+import { Button, Box, Typography } from '../ui';
 
 interface ProductFormHeaderProps {
   isEditing: boolean;
@@ -20,17 +18,21 @@ export const ProductFormHeader: React.FC<ProductFormHeaderProps> = ({
 
   return (
     <Box
-      className={`flex items-center justify-between border-b ${theme.colors.border} pb-4`}
+      display="flex"
+      align="center"
+      justify="between"
+      divider="bottom"
+      paddingBottom="md"
     >
       <Box>
-        <h3 className="text-xl font-bold text-white uppercase tracking-wider">
+        <Typography variant="h3">
           {t(
             isEditing
               ? 'admin.productForm.editTitle'
               : 'admin.productForm.createTitle'
           )}
-        </h3>
-        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
+        </Typography>
+        <Typography variant="body">
           {isEditing
             ? t('admin.productForm.editDescription', {
                 title: productTitle ?? '',

@@ -10,6 +10,8 @@ const iconButtonVariants = cva(
         default: 'bg-neutral-900/80 border border-neutral-700 text-white hover:border-orange-600 hover:text-orange-500',
         ghost: 'bg-transparent text-neutral-400 hover:text-white',
         subtle: 'bg-neutral-900/60 text-neutral-300 hover:text-white hover:bg-neutral-900',
+        overlay:
+          'bg-neutral-950/90 hover:bg-neutral-950 text-white shadow-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
       },
       size: {
         sm: 'p-1.5',

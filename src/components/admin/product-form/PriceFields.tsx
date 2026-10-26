@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input, Typography } from '../../ui';
-import { theme } from '../../../theme';
+import { Box, Input, Checkbox, Typography } from '../../ui';
 import { formatPriceForLanguage } from '../../../i18n/formatters';
 import {
   getDiscountedCents,
@@ -39,7 +38,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
     : priceCents;
 
   return (
-    <Box className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <Box display="grid" columns="1" columnsMd="3" gap="lg">
       <Box>
         <Input
           id="prod-price"
@@ -53,20 +52,13 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
           onChange={(event) => onPriceChange(event.target.value)}
           placeholder={t('admin.priceFields.pricePlaceholder')}
         />
-        <Box className="mt-3 flex items-center gap-2">
-          <input
+        <Box marginTop="tight">
+          <Checkbox
             id="prod-price-on-request"
-            type="checkbox"
             checked={priceOnRequest}
-            onChange={(event) => onPriceOnRequestChange(event.target.checked)}
-            className="w-4 h-4 text-orange-600 bg-neutral-950 border-neutral-800 rounded focus:ring-orange-600"
+            onChange={onPriceOnRequestChange}
+            label={t('admin.priceFields.onRequest')}
           />
-          <label
-            htmlFor="prod-price-on-request"
-            className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
-          >
-            {t('admin.priceFields.onRequest')}
-          </label>
         </Box>
       </Box>
 
@@ -83,28 +75,30 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
           onChange={(event) => onDiscountChange(event.target.value)}
           placeholder={t('admin.priceFields.discountPlaceholder')}
         />
-        <Typography variant="caption" className={`mt-2 ${theme.colors.textMuted}`}>
+        <Typography variant="caption" tone="muted" marginTop="sm">
           {t('admin.priceFields.discountHint')}
         </Typography>
       </Box>
 
-      <Box className="rounded-lg border border-neutral-800 bg-neutral-950/60 p-4">
-        <Typography as="span" variant="caption" className="block text-xs font-semibold uppercase tracking-wider text-neutral-400">
+      <Box rounded="lg" border background="subtle" padding="md">
+        <Typography variant="caption" tone="muted" display="block">
           {t('admin.priceFields.preview')}
         </Typography>
         {finalCents == null ? (
-          <Typography variant="body" className="mt-2 text-sm text-neutral-300">{t('admin.priceFields.onRequest')}</Typography>
+          <Typography variant="body" tone="main" marginTop="sm">
+            {t('admin.priceFields.onRequest')}
+          </Typography>
         ) : (
-          <Box className="mt-2 space-y-1">
-            <Typography variant="body" className="text-lg font-bold text-orange-400">
+          <Box marginTop="sm" display="flex" direction="column" gap="xs">
+            <Typography variant="h4" tone="warning">
               {formatPriceForLanguage(finalCents, 'EUR', language)}
             </Typography>
             {hasValidDiscount && priceCents != null && (
-              <Typography variant="caption" className="text-xs text-neutral-400">
+              <Typography variant="caption" tone="muted">
                 {t('admin.priceFields.before')}{' '}
-                <s className="text-neutral-500">
+                <Typography as="span" size="xs" tone="subtle" strike>
                   {formatPriceForLanguage(priceCents, 'EUR', language)}
-                </s>{' '}
+                </Typography>{' '}
                 · -{parsedDiscount}%
               </Typography>
             )}

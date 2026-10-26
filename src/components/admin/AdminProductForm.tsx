@@ -1,7 +1,7 @@
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { Card, Box } from '../ui';
+import { Box, Typography } from '../ui';
 import {
   validateImageFile,
   type ImageValidationError,
@@ -183,7 +183,17 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
   };
 
   return (
-    <Card className="p-6 sm:p-8 space-y-6">
+    <Box
+      background="surface"
+      border
+      rounded="xl"
+      overflow="hidden"
+      padding="lg"
+      paddingSm="xl"
+      display="flex"
+      direction="column"
+      gap="lg"
+    >
       <ProductFormHeader
         isEditing={Boolean(editingProduct)}
         productTitle={editingProduct?.title}
@@ -191,13 +201,22 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       />
 
       {formError && (
-        <Box className="p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-3 text-red-300 text-sm">
+        <Box
+          display="flex"
+          align="center"
+          gap="tight"
+          padding="md"
+          background="dangerSoft"
+          border
+          borderTone="danger"
+          rounded="lg"
+        >
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
-          <span>{formError}</span>
+          <Typography variant="body" size="sm" tone="dangerSoft">{formError}</Typography>
         </Box>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <Box as="form" display="flex" direction="column" gap="lg" onSubmit={handleSubmit}>
         <ProductDetailsFields
           title={title}
           description={description}
@@ -247,8 +266,8 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           isSubmitting={isSubmitting}
           onCancelEdit={onCancelEdit}
         />
-      </form>
-    </Card>
+      </Box>
+    </Box>
   );
 };
 

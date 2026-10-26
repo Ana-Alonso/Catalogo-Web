@@ -1,34 +1,40 @@
 import React from 'react';
+import { Box } from '../ui';
 import { Skeleton } from '../ui/Skeleton';
 
 const SKELETON_ROWS = 3;
 
 export const AdminRegistrationsSkeleton: React.FC = () => {
   return (
-    <div className="space-y-6" aria-hidden="true">
+    <Box display="flex" direction="column" gap="lg" aria-hidden="true">
       {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-        <div key={index} className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-6 w-28" rounded="full" />
-          </div>
-          <div className="rounded-lg border border-neutral-800 divide-y divide-neutral-800">
+        <Box key={index} display="flex" direction="column" gap="tight">
+          <Box display="flex" align="center" justify="between" gap="tight">
+            <Skeleton height={5} width={48} />
+            <Skeleton height={6} width={28} rounded="full" />
+          </Box>
+          <Box rounded="lg" border divide="neutral">
             {Array.from({ length: 2 }, (_row, rowIndex) => (
-              <div
+              <Box
                 key={rowIndex}
-                className="p-4 flex flex-wrap items-center justify-between gap-3"
+                padding="md"
+                display="flex"
+                wrap
+                align="center"
+                justify="between"
+                gap="tight"
               >
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-3 w-56 max-w-full" />
-                </div>
-                <Skeleton className="h-8 w-32" />
-              </div>
+                <Box display="flex" direction="column" gap="sm">
+                  <Skeleton height={4} width={40} />
+                  <Skeleton height={3} width={56} maxWidth="full" />
+                </Box>
+                <Skeleton height={8} width={32} />
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 };
 

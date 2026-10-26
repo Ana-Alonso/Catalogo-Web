@@ -1,10 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Box, ErrorState } from '../ui';
-import { Typography } from '../ui';
+import { Card, Box, ErrorState, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../ui';
 import { AdminProductTableRow } from './AdminProductTableRow';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
-import { theme } from '../../theme';
 import type { CatalogItem } from '../../types/catalog';
 
 interface AdminProductTableProps {
@@ -30,9 +28,9 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
 
   if (isLoading) {
     return (
-      <div role="status" aria-label={t('admin.productTable.loading')}>
+      <Box role="status" aria-label={t('admin.productTable.loading')}>
         <AdminProductTableSkeleton />
-      </div>
+      </Box>
     );
   }
 
@@ -49,40 +47,42 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
 
   if (products.length === 0) {
     return (
-      <Card className="text-center py-12">
-        <Typography variant="body" className={theme.colors.textMuted}>{t('admin.productTable.empty')}</Typography>
+      <Card>
+        <Box textAlign="center" paddingY="3xl">
+          <Typography variant="body">{t('admin.productTable.empty')}</Typography>
+        </Box>
       </Card>
     );
   }
 
   return (
     <Card>
-      <Box className={`p-6 border-b ${theme.colors.border}`}>
-        <h3 className="text-xl font-bold text-white uppercase tracking-wider">
+      <Box padding="lg" divider="bottom">
+        <Typography variant="h3">
           {t('admin.productTable.title', { count: products.length })}
-        </h3>
-        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
+        </Typography>
+        <Typography variant="body">
           {t('admin.productTable.subtitle')}
         </Typography>
       </Box>
 
-      <Box className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className={`border-b ${theme.colors.border} bg-neutral-950/60 text-xs font-semibold uppercase tracking-wider text-neutral-400`}>
-              <th className="py-4 px-6">{t('admin.productTable.columns.artwork')}</th>
-              <th className="py-4 px-6">{t('admin.productTable.columns.category')}</th>
-              <th className="py-4 px-6">
+      <Box overflow="xAuto">
+        <Table fullWidth>
+          <TableHead>
+            <TableRow head>
+              <TableHeader>{t('admin.productTable.columns.artwork')}</TableHeader>
+              <TableHeader>{t('admin.productTable.columns.category')}</TableHeader>
+              <TableHeader>
                 {t('admin.productTable.columns.availability')}
-              </th>
-              <th className="py-4 px-6">{t('admin.productTable.columns.price')}</th>
-              <th className="py-4 px-6">{t('admin.productTable.columns.links')}</th>
-              <th className="py-4 px-6 text-right">
+              </TableHeader>
+              <TableHeader>{t('admin.productTable.columns.price')}</TableHeader>
+              <TableHeader>{t('admin.productTable.columns.links')}</TableHeader>
+              <TableHeader align="right">
                 {t('admin.productTable.columns.actions')}
-              </th>
-            </tr>
-          </thead>
-          <tbody className={`divide-y ${theme.colors.borderSubtle} text-sm`}>
+              </TableHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {products.map((item) => (
               <AdminProductTableRow
                 key={item.id}
@@ -92,8 +92,8 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                 onEdit={onEdit}
               />
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </Box>
     </Card>
   );

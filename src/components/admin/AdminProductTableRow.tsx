@@ -1,8 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
-import { Badge, Box, Button } from '../ui';
-import { theme } from '../../theme';
+import { Badge, Box, Button, Typography, Image, TableCell, TableRow, TextLink } from '../ui';
 import { formatPriceForLanguage } from '../../i18n/formatters';
 import {
   availabilityTranslationKeys,
@@ -44,17 +43,23 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
       : item.priceCents;
 
   return (
-    <tr className="hover:bg-neutral-800/40 transition-colors">
-      <td className="py-4 px-6">
-        <Box className="flex items-center gap-3">
-          <img
+    <TableRow hoverable>
+      <TableCell>
+        <Box display="flex" align="center" gap="tight">
+          <Image
             src={item.image}
             alt=""
-            className="w-12 h-12 rounded object-cover bg-neutral-800 flex-shrink-0"
+            width={12}
+            height={12}
+            rounded="md"
+            background="strong"
+            shrink={false}
           />
           <Box>
-            <Box className="flex flex-wrap items-center gap-1.5">
-              <span className="font-semibold text-white">{item.title}</span>
+            <Box display="flex" wrap align="center" gap="xs">
+              <Typography size="sm" tone="main" weight="semibold">
+                {item.title}
+              </Typography>
               {item.source === 'etsy' && (
                 <Badge variant="neutral">{t('admin.productTable.etsy')}</Badge>
               )}
@@ -62,78 +67,81 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
                 <Badge variant="outline">{t('admin.productTable.hidden')}</Badge>
               )}
             </Box>
-            <Box className={`${theme.colors.textMuted} text-xs line-clamp-1 max-w-xs`}>
+            <Typography variant="body" size="xs" clamp={1} maxWidth="xs">
               {item.description}
-            </Box>
+            </Typography>
           </Box>
         </Box>
-      </td>
-      <td className="py-4 px-6">
+      </TableCell>
+      <TableCell>
         <Badge variant="outline">
           {t(categoryTranslationKeys[item.category])}
         </Badge>
         {item.category === 'talleres' && (
-          <div className="mt-1.5 text-xs text-neutral-500">
+          <Typography size="xs" tone="subtle" marginTop="tight">
             {item.cupo != null
               ? t('admin.productTable.capacity', { count: item.cupo })
               : t('admin.productTable.noCapacity')}
-          </div>
+          </Typography>
         )}
-      </td>
-      <td className="py-4 px-6">
+      </TableCell>
+      <TableCell>
         <Badge variant={statusBadgeVariant[currentStatus]}>
           {t(availabilityTranslationKeys[currentStatus])}
         </Badge>
-      </td>
-      <td className="py-4 px-6 font-medium text-neutral-300">
+      </TableCell>
+      <TableCell weight="medium" tone="muted">
         {displayCents != null ? (
-          <Box className="space-y-1">
-            <span>
-              {formatPriceForLanguage(displayCents, currency, language)}
-            </span>
+          <Box display="flex" direction="column" gap="xs">
+            <Typography>{formatPriceForLanguage(displayCents, currency, language)}</Typography>
             {offerPercent != null && item.priceCents != null && (
-              <Box className="text-xs text-neutral-500">
-                <s>
+              <Typography as="span" size="xs" tone="subtle">
+                <Typography as="span" size="xs" tone="subtle" strike>
                   {formatPriceForLanguage(
                     item.priceCents,
                     currency,
                     language
                   )}
-                </s>
-                <span className="ml-2 text-orange-400">-{offerPercent}%</span>
-              </Box>
+                </Typography>
+                <Typography as="span" size="xs" tone="warning" marginLeft="sm">
+                  -{offerPercent}%
+                </Typography>
+              </Typography>
             )}
           </Box>
         ) : (
           t('admin.productTable.consult')
         )}
-      </td>
-      <td className="py-4 px-6">
-        <Box className="flex items-center gap-3">
+      </TableCell>
+      <TableCell>
+        <Box display="flex" align="center" gap="tight">
           {item.category !== 'talleres' && item.etsyLink && (
-            <a
+            <TextLink
               href={item.etsyLink}
               target="_blank"
               rel="noopener noreferrer"
-              className={`text-xs ${theme.colors.primaryText} hover:underline inline-flex items-center gap-1`}
+              size="xs"
+              hover="underline"
             >
               Etsy <ExternalLink className="w-3 h-3" />
-            </a>
+            </TextLink>
           )}
           {item.category !== 'talleres' && item.vintedLink && (
-            <a
+            <TextLink
               href={item.vintedLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-neutral-400 hover:text-white inline-flex items-center gap-1"
+              tone="muted"
+              size="xs"
+              hover="bright"
             >
               Vinted <ExternalLink className="w-3 h-3" />
-            </a>
+            </TextLink>
           )}
         </Box>
-      </td>
-      <td className="py-4 px-6 text-right">
-        <Box className="flex items-center justify-end gap-1">
+      </TableCell>
+      <TableCell align="right">
+        <Box display="flex" align="center" justify="end" gap="xs">
           <Button
             variant="ghost"
             size="sm"
@@ -177,8 +185,8 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
             <Trash2 className="w-4 h-4 text-red-400" />
           </Button>
         </Box>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
 

@@ -1,8 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input } from '../../ui';
-import { Typography } from '../../ui';
-import { theme } from '../../../theme';
+import { Box, Input, Typography } from '../../ui';
 
 interface WorkshopFieldsProps {
   eventDate: string;
@@ -24,19 +22,23 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Box className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 rounded-lg bg-neutral-950 border border-neutral-800">
-      <Box>
-        <label htmlFor="prod-event-date" className={theme.inputs.label}>
-          {t('admin.workshopFields.dateLabel')}
-        </label>
-        <input
-          id="prod-event-date"
-          type="datetime-local"
-          value={eventDate}
-          onChange={(event) => onEventDateChange(event.target.value)}
-          className={theme.inputs.base}
-        />
-      </Box>
+    <Box
+      display="grid"
+      columns="1"
+      columnsMd="3"
+      gap="lg"
+      padding="md"
+      rounded="lg"
+      background="neutral"
+      border
+    >
+      <Input
+        id="prod-event-date"
+        label={t('admin.workshopFields.dateLabel')}
+        type="datetime-local"
+        value={eventDate}
+        onChange={(event) => onEventDateChange(event.target.value)}
+      />
       <Input
         id="prod-event-loc"
         label={t('admin.workshopFields.locationLabel')}
@@ -46,20 +48,17 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
         placeholder={t('admin.workshopFields.locationPlaceholder')}
       />
       <Box>
-        <label htmlFor="prod-cupo" className={theme.inputs.label}>
-          {t('admin.workshopFields.capacityLabel')}
-        </label>
-        <input
+        <Input
           id="prod-cupo"
+          label={t('admin.workshopFields.capacityLabel')}
           type="number"
           min={1}
           step={1}
           value={cupo}
           onChange={(event) => onCupoChange(event.target.value)}
-          className={theme.inputs.base}
           placeholder={t('admin.workshopFields.capacityPlaceholder')}
         />
-        <Typography variant="body" className="mt-1 text-xs text-neutral-500">
+        <Typography variant="body" tone="subtle" size="xs" marginTop="xs">
           {t('admin.workshopFields.capacityHint')}
         </Typography>
       </Box>

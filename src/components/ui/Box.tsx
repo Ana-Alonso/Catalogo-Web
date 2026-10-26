@@ -1,19 +1,16 @@
-import React, { type HTMLAttributes, type ElementType } from 'react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export interface BoxProps extends HTMLAttributes<HTMLElement> {
-  as?: ElementType;
-}
+import React from 'react';
+import { cn } from '../../design-system/utils/cn';
+import { designClasses, splitDesignProps, type BoxProps } from './boxClasses';
 
 export const Box: React.FC<BoxProps> = ({
   as: Component = 'div',
   className,
   children,
-  ...props
+  ...rest
 }) => {
+  const { design, dom } = splitDesignProps(rest);
   return (
-    <Component className={twMerge(clsx(className))} {...props}>
+    <Component className={cn(designClasses(design), className)} {...dom}>
       {children}
     </Component>
   );

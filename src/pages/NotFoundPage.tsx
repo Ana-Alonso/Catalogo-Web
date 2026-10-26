@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { normalizeLanguage } from '../i18n/languages';
 import { SITE_NAME } from '../seo/site';
-import { theme } from '../theme';
+import { Box, NavLink, Typography } from '../components/ui';
 
 export const NotFoundPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -15,23 +14,41 @@ export const NotFoundPage: React.FC = () => {
   useDocumentTitle(`${t('errors.notFound.title')} | ${SITE_NAME}`);
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-50 flex items-center justify-center px-4">
-      <div className="max-w-xl text-center">
-        <p className={`${theme.colors.primaryText} text-6xl font-bold`}>404</p>
-        <h1 className="mt-4 text-3xl font-bold tracking-wide uppercase">
-          {t('errors.notFound.title')}
-        </h1>
-        <p className={`${theme.colors.textMuted} mt-4 text-base`}>
-          {t('errors.notFound.description')}
-        </p>
-        <Link
-          to={`/${language}`}
-          className={`inline-flex mt-8 items-center justify-center rounded-md px-6 py-3 text-xs font-bold uppercase tracking-widest ${theme.colors.primary} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950`}
+    <Box
+      as="main"
+      minHeight="screen"
+      background="neutral"
+      tone="bright"
+      display="flex"
+      align="center"
+      justify="center"
+      paddingX="md"
+    >
+      <Box maxWidth="xl" textAlign="center">
+        <Typography as="p" variant="plain" tone="primary" size="display" weight="bold">
+          404
+        </Typography>
+        <Typography
+          as="h1"
+          variant="plain"
+          marginTop="md"
+          size="3xl"
+          weight="bold"
+          tracking="wide"
+          transform="uppercase"
         >
-          {t('errors.notFound.backHome')}
-        </Link>
-      </div>
-    </main>
+          {t('errors.notFound.title')}
+        </Typography>
+        <Typography variant="body" size="base" tone="muted" marginTop="md">
+          {t('errors.notFound.description')}
+        </Typography>
+        <Box marginTop="xl">
+          <NavLink to={`/${language}`} variant="cta">
+            {t('errors.notFound.backHome')}
+          </NavLink>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

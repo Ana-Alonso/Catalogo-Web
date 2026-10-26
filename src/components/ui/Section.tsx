@@ -1,6 +1,7 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../design-system/utils/cn';
+import { MIN_HEIGHT } from './styles';
 
 const sectionVariants = cva('w-full', {
   variants: {
@@ -34,14 +35,19 @@ export interface SectionProps
   extends React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof sectionVariants> {
   as?: React.ElementType;
+  minHeight?: keyof typeof MIN_HEIGHT;
 }
 
 export const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, paddingY, background, overflow, as: Component = 'section', children, ...props }, ref) => {
+  ({ className, paddingY, background, overflow, minHeight, as: Component = 'section', children, ...props }, ref) => {
     return (
       <Component
         ref={ref}
-        className={cn(sectionVariants({ paddingY, background, overflow }), className)}
+        className={cn(
+          sectionVariants({ paddingY, background, overflow }),
+          minHeight && MIN_HEIGHT[minHeight],
+          className
+        )}
         {...props}
       >
         {children}

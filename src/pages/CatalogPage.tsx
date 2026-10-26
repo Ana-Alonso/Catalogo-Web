@@ -6,7 +6,7 @@ import HeroSection from '../components/hero/HeroSection';
 import BookShowcase from '../components/book/BookShowcase';
 import GallerySection from '../components/catalog/GallerySection';
 import JsonLd from '../components/seo/JsonLd';
-import { Container } from '../components/ui';
+import { Box, Container, NavLink } from '../components/ui';
 import { useProducts } from '../hooks/useProducts';
 import { useWorkshopSpots } from '../hooks/useWorkshopSpots';
 import { normalizeLanguage } from '../i18n/languages';
@@ -48,21 +48,25 @@ export const CatalogPage: React.FC = () => {
   } = useWorkshopSpots();
 
   return (
-    <div className="bg-neutral-950 min-h-screen text-neutral-50 selection:bg-orange-600 selection:text-white font-sans overflow-x-hidden">
+    <Box
+      background="neutral"
+      minHeight="screen"
+      tone="bright"
+      selection="primary"
+      font="sans"
+      overflow="xHidden"
+    >
       <JsonLd data={structuredData} />
-      <a 
-        href="#main-content" 
-        className="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:p-4 focus:bg-orange-600 focus:text-white focus:top-4 focus:left-4 rounded-md shadow-lg"
-      >
+      <NavLink variant="skip" href="#main-content">
         {t('a11y.skipToContent')}
-      </a>
+      </NavLink>
 
       <Navbar 
         activeCategory={activeCategory} 
         onSelectCategory={setActiveCategory}
       />
       
-      <main id="main-content">
+      <Box as="main" id="main-content">
         <HeroSection 
           items={products}
           onShowNew={() => {
@@ -116,10 +120,10 @@ export const CatalogPage: React.FC = () => {
           onRetrySpots={refreshSpots}
         />
         </Container>
-      </main>
+      </Box>
 
       <Footer />
-    </div>
+    </Box>
   );
 };
 

@@ -1,10 +1,8 @@
 import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
-import { Button, Card, Input, PasswordInput } from '../ui';
-import { Typography } from '../ui';
+import { Box, Button, Image, Input, PasswordInput, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
-import { theme } from '../../theme';
 import logoImg from '../../assets/Logo.png';
 
 interface AdminLoginFormProps {
@@ -37,27 +35,55 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
   };
 
   return (
-    <div
-      className={`fixed inset-0 z-50 bg-neutral-950 flex flex-col justify-center items-center px-4`}
+    <Box
+      position="fixed"
+      inset
+      zIndex={50}
+      background="neutral"
+      display="flex"
+      direction="column"
+      justify="center"
+      align="center"
+      paddingX="md"
     >
-      <div className="absolute top-6 right-6">
+      <Box position="absolute" corner="top-right-lg">
         <LanguageSwitcher />
-      </div>
-      <Card className="max-w-md w-full p-8 text-center shadow-2xl">
-        <div className="flex justify-center mb-6">
-          <img src={logoImg} alt={t('nav.logoAlt')} className="h-12 w-auto object-contain" />
-        </div>
-        <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600">
-          <Lock className="w-6 h-6" aria-hidden="true" />
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-wider">
+      </Box>
+      <Box
+        width="full"
+        maxWidth="cover"
+        background="surface"
+        border
+        rounded="xl"
+        overflow="hidden"
+        padding="xl"
+        textAlign="center"
+        shadow="dramatic"
+      >
+        <Box display="flex" justify="center" marginBottom="lg">
+          <Image src={logoImg} alt={t('nav.logoAlt')} height={12} fit="contain" />
+        </Box>
+        <Box
+          width={12}
+          height={12}
+          background="strong"
+          rounded="full"
+          display="flex"
+          align="center"
+          justify="center"
+          center
+          marginBottom="md"
+        >
+          <Lock className="w-6 h-6 text-orange-600" aria-hidden="true" />
+        </Box>
+        <Typography variant="h2" size="heading-sm" weight="bold" marginBottom="sm">
           {t('admin.login.title')}
-        </h2>
-        <Typography variant="body" className={`${theme.colors.textMuted} text-sm mb-6`}>
+        </Typography>
+        <Typography variant="body" marginBottom="lg">
           {t('admin.login.subtitle')}
         </Typography>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <Box as="form" display="flex" direction="column" gap="md" onSubmit={handleSubmit}>
           <Input
             id="admin-email"
             label={t('admin.login.emailLabel')}
@@ -79,21 +105,21 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
             required
           />
           {errorMessage && (
-            <Typography variant="body" className="text-xs text-red-400" role="alert">
+            <Typography variant="body" size="xs" tone="danger" role="alert">
               {errorMessage}
             </Typography>
           )}
-          <div className="flex gap-3 pt-2">
-            <Button variant="secondary" className="w-1/2" onClick={onClose}>
+          <Box display="grid" columns={2} gap="tight" paddingTop="sm">
+            <Button variant="secondary" fullWidth onClick={onClose}>
               {t('admin.backToSite')}
             </Button>
-            <Button type="submit" variant="primary" className="w-1/2" disabled={isSubmitting}>
+            <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
               {isSubmitting ? t('admin.login.submitting') : t('admin.login.submit')}
             </Button>
-          </div>
-        </form>
-      </Card>
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

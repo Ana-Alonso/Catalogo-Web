@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Plus } from 'lucide-react';
 import { Button, Box } from '../ui';
-import { theme } from '../../theme';
 
 interface ProductFormActionsProps {
   isEditing: boolean;
@@ -19,7 +18,11 @@ export const ProductFormActions: React.FC<ProductFormActionsProps> = ({
 
   return (
     <Box
-      className={`pt-4 border-t ${theme.colors.border} flex justify-end gap-3`}
+      display="flex"
+      justify="end"
+      gap="tight"
+      paddingTop="md"
+      divider="top"
     >
       {isEditing && onCancelEdit && (
         <Button variant="outline" onClick={onCancelEdit}>

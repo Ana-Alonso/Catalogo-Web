@@ -1,10 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Card, Badge, Button, Box, ErrorState } from '../ui';
-import { Typography } from '../ui';
+import { Card, Badge, Button, Box, ErrorState, Typography } from '../ui';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
-import { theme } from '../../theme';
 import { getIntlLocale } from '../../i18n/languages';
 import { registrationStatusTranslationKeys } from '../../i18n/labels';
 import type { CatalogItem } from '../../types/catalog';
@@ -62,23 +60,23 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
   return (
     <Card>
-      <Box className={`p-6 border-b ${theme.colors.border} flex items-center gap-3`}>
+      <Box padding="lg" divider="bottom" display="flex" align="center" gap="tight">
         <ClipboardList className="w-5 h-5 text-orange-500" aria-hidden="true" />
         <Box>
-          <h3 className="text-xl font-bold text-white uppercase tracking-wider">
+          <Typography variant="h3">
             {t('admin.registrations.title', { count: registrations.length })}
-          </h3>
-          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
+          </Typography>
+          <Typography variant="body">
             {t('admin.registrations.subtitle')}
           </Typography>
         </Box>
       </Box>
 
-      <Box className="p-6 space-y-8">
+      <Box padding="lg" display="flex" direction="column" gap="xl">
         {isLoading && (
-          <div role="status" aria-label={t('admin.registrations.loading')}>
+          <Box role="status" aria-label={t('admin.registrations.loading')}>
             <AdminRegistrationsSkeleton />
-          </div>
+          </Box>
         )}
 
         {!isLoading && error && (
@@ -91,9 +89,11 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
         )}
 
         {!isLoading && !error && workshopsWithRegistrations.length === 0 && (
-          <Typography variant="body" className={`${theme.colors.textMuted} text-sm text-center py-4`}>
-            {t('admin.registrations.emptyWorkshops')}
-          </Typography>
+          <Box paddingY="xs" textAlign="center">
+            <Typography variant="body">
+              {t('admin.registrations.emptyWorkshops')}
+            </Typography>
+          </Box>
         )}
 
         {!isLoading && !error &&
@@ -105,10 +105,18 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
             return (
               <Box key={workshop.id}>
-                <Box className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                  <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                <Box display="flex" wrap align="center" justify="between" gap="tight" marginBottom="md">
+                  <Typography
+                    as="h4"
+                    variant="body"
+                    size="sm"
+                    tone="main"
+                    weight="bold"
+                    transform="uppercase"
+                    tracking="wider"
+                  >
                     {workshop.title}
-                  </h4>
+                  </Typography>
                   <Badge variant={cupo !== null && activeCount >= cupo ? 'outline' : 'primary'}>
                     <Users className="w-3 h-3 mr-1" aria-hidden="true" />
                     {cupo !== null
@@ -122,31 +130,36 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                   </Badge>
                 </Box>
 
-                <Box className={`rounded-lg border ${theme.colors.border} divide-y ${theme.colors.borderSubtle}`}>
+                <Box rounded="lg" border divide="neutral">
                   {list.length === 0 && (
-                    <Typography variant="body" className={`${theme.colors.textMuted} text-sm p-4`}>
-                      {t('admin.registrations.empty')}
-                    </Typography>
+                    <Box padding="md">
+                      <Typography variant="body">{t('admin.registrations.empty')}</Typography>
+                    </Box>
                   )}
 
                   {list.map((registration) => (
                     <Box
                       key={registration.id}
-                      className="p-4 flex flex-wrap items-center justify-between gap-3"
+                      padding="md"
+                      display="flex"
+                      wrap
+                      align="center"
+                      justify="between"
+                      gap="tight"
                     >
                       <Box>
-                        <span className="text-sm font-semibold text-white block">
+                        <Typography variant="body" size="sm" tone="main" weight="semibold" display="block">
                           {registration.name}
-                        </span>
-                        <span className={`text-xs ${theme.colors.textMuted}`}>
+                        </Typography>
+                        <Typography variant="body" size="xs">
                           {registration.email}
-                        </span>
+                        </Typography>
                       </Box>
 
-                      <Box className="flex flex-wrap items-center gap-2">
-                        <span className={`text-xs ${theme.colors.textSubtle}`}>
+                      <Box display="flex" wrap align="center" gap="sm">
+                        <Typography variant="body" size="xs" tone="subtle">
                           {formatRegistrationDate(registration.created_at, language)}
-                        </span>
+                        </Typography>
                         <Badge variant={statusBadgeVariant[registration.status]}>
                           {t(registrationStatusTranslationKeys[registration.status])}
                         </Badge>

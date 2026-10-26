@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Animated, Box, Container, Header as UIHeader, IconButton, Image, NavLink, Presence, Typography } from '../ui';
 import { Menu, X } from 'lucide-react';
 import { useWindowScroll } from '../../hooks/useWindowScroll';
-import { Box, Container, Header as UIHeader, Typography } from '../ui';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
-import { theme } from '../../theme';
 import type { CategoryType, NavLinkItem } from '../../types/catalog';
 import logoImg from '../../assets/Logo.png';
 
@@ -36,101 +34,123 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <UIHeader 
+    <UIHeader
       variant={isScrolled ? 'default' : 'transparent'}
-      className={`fixed top-0 left-0 transition-all duration-300 ${
-        isScrolled ? 'shadow-lg shadow-black/50' : ''
-      }`}
+      position="fixed"
+      elevated={isScrolled}
     >
       <Container as="nav" aria-label={t('nav.ariaLabel')}>
-        <Box className="flex justify-between items-center h-20">
-          <a 
-            href="#" 
+        <Box display="flex" justify="between" align="center" height="nav">
+          <Box
+            as="a"
+            href="#"
             onClick={() => handleLinkClick('todas')}
-            className={`flex-shrink-0 flex items-center gap-3 cursor-pointer focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} rounded-sm group`}
+            shrink={false}
+            display="flex"
+            align="center"
+            gap="tight"
+            cursor="pointer"
+            focusRing="plain"
+            rounded="sm"
+            group
             aria-label={t('nav.homeAria')}
           >
-            <img 
-              src={logoImg} 
+            <Image
+              src={logoImg}
               alt={t('nav.logoAlt')}
-              className="h-11 w-auto max-w-[130px] object-contain transition-transform group-hover:scale-105" 
+              height={11}
+              width="auto"
+              maxWidth="logo"
+              fit="contain"
+              effect="zoomFast"
             />
-            <Typography variant="h4" as="span" className="tracking-widest uppercase hidden sm:inline">
+            <Typography
+              variant="h4"
+              as="span"
+              tracking="widest"
+              transform="uppercase"
+              display="inline"
+              hideBelow="sm"
+            >
               <Trans
                 i18nKey="brand.name"
-                components={{ highlight: <span className={theme.colors.primaryText} /> }}
+                components={{ highlight: <Typography as="span" variant="plain" tone="primary" /> }}
               />
             </Typography>
-          </a>
+          </Box>
 
-          <Box className="hidden md:flex items-center space-x-6">
+          <Box display="flex" align="center" gap="lg" hideBelow="md">
             {navLinks.map((link) => {
               const isActive = activeCategory === link.category;
               return (
-                <a
+                <NavLink
                   key={link.category}
                   href={link.href}
                   onClick={() => handleLinkClick(link.category)}
-                  className={`text-sm font-medium tracking-wide uppercase px-3 py-1.5 rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
-                    isActive 
-                      ? 'text-orange-500 font-semibold' 
-                      : 'text-neutral-300 hover:text-white'
-                  }`}
+                  active={isActive}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {t(link.labelKey)}
-                </a>
+                </NavLink>
               );
             })}
             <LanguageSwitcher />
           </Box>
 
-          <Box className="md:hidden flex items-center gap-2">
+          <Box display="flex" align="center" gap="sm" showBelow="md">
             <LanguageSwitcher onSelect={() => setIsOpen(false)} />
-            <button
-              type="button"
+            <IconButton
+              variant="ghost"
               onClick={() => setIsOpen((prev) => !prev)}
-              className={`text-neutral-300 hover:text-white p-2 rounded-md focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus}`}
               aria-expanded={isOpen}
               aria-label={isOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            </IconButton>
           </Box>
         </Box>
 
-        <AnimatePresence>
+        <Presence>
           {isOpen && (
-            <motion.div
+            <Animated
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-neutral-900 border-b border-neutral-800 rounded-b-lg overflow-hidden"
+              hideFrom="md"
+              background="surface"
+              divider="bottom"
+              rounded="bottom-lg"
+              overflow="hidden"
             >
-              <Box className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
+              <Box
+                display="flex"
+                direction="column"
+                align="stretch"
+                gap="xs"
+                paddingX="sm"
+                paddingTop="sm"
+                paddingBottom="md"
+              >
                 {navLinks.map((link) => {
                   const isActive = activeCategory === link.category;
                   return (
-                    <a
+                    <NavLink
                       key={link.category}
+                      variant="mobile"
                       href={link.href}
                       onClick={() => handleLinkClick(link.category)}
-                      className={`block px-3 py-3 text-base font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
-                        isActive
-                          ? 'text-orange-500 bg-neutral-800/80 font-semibold'
-                          : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
-                      }`}
+                      active={isActive}
                       aria-current={isActive ? 'page' : undefined}
                     >
                       {t(link.labelKey)}
-                    </a>
+                    </NavLink>
                   );
                 })}
               </Box>
-            </motion.div>
+            </Animated>
           )}
-        </AnimatePresence>
+        </Presence>
       </Container>
     </UIHeader>
   );

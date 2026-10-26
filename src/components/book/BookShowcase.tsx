@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
-import { Box, Container, IconButton, Section, Typography } from '../ui';
-import { theme } from '../../theme';
+import {
+  Animated,
+  AnimatedButton,
+  AnimatedImage,
+  Box,
+  Button,
+  Container,
+  Dot,
+  IconButton,
+  Image,
+  Presence,
+  Section,
+  Typography,
+} from '../ui';
 import libro1 from '../../assets/book/Libro1.jpeg';
 import libro2 from '../../assets/book/Libro2.jpeg';
 import libro3 from '../../assets/book/Libro3.jpeg';
@@ -45,31 +56,41 @@ export const BookShowcase: React.FC = () => {
   return (
     <Section paddingY="lg" background="neutral" overflow="hidden">
       <Container>
-        <motion.div
+        <Animated
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col items-center justify-center mb-8"
+          display="flex"
+          direction="column"
+          align="center"
+          justify="center"
+          marginBottom="xl"
         >
-          <div className="relative w-full max-w-[600px] h-[320px] sm:h-[380px] md:h-[440px] flex items-center justify-center">
-            <IconButton
-              onClick={goToPrevious}
-              className="absolute left-0 sm:-left-12 z-30"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </IconButton>
-            <IconButton
-              onClick={goToNext}
-              className="absolute right-0 sm:-right-12 z-30"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </IconButton>
+          <Box
+            position="relative"
+            width="full"
+            maxWidth="showcase"
+            height={80}
+            heightSm={95}
+            heightMd={110}
+            display="flex"
+            align="center"
+            justify="center"
+          >
+            <Box position="absolute" edge="left-out" zIndex={30}>
+              <IconButton onClick={goToPrevious} aria-label="Previous">
+                <ChevronLeft className="w-5 h-5" />
+              </IconButton>
+            </Box>
+            <Box position="absolute" edge="right-out" zIndex={30}>
+              <IconButton onClick={goToNext} aria-label="Next">
+                <ChevronRight className="w-5 h-5" />
+              </IconButton>
+            </Box>
 
-            <AnimatePresence mode="wait">
-              <motion.button
+            <Presence mode="wait">
+              <AnimatedButton
                 key={currentIndex}
                 initial={{ opacity: 0, scale: 0.95, x: 40 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -77,94 +98,120 @@ export const BookShowcase: React.FC = () => {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
                 type="button"
                 onClick={() => setIsLightboxOpen(true)}
-                className="relative w-[200px] sm:w-[240px] md:w-[280px] h-[280px] sm:h-[336px] md:h-[392px] cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                position="relative"
+                width={50}
+                widthSm={60}
+                widthMd={70}
+                height={70}
+                heightSm={84}
+                heightMd={98}
+                cursor="zoom"
+                focusRing="visiblePrimary"
                 aria-label={t('book.imageAlt')}
               >
-                <Box className="relative w-full h-full rounded-lg overflow-hidden shadow-2xl shadow-black/70">
-                  <img
+                <Box
+                  position="relative"
+                  width="full"
+                  height="full"
+                  rounded="lg"
+                  overflow="hidden"
+                  shadow="dramatic"
+                >
+                  <Image
                     src={images[currentIndex]}
                     alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
-                    className="w-full h-full object-cover"
+                    fullWidth
+                    height="full"
                     loading="eager"
                   />
                 </Box>
-              </motion.button>
-            </AnimatePresence>
+              </AnimatedButton>
+            </Presence>
 
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+            <Box
+              position="absolute"
+              edge="bottom-center-out"
+              display="flex"
+              gap="sm"
+            >
               {images.map((_, index) => (
-                <button
+                <Dot
                   key={index}
-                  type="button"
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex ? 'bg-orange-600 w-6' : 'bg-neutral-700 hover:bg-neutral-500'
-                  }`}
+                  active={index === currentIndex}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
-            </div>
-          </div>
-        </motion.div>
+            </Box>
+          </Box>
+        </Animated>
 
-        <Box className="max-w-3xl mx-auto text-center mt-12">
-          <Typography variant="h2" className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mb-3">
+        <Box maxWidth="md" center textAlign="center" marginTop="3xl">
+          <Typography variant="h2" size="heading-sm" marginBottom="sm">
             {t('book.title')}
           </Typography>
-          <Box className="h-px w-16 bg-orange-600 mx-auto mb-4" />
-          <Typography variant="body" className={`text-base md:text-lg mb-8 leading-relaxed ${theme.colors.textMuted}`}>
+          <Box height="hairline" width={16} background="primaryFlat" center marginBottom="md" />
+          <Typography variant="body" size="reading" tone="muted" marginBottom="xl">
             {t('book.description')}
           </Typography>
-          <a
+          <Button
             href={AMAZON_BOOK_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold tracking-wide uppercase rounded-sm transition-colors border border-orange-600/80 text-orange-400 hover:bg-orange-600 hover:text-white hover:border-orange-600 focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950`}
+            variant="accent"
+            size="md"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-4 h-4" aria-hidden="true" />
             {t('book.cta')}
-          </a>
+          </Button>
         </Box>
       </Container>
 
-      <AnimatePresence>
+      <Presence>
         {isLightboxOpen && (
-          <motion.div
+          <Animated
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+            position="fixed"
+            inset
+            zIndex={50}
+            background="overlayStrong"
+            display="flex"
+            align="center"
+            justify="center"
+            padding="md"
             onClick={() => setIsLightboxOpen(false)}
           >
-            <IconButton
-              onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-4 right-4"
-              aria-label="Close"
-            >
-              <X className="w-6 h-6" />
-            </IconButton>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                goToPrevious();
-              }}
-              className="absolute left-4"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </IconButton>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNext();
-              }}
-              className="absolute right-4"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </IconButton>
-            <motion.img
+            <Box position="absolute" corner="top-right-md">
+              <IconButton onClick={() => setIsLightboxOpen(false)} aria-label="Close">
+                <X className="w-6 h-6" />
+              </IconButton>
+            </Box>
+            <Box position="absolute" edge="left-md">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </IconButton>
+            </Box>
+            <Box position="absolute" edge="right-md">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+                aria-label="Next"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </IconButton>
+            </Box>
+            <AnimatedImage
               key={currentIndex}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -172,12 +219,14 @@ export const BookShowcase: React.FC = () => {
               transition={{ duration: 0.3 }}
               src={images[currentIndex]}
               alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
+              maxWidth="full"
+              maxHeight="full"
+              fit="contain"
               onClick={(e) => e.stopPropagation()}
             />
-          </motion.div>
+          </Animated>
         )}
-      </AnimatePresence>
+      </Presence>
     </Section>
   );
 };

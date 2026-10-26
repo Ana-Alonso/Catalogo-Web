@@ -8,9 +8,7 @@ import { AdminRegistrationsPanel } from './AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './AdminWorkshopCalendarPanel';
 import { AdminLoginForm } from './AdminLoginForm';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
-import { Container } from '../ui';
-import { Typography } from '../ui';
-import { theme } from '../../theme';
+import { Container, Typography, Box } from '../ui';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import type {
@@ -160,13 +158,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   if (isLoading) {
     return (
-      <div
-        className={`fixed inset-0 z-50 ${theme.colors.background} flex flex-col justify-center items-center gap-3`}
+      <Box
+        position="fixed"
+        inset
+        zIndex={50}
+        background="neutral"
+        display="flex"
+        direction="column"
+        justify="center"
+        align="center"
+        gap="tight"
         role="status"
       >
         <LoaderCircle className="w-6 h-6 text-orange-500 animate-spin" aria-hidden="true" />
-        <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>{t('admin.loadingSession')}</Typography>
-      </div>
+        <Typography variant="body">{t('admin.loadingSession')}</Typography>
+      </Box>
     );
   }
 
@@ -181,25 +187,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   }
 
   return (
-    <div className={`fixed inset-0 z-50 ${theme.colors.background} overflow-y-auto`}>
+    <Box
+      position="fixed"
+      inset
+      zIndex={50}
+      background="neutral"
+      overflow="yAuto"
+    >
       <AdminDashboardHeader onClose={onClose} onLogout={handleLogout} />
 
-      <Container as="main" className="py-10 space-y-8">
+      <Container
+        as="main"
+        paddingY="2xl"
+        display="flex"
+        direction="column"
+        gap="xl"
+      >
         {feedbackMsg && (
-          <div
-            className={`p-4 rounded-xl border flex items-center gap-3 text-sm ${
-              feedbackMsg.type === 'success'
-                ? 'bg-green-950/40 border-green-800 text-green-300'
-                : 'bg-red-950/40 border-red-800 text-red-300'
-            }`}
+          <Box
+            padding="md"
+            rounded="xl"
+            border
+            display="flex"
+            align="center"
+            gap="tight"
+            background={feedbackMsg.type === 'success' ? 'successSoft' : 'dangerSoft'}
+            borderTone={feedbackMsg.type === 'success' ? 'success' : 'danger'}
           >
             {feedbackMsg.type === 'success' ? (
               <CheckCircle className="w-5 h-5 text-green-400" />
             ) : (
               <AlertCircle className="w-5 h-5 text-red-400" />
             )}
-            <span>{feedbackMsg.text}</span>
-          </div>
+            <Typography
+              variant="body"
+              size="sm"
+              tone={feedbackMsg.type === 'success' ? 'successSoft' : 'dangerSoft'}
+            >
+              {feedbackMsg.text}
+            </Typography>
+          </Box>
         )}
 
         {createdWorkshop && (
@@ -249,7 +276,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onDelete={onDeleteRegistration}
         />
       </Container>
-    </div>
+    </Box>
   );
 };
 

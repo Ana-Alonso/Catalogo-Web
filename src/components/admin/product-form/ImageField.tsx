@@ -1,8 +1,7 @@
 import React, { type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
-import { Box } from '../../ui';
-import { theme } from '../../../theme';
+import { Box, Image, Input, Typography } from '../../ui';
 import { ACCEPTED_IMAGE_INPUT } from '../../../utils/imageValidation';
 
 interface ImageFieldProps {
@@ -23,52 +22,83 @@ export const ImageField: React.FC<ImageFieldProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Box className="space-y-4">
-      <label className={theme.inputs.label}>
+    <Box display="flex" direction="column" gap="md">
+      <Typography variant="body" size="xs" tone="muted" weight="semibold" transform="uppercase" tracking="wider" marginBottom="sm">
         {t('admin.imageField.label')}{' '}
         {isEditing
           ? t('admin.imageField.optionalHint')
           : t('admin.imageField.requiredHint')}
-      </label>
+      </Typography>
 
-      <Box className="flex flex-col sm:flex-row items-center gap-6">
-        <label className="w-full sm:w-auto flex-1 cursor-pointer flex flex-col items-center justify-center p-6 border-2 border-dashed border-neutral-800 hover:border-orange-600 rounded-lg transition-colors bg-neutral-950/60">
+      <Box display="flex" direction="column" stackBelow="sm" align="center" gap="lg">
+        <Box
+          as="label"
+          display="flex"
+          direction="column"
+          align="center"
+          justify="center"
+          grow
+          block
+          widthSm="auto"
+          cursor="pointer"
+          padding="lg"
+          border
+          borderTone="neutral"
+          borderWidth="thick"
+          borderStyle="dashed"
+          hoverBorder="primary"
+          rounded="lg"
+          background="subtle"
+          group
+          cssTransition="colors"
+        >
           <Upload className="w-8 h-8 text-neutral-500 mb-2 group-hover:text-orange-600" />
-          <span className="text-sm text-neutral-300 font-medium">
+          <Typography variant="body" size="sm" tone="muted" weight="medium">
             {t('admin.imageField.upload')}
-          </span>
-          <span className="text-xs text-neutral-500 mt-1">
+          </Typography>
+          <Typography variant="body" size="xs" tone="subtle" marginTop="xs">
             {t('admin.imageField.formats')}
-          </span>
+          </Typography>
           <input
             type="file"
             accept={ACCEPTED_IMAGE_INPUT}
             onChange={onFileChange}
             className="hidden"
           />
-        </label>
+        </Box>
 
         {(previewUrl || externalImageUrl) && (
-          <Box className="w-28 h-28 relative rounded-lg overflow-hidden border border-neutral-700 bg-neutral-800 flex-shrink-0">
-            <img
+          <Box
+            width={28}
+            height={28}
+            position="relative"
+            rounded="lg"
+            overflow="hidden"
+            border
+            borderTone="strong"
+            background="strong"
+            shrink={false}
+          >
+            <Image
               src={previewUrl || externalImageUrl}
               alt={t('admin.imageField.previewAlt')}
-              className="w-full h-full object-cover"
+              fullWidth
+              height="full"
+              fit="fill"
             />
           </Box>
         )}
       </Box>
 
       <Box>
-        <span className="text-xs text-neutral-500 block mb-1">
+        <Typography variant="body" size="xs" tone="subtle" display="block" marginBottom="xs">
           {t('admin.imageField.urlHint')}
-        </span>
-        <input
+        </Typography>
+        <Input
           type="url"
           value={externalImageUrl}
           onChange={(event) => onExternalUrlChange(event.target.value)}
           placeholder="https://..."
-          className={theme.inputs.base}
         />
       </Box>
     </Box>

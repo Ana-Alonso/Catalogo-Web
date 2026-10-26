@@ -1,9 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
-import { Button, Card, Box } from '../ui';
-import { Typography } from '../ui';
-import { theme } from '../../theme';
+import { Box, Button, Typography, Image, Select } from '../ui';
 import { formatPriceForLanguage } from '../../i18n/formatters';
 import { categoryTranslationKeys } from '../../i18n/labels';
 import type {
@@ -50,15 +48,29 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
   };
 
   return (
-    <Card className="p-6 sm:p-8 space-y-6">
-      <Box className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b ${theme.colors.border} pb-4`}>
+    <Box
+      background="surface"
+      border
+      rounded="xl"
+      overflow="hidden"
+      padding="lg"
+      paddingSm="xl"
+      display="flex"
+      direction="column"
+      gap="lg"
+    >
+      <Box
+        display="flex"
+        stackBelow="sm"
+        alignSm="center"
+        justify="between"
+        gap="md"
+        divider="bottom"
+        paddingBottom="md"
+      >
         <Box>
-          <h3 className="text-xl font-bold text-white uppercase tracking-wider">
-            {t('admin.etsyForm.title')}
-          </h3>
-          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
-            {t('admin.etsyForm.subtitle')}
-          </Typography>
+          <Typography variant="h3">{t('admin.etsyForm.title')}</Typography>
+          <Typography variant="body">{t('admin.etsyForm.subtitle')}</Typography>
         </Box>
         <Button variant="secondary" size="sm" onClick={onCancelEdit}>
           <X className="w-3.5 h-3.5" />
@@ -66,18 +78,24 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
         </Button>
       </Box>
 
-      <Box className="flex flex-col sm:flex-row gap-6">
-        <img
+      <Box display="flex" stackBelow="sm" gap="lg">
+        <Image
           src={product.image}
           alt={product.title}
-          className="w-full sm:w-40 h-40 rounded-lg object-cover bg-neutral-800 border border-neutral-800"
+          block
+          widthSm={40}
+          displaySm="block"
+          height={40}
+          rounded="lg"
+          background="strong"
+          border
         />
-        <Box className="space-y-2">
-          <Typography variant="body" className="text-lg font-bold text-white">{product.title}</Typography>
-          <Typography variant="body" className={`${theme.colors.textMuted} text-sm line-clamp-3`}>
+        <Box display="flex" direction="column" gap="sm">
+          <Typography variant="h4">{product.title}</Typography>
+          <Typography variant="body" clamp={3}>
             {product.description}
           </Typography>
-          <Typography variant="body" className="text-sm text-neutral-300">
+          <Typography variant="body">
             {product.priceCents != null
               ? formatPriceForLanguage(
                   product.priceCents,
@@ -86,62 +104,72 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
                 )
               : t('admin.etsyForm.priceOnRequest')}
           </Typography>
-          <Box className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-            <span className="inline-flex items-center gap-1">
+          <Box display="flex" wrap align="center" gap="sm" tone="subtle" size="xs">
+            <Typography as="span" size="xs" tone="subtle" icon>
               <RefreshCw className="w-3 h-3" />
               {t('admin.etsyForm.listing', {
                 id: product.etsyListingId ?? '—',
               })}
-            </span>
+            </Typography>
             {product.etsyState && (
-              <span>
+              <Typography as="span" size="xs" tone="subtle">
                 {t('admin.etsyForm.status', { state: product.etsyState })}
-              </span>
+              </Typography>
             )}
             {product.isVisible === false && (
-              <span className="text-red-400">{t('admin.etsyForm.hidden')}</span>
+              <Typography as="span" size="xs" tone="danger">{t('admin.etsyForm.hidden')}</Typography>
             )}
           </Box>
         </Box>
       </Box>
 
-      <Box className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-neutral-400">
-        {t('admin.etsyForm.offersNote')}
+      <Box padding="md" background="neutral" border rounded="lg">
+        <Typography variant="body" size="xs">{t('admin.etsyForm.offersNote')}</Typography>
       </Box>
 
       {formError && (
-        <Box className="p-4 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-3 text-red-300 text-sm">
+        <Box
+          display="flex"
+          align="center"
+          gap="tight"
+          padding="md"
+          background="dangerSoft"
+          border
+          borderTone="danger"
+          rounded="lg"
+        >
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
-          <span>{formError}</span>
+          <Typography variant="body" size="sm" tone="dangerSoft">{formError}</Typography>
         </Box>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Box as="form" display="flex" direction="column" gap="lg" onSubmit={handleSubmit}>
+        <Box display="grid" columns="1" columnsMd="2" gap="lg">
           <Box>
-            <label htmlFor="etsy-category" className={theme.inputs.label}>
-              {t('admin.etsyForm.categoryLabel')}
-            </label>
-            <select
+            <Select
               id="etsy-category"
+              label={t('admin.etsyForm.categoryLabel')}
               value={category}
               onChange={(event) =>
                 setCategory(event.target.value as Exclude<CategoryType, 'todas'>)
               }
-              className={theme.inputs.base}
             >
               {CATEGORY_OPTIONS.map((option) => (
                 <option key={option} value={option}>
                   {t(categoryTranslationKeys[option])}
                 </option>
               ))}
-            </select>
+            </Select>
           </Box>
-
-
         </Box>
 
-        <Box className={`pt-4 border-t ${theme.colors.border} flex justify-end gap-3`}>
+        <Box
+          display="flex"
+          justify="end"
+          gap="tight"
+          paddingTop="md"
+          divider="top"
+        >
           <Button variant="outline" onClick={onCancelEdit}>
             {t('admin.etsyForm.cancel')}
           </Button>
@@ -152,8 +180,8 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
               : t('admin.etsyForm.saveChanges')}
           </Button>
         </Box>
-      </form>
-    </Card>
+      </Box>
+    </Box>
   );
 };
 

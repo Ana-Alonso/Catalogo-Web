@@ -1,31 +1,30 @@
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Box, Card } from '../ui';
 import { Skeleton } from '../ui/Skeleton';
-import { theme } from '../../theme';
 
 const SKELETON_ROWS = 5;
 
 export const AdminProductTableSkeleton: React.FC = () => {
   return (
     <Card aria-hidden="true">
-      <div className={`p-6 border-b ${theme.colors.border} space-y-2`}>
-        <Skeleton className="h-6 w-64" />
-        <Skeleton className="h-4 w-80 max-w-full" />
-      </div>
-      <div className="divide-y divide-neutral-800">
+      <Box padding="lg" divider="bottom" display="flex" direction="column" gap="sm">
+        <Skeleton height={6} width={64} />
+        <Skeleton height={4} width={80} maxWidth="full" />
+      </Box>
+      <Box divide="neutral">
         {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-          <div key={index} className="p-6 flex items-center gap-4">
-            <Skeleton className="w-12 h-12 flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-            <Skeleton className="h-6 w-24" rounded="full" />
-            <Skeleton className="h-6 w-20" rounded="full" />
-            <Skeleton className="h-8 w-16" />
-          </div>
+          <Box key={index} padding="lg" display="flex" align="center" gap="md">
+            <Skeleton width={12} height={12} shrink={false} />
+            <Box flex display="flex" direction="column" gap="xs">
+              <Skeleton height={4} width="1/3" />
+              <Skeleton height={3} width="1/2" />
+            </Box>
+            <Skeleton height={6} width={24} rounded="full" />
+            <Skeleton height={6} width={20} rounded="full" />
+            <Skeleton height={8} width={16} />
+          </Box>
         ))}
-      </div>
+      </Box>
     </Card>
   );
 };

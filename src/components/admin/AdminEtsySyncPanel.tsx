@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button, Card, Box } from '../ui';
-import { Typography } from '../ui';
-import { theme } from '../../theme';
+import { Button, Card, Box, Typography } from '../ui';
 import {
   EtsySyncError,
   triggerEtsySync,
@@ -61,13 +59,20 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
   };
 
   return (
-    <Card className="p-6">
-      <Box className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <Card padding="lg">
+      <Box
+        display="flex"
+        direction="column"
+        stackBelow="sm"
+        alignSm="center"
+        justify="between"
+        gap="md"
+      >
         <Box>
-          <h3 className="text-lg font-bold text-white uppercase tracking-wider">
+          <Typography variant="h4" transform="uppercase" tracking="wider">
             {t('admin.etsySync.title')}
-          </h3>
-          <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
+          </Typography>
+          <Typography variant="body">
             {t('admin.etsySync.description')}
           </Typography>
         </Box>
@@ -81,18 +86,28 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
 
       {feedback && (
         <Box
-          className={`mt-4 p-3 rounded-lg border flex items-center gap-2 text-sm ${
-            feedback.type === 'success'
-              ? 'bg-green-950/40 border-green-800 text-green-300'
-              : 'bg-red-950/40 border-red-800 text-red-300'
-          }`}
+          marginTop="md"
+          padding="tight"
+          rounded="lg"
+          border
+          display="flex"
+          align="center"
+          gap="sm"
+          background={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
+          borderTone={feedback.type === 'success' ? 'success' : 'danger'}
         >
           {feedback.type === 'success' ? (
             <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-400" />
           ) : (
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
           )}
-          <span>{feedback.text}</span>
+          <Typography
+            variant="body"
+            size="sm"
+            tone={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
+          >
+            {feedback.text}
+          </Typography>
         </Box>
       )}
     </Card>

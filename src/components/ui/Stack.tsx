@@ -28,6 +28,7 @@ const stackVariants = cva('flex', {
       md: 'gap-4',
       lg: 'gap-6',
       xl: 'gap-8',
+      '2xl': 'gap-10',
     },
     wrap: {
       true: 'flex-wrap',

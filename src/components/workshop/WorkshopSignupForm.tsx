@@ -1,9 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
-import { Button, Input, Box, CalendarEventActions } from '../ui';
-import { Typography } from '../ui';
-import { theme } from '../../theme';
+import { Button, Input, Box, CalendarEventActions, TextLink, Typography } from '../ui';
 import {
   getRegistrationErrorCode,
   type RegistrationErrorCode,
@@ -77,64 +75,88 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
 
   if (isSuccess) {
     return (
-      <div className="space-y-4">
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="w-12 h-12 bg-green-950/60 border border-green-800/60 rounded-full flex items-center justify-center">
+      <Box display="flex" direction="column" gap="md">
+        <Box display="flex" direction="column" gap="md" textAlign="center">
+          <Box display="flex" justify="center">
+            <Box
+              width={12}
+              height={12}
+              background="successSoft"
+              border
+              borderTone="success"
+              rounded="full"
+              display="flex"
+              align="center"
+              justify="center"
+            >
               <CheckCircle className="w-6 h-6 text-green-400" aria-hidden="true" />
-            </div>
-          </div>
-          <div>
-            <Typography variant="body" className="text-white font-semibold">
+            </Box>
+          </Box>
+          <Box>
+            <Typography variant="body" tone="main" weight="semibold">
               {t('workshop.form.successTitle')}
             </Typography>
-            <Typography variant="body" className={`${theme.colors.textMuted} text-sm mt-1`}>
+            <Typography variant="body" size="sm" tone="muted" marginTop="xs">
               {t('workshop.form.successBody', { title: workshop.title })}
             </Typography>
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         <CalendarEventActions workshop={workshop} attendee={{ name, email }} />
 
-        <Box className="p-3 bg-neutral-950 border border-neutral-800 rounded-lg flex items-start gap-2 text-sm text-neutral-300">
+        <Box
+          display="flex"
+          align="start"
+          gap="sm"
+          padding="tight"
+          background="neutral"
+          border
+          rounded="lg"
+        >
           <Bell className="w-4 h-4 mt-0.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
-          <span>
+          <Typography as="span" variant="body" size="sm" tone="muted">
             <Trans
               i18nKey={socialNoticeKey}
               components={{
                 instagram: (
-                  <a
+                  <TextLink
                     href={instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium"
+                    tone="warning"
+                    hover="accentSoft"
+                    underline
+                    weight="medium"
                     aria-label={t('workshop.social.instagramAria')}
                   />
                 ),
                 tiktok: (
-                  <a
+                  <TextLink
                     href={tiktokUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-orange-400 hover:text-orange-300 underline underline-offset-2 font-medium"
+                    tone="warning"
+                    hover="accentSoft"
+                    underline
+                    weight="medium"
                     aria-label={t('workshop.social.tiktokAria')}
                   />
                 ),
               }}
             />
-          </span>
+          </Typography>
         </Box>
 
-        <Button type="button" variant="primary" className="w-full" onClick={onClose}>
+        <Button type="button" variant="primary" fullWidth onClick={onClose}>
           {t('common.close')}
         </Button>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      <Typography variant="body" className={`${theme.colors.textMuted} text-sm`}>
+    <Box as="form" display="flex" direction="column" gap="md" onSubmit={handleSubmit} noValidate>
+      <Typography variant="body" size="sm" tone="muted">
         {t('workshop.form.intro', { title: workshop.title })}
       </Typography>
 
@@ -162,15 +184,24 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
 
       {errorCode && (
         <Box
-          className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg flex items-center gap-2 text-red-300 text-sm"
+          display="flex"
+          align="center"
+          gap="sm"
+          padding="tight"
+          rounded="lg"
+          background="dangerSoft"
+          border
+          borderTone="danger"
           role="alert"
         >
           <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" aria-hidden="true" />
-          <span>{t(`workshop.form.errors.${errorCode}`)}</span>
+          <Typography as="span" variant="body" size="sm" tone="dangerSoft">
+            {t(`workshop.form.errors.${errorCode}`)}
+          </Typography>
         </Box>
       )}
 
-      <Button type="submit" variant="primary" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
         {isSubmitting ? (
           <>
             <LoaderCircle className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -183,7 +214,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
           </>
         )}
       </Button>
-    </form>
+    </Box>
   );
 };
 

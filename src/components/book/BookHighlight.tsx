@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
-import { Box, Container, Typography } from '../ui';
-import { theme } from '../../theme';
-import libro1 from '../assets/book/Libro1.jpeg';
-import libro2 from '../assets/book/Libro2.jpeg';
-import libro3 from '../assets/book/Libro3.jpeg';
-import libro4 from '../assets/book/Libro4.jpeg';
+import {
+  Animated,
+  AnimatedImage,
+  AnimatedText,
+  Badge,
+  Box,
+  Button,
+  Container,
+  Dot,
+  IconButton,
+  Image,
+  Presence,
+  Section,
+  Typography,
+} from '../ui';
+import libro1 from '../../assets/book/Libro1.jpeg';
+import libro2 from '../../assets/book/Libro2.jpeg';
+import libro3 from '../../assets/book/Libro3.jpeg';
+import libro4 from '../../assets/book/Libro4.jpeg';
 
 const images = [libro1, libro2, libro3, libro4];
 
@@ -49,38 +61,54 @@ export const BookHighlight: React.FC = () => {
   };
 
   return (
-    <section id="libro" className="py-12 md:py-16 bg-neutral-950">
+    <Section id="libro" paddingY="lg" background="neutral">
       <Container>
-        <motion.div
+        <Animated
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mb-8"
+          marginBottom="xl"
         >
-          <Typography variant="h2" className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mb-3">
+          <Typography variant="h2" size="heading-sm" marginBottom="sm">
             {t('book.sectionHeading', 'Libro Destacado')}
           </Typography>
-          <Box className="h-1 w-20 bg-orange-600" />
-        </motion.div>
+          <Box height={1} width={20} background="primaryFlat" />
+        </Animated>
 
-        <motion.div
+        <Animated
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center"
+          display="grid"
+          columns={1}
+          columnsLg={2}
+          gap="xl"
+          gapLg="3xl"
+          align="center"
         >
-          <Box 
-            className="relative group"
+          <Box
+            position="relative"
+            group
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             onFocus={() => setIsPaused(true)}
             onBlur={() => setIsPaused(false)}
           >
-            <Box className={`relative aspect-[3/4] max-w-md mx-auto w-full rounded-lg overflow-hidden ${theme.card.base}`}>
-              <AnimatePresence mode="wait">
-                <motion.img
+            <Box
+              position="relative"
+              aspect="portrait"
+              maxWidth="cover"
+              center
+              width="full"
+              rounded="xl"
+              overflow="hidden"
+              background="surface"
+              border
+            >
+              <Presence mode="wait">
+                <AnimatedImage
                   key={currentIndex}
                   src={images[currentIndex]}
                   alt={t('book.imageAlt')}
@@ -92,39 +120,40 @@ export const BookHighlight: React.FC = () => {
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
                   onDragEnd={handleDragEnd}
-                  className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
+                  fullWidth
+                  height="full"
+                  cursor="grab"
                 />
-              </AnimatePresence>
+              </Presence>
 
-              <button
-                type="button"
-                onClick={goToPrevious}
-                className={`absolute left-2 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-neutral-950/90 hover:bg-neutral-950 text-white transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} shadow-lg`}
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
+              <Box position="absolute" top="-1/2" left={2} shift="center-y">
+                <IconButton
+                  variant="overlay"
+                  size="lg"
+                  onClick={goToPrevious}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </IconButton>
+              </Box>
 
-              <button
-                type="button"
-                onClick={goToNext}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-neutral-950/90 hover:bg-neutral-950 text-white transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} shadow-lg`}
-                aria-label="Next image"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+              <Box position="absolute" top="-1/2" right={2} shift="center-y">
+                <IconButton
+                  variant="overlay"
+                  size="lg"
+                  onClick={goToNext}
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </IconButton>
+              </Box>
 
-              <Box className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              <Box position="absolute" edge="bottom-center-md" display="flex" gap="sm">
                 {images.map((_, index) => (
-                  <button
+                  <Dot
                     key={index}
-                    type="button"
                     onClick={() => goToSlide(index)}
-                    className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
-                      index === currentIndex
-                        ? 'bg-orange-600 w-8'
-                        : 'bg-neutral-400/70 hover:bg-neutral-300 w-2'
-                    }`}
+                    active={index === currentIndex}
                     aria-label={`Go to slide ${index + 1}`}
                     aria-current={index === currentIndex ? 'true' : undefined}
                   />
@@ -132,61 +161,67 @@ export const BookHighlight: React.FC = () => {
               </Box>
             </Box>
 
-            <Box className="flex gap-2 mt-4 max-w-md mx-auto">
+            <Box display="flex" gap="sm" marginTop="md" maxWidth="cover" center>
               {images.map((img, index) => (
-                <button
+                <Box
                   key={index}
-                  type="button"
+                  as="button"
+                  grow
+                  aspect="portrait"
+                  rounded="md"
+                  overflow="hidden"
+                  border
+                  borderWidth="thick"
+                  cssTransition="all"
+                  focusRing="plain"
+                  borderTone={index === currentIndex ? 'primary' : 'neutral'}
+                  hoverBorder={index === currentIndex ? undefined : 'muted'}
                   onClick={() => goToSlide(index)}
-                  className={`flex-1 aspect-[3/4] rounded-md overflow-hidden border-2 transition-all focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} ${
-                    index === currentIndex
-                      ? 'border-orange-600'
-                      : 'border-neutral-800 hover:border-neutral-600'
-                  }`}
                   aria-label={`Ver imagen ${index + 1}`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" aria-hidden="true" />
-                </button>
+                  <Image src={img} alt="" fullWidth height="full" />
+                </Box>
               ))}
             </Box>
           </Box>
 
-          <Box className="text-center lg:text-left">
+          <Box textAlign="center" textAlignLg="left">
             {t('book.badge') && (
-              <motion.span
+              <AnimatedText
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className={`inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-sm mb-4 ${theme.colors.primaryBadge}`}
+                display="inline-block"
+                marginBottom="md"
               >
-                {t('book.badge')}
-              </motion.span>
+                <Badge variant="primary">{t('book.badge')}</Badge>
+              </AnimatedText>
             )}
 
-            <Typography variant="h2" className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white uppercase tracking-wider mb-4">
+            <Typography variant="h2" size="heading-lg" marginBottom="md">
               {t('book.title')}
             </Typography>
 
-            <Box className="h-1 w-20 bg-orange-600 mb-6 mx-auto lg:mx-0" />
+            <Box height={1} width={20} background="primaryFlat" marginX="auto-start-lg" marginBottom="lg" />
 
-            <Typography variant="body" className={`text-lg mb-8 leading-relaxed ${theme.colors.textMuted}`}>
+            <Typography variant="body" size="lg" tone="muted" marginBottom="xl">
               {t('book.description')}
             </Typography>
 
-            <a
+            <Button
               href={AMAZON_BOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center justify-center gap-2 px-8 py-4 font-bold tracking-widest uppercase rounded-sm transition-all shadow-lg shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${theme.colors.primary}`}
+              size="lg"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" aria-hidden="true" />
               {t('book.cta')}
-            </a>
+            </Button>
           </Box>
-        </motion.div>
+        </Animated>
       </Container>
-    </section>
+    </Section>
   );
 };
 

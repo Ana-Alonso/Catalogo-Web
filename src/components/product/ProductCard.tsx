@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, type Variants } from 'framer-motion';
+import { type Variants } from 'framer-motion';
 import { ShoppingBag, Tag, Calendar, MapPin, Users, UserPlus } from 'lucide-react';
-import { Badge, Box, Typography, Button } from '../ui';
+import { AnimatedCard, Badge, Box, Button, Image, Typography } from '../ui';
 import { Modal } from '../ui/Modal';
 import { WorkshopSignupForm } from '../workshop/WorkshopSignupForm';
-import { theme } from '../../theme';
 import {
   formatPriceForLanguage,
   formatWorkshopDateForLanguage,
@@ -63,34 +62,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
 
   return (
     <>
-    <motion.article 
+    <AnimatedCard
       variants={itemVariants}
-      className={`group ${theme.colors.surface}/90 rounded-lg overflow-hidden flex flex-col hover:shadow-2xl hover:shadow-orange-950/20 transition-all duration-300 border ${theme.colors.border} hover:border-neutral-700 focus-within:ring-2 ${theme.colors.primaryFocus}`}
+      group
+      background="card"
+      rounded="lg"
+      overflow="hidden"
+      display="flex"
+      direction="column"
+      hoverShadow="spotlight"
+      cssTransition="allSlow"
+      border
+      hoverBorder="muted"
+      focusRing="withinPrimary"
     >
-      <Box className="relative aspect-square overflow-hidden bg-neutral-800">
-        <img 
-          src={item.image} 
+      <Box position="relative" aspect="square" overflow="hidden" background="strong">
+        <Image
+          src={item.image}
           alt={t('product.imageAlt', { title: item.title })}
-          className={`w-full h-full object-cover object-center grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out ${
-            currentStatus === 'vendido' ? 'opacity-50' : ''
-          }`}
+          fullWidth
+          height="full"
+          position="center"
+          effect="gallery"
+          opacity={currentStatus === 'vendido' ? 50 : undefined}
           loading="lazy"
         />
-        <Box 
-          className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-transparent to-transparent opacity-80" 
-          aria-hidden="true"
-        />
+        <Box position="absolute" inset gradient="fadeUp" opacity={80} aria-hidden="true" />
 
-
-        
-        <Box className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+        <Box position="absolute" corner="top-right" display="flex" direction="column" align="end" gap="xs">
           {hasOffer && (
-            <span className="bg-orange-600 text-white font-bold text-[10px] uppercase px-2 py-1 rounded shadow-md">
-              -{item.discountPercent}%
-            </span>
+            <Badge variant="solid">-{item.discountPercent}%</Badge>
           )}
-          <span
-            className="bg-neutral-950/80 backdrop-blur-sm border border-neutral-700 text-orange-400 font-bold text-xs uppercase px-2.5 py-1 rounded-sm"
+          <Badge
+            variant="glass"
             aria-label={
               priceCents == null
                 ? t('product.priceOnRequest')
@@ -106,20 +110,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             {priceCents == null ? (
               t('product.consult')
             ) : hasOffer ? (
-              <span className="inline-flex items-center gap-1.5">
-                <s className="text-neutral-400 font-medium normal-case">{originalPrice}</s>
-                <span>{finalPrice}</span>
-              </span>
+              <Typography as="span" size="xs" tone="warning" icon>
+                <Typography as="s" size="xs" tone="muted" weight="medium" transform="none">
+                  {originalPrice}
+                </Typography>
+                {finalPrice}
+              </Typography>
             ) : (
               finalPrice
             )}
-          </span>
+          </Badge>
         </Box>
       </Box>
 
-      <Box className="p-6 flex flex-col flex-grow">
-        <Box className="mb-2">
-          <Box className="flex items-center gap-2 mb-1">
+      <Box padding="lg" display="flex" direction="column" grow>
+        <Box marginBottom="sm">
+          <Box display="flex" align="center" gap="sm" marginBottom="xs">
             <Badge variant="primary">
               {t(categoryTranslationKeys[item.category])}
             </Badge>
@@ -127,42 +133,53 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               {t(availabilityTranslationKeys[currentStatus])}
             </Badge>
           </Box>
-          <Typography variant="h4" className="mt-1">{item.title}</Typography>
+          <Typography variant="h4" marginTop="xs">{item.title}</Typography>
         </Box>
 
         {item.category === 'talleres' && (item.eventDate || item.eventLocation) && (
-          <Box className="my-2 p-2.5 rounded bg-neutral-950 border border-neutral-800 space-y-1 text-xs text-neutral-300">
+          <Box marginY="sm" padding="sm" rounded="sm" background="neutral" border>
             {item.eventDate && (
-              <Box className="flex items-center gap-2 text-orange-400 font-medium capitalize">
-                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{formatWorkshopDateForLanguage(item.eventDate, language)}</span>
+              <Box display="flex" align="center" gap="sm" marginBottom="xs">
+                <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
+                <Typography
+                  as="span"
+                  variant="body"
+                  size="xs"
+                  tone="warning"
+                  weight="medium"
+                  transform="capitalize"
+                >
+                  {formatWorkshopDateForLanguage(item.eventDate, language)}
+                </Typography>
               </Box>
             )}
             {item.eventLocation && (
-              <Box className="flex items-center gap-2 text-neutral-400">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{item.eventLocation}</span>
+              <Box display="flex" align="center" gap="sm">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" aria-hidden="true" />
+                <Typography as="span" variant="body" size="xs" tone="muted">
+                  {item.eventLocation}
+                </Typography>
               </Box>
             )}
           </Box>
         )}
 
-        <Typography variant="body" className="mb-6 flex-grow">
+        <Typography variant="body" marginBottom="lg" grow>
           {item.description}
         </Typography>
         
-        <Box className="flex flex-col gap-2.5 mt-auto">
+        <Box display="flex" direction="column" gap="sm" marginTop="auto">
           {isWorkshop && !isFinished && (
-            <Box className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
+            <Box display="flex" align="center" gap="sm">
               <Users className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" aria-hidden="true" />
               {cupo === null ? (
-                <span className="text-neutral-400">{t('product.spotsOpen')}</span>
+                <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
               ) : isFull ? (
-                <span className="text-red-400">{t('product.spotsFull')}</span>
+                <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
               ) : (
-                <span className="text-green-400">
+                <Typography variant="caption" tone="success">
                   {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
-                </span>
+                </Typography>
               )}
             </Box>
           )}
@@ -170,7 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              fullWidth
               onClick={() => setIsSignupOpen(true)}
               aria-label={t('product.signupAria', { title: item.title })}
             >
@@ -179,42 +196,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             </Button>
           )}
           {isWorkshop && isFull && !isFinished && (
-            <Box className="text-center py-2.5 text-xs text-red-400 font-semibold uppercase tracking-wider bg-red-950/30 rounded border border-red-900/50">
-              {t('product.workshopFull')}
+            <Box textAlign="center" paddingY="sm" background="dangerSoft" border borderTone="danger" rounded="sm">
+              <Typography variant="caption" tone="danger">{t('product.workshopFull')}</Typography>
             </Box>
           )}
           {!isWorkshop && item.etsyLink && currentStatus !== 'vendido' && (
-            <a 
+            <Button
               href={item.etsyLink}
               target="_blank"
               rel="noopener noreferrer"
-              className={`w-full inline-flex justify-center items-center gap-2 ${theme.colors.primary} font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`}
+              size="card"
+              fullWidth
               aria-label={t('product.buyEtsyAria', { title: item.title })}
             >
               <ShoppingBag className="w-4 h-4" aria-hidden="true" />
               {t('product.buyEtsy')}
-            </a>
+            </Button>
           )}
           {!isWorkshop && item.vintedLink && currentStatus !== 'vendido' && (
-            <a 
+            <Button
               href={item.vintedLink}
               target="_blank"
               rel="noopener noreferrer"
-              className={`w-full inline-flex justify-center items-center gap-2 bg-transparent border border-neutral-700 hover:border-neutral-400 text-neutral-300 hover:text-white font-semibold py-3 px-4 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 ${theme.colors.primaryFocus} focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 text-sm`}
+              variant="outline"
+              size="card"
+              fullWidth
               aria-label={t('product.viewVintedAria', { title: item.title })}
             >
               <Tag className="w-4 h-4" aria-hidden="true" />
               {t('product.viewVinted')}
-            </a>
+            </Button>
           )}
           {currentStatus === 'vendido' && (
-            <Box className="text-center py-2.5 text-xs text-neutral-500 font-semibold uppercase tracking-wider bg-neutral-950 rounded border border-neutral-800">
-              {t('product.unavailable')}
+            <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
+              <Typography variant="caption" tone="subtle">{t('product.unavailable')}</Typography>
             </Box>
           )}
         </Box>
       </Box>
-    </motion.article>
+    </AnimatedCard>
 
     <Modal
       isOpen={isSignupOpen}
