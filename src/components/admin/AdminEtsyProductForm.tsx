@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Box, Button, Icon, Image, Select, Typography } from '../ui';
@@ -38,7 +38,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError(null);
     const success = await onSubmit({ category });
@@ -144,7 +144,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
       )}
 
       <Box as="form" display="flex" direction="column" gap="lg" onSubmit={handleSubmit}>
-        <Box display="grid" columns="1" columnsMd="2" gap="lg">
+        <Box display="grid" columns={1} columnsMd={2} gap="lg">
           <Box>
             <Select
               id="etsy-category"

@@ -60,14 +60,14 @@ export const NavLink: React.FC<NavLinkProps> = ({
 
   if (rest.to !== undefined) {
     return (
-      <Link to={rest.to} onClick={onClick} className={classes} {...rest}>
+      <Link {...rest} to={rest.to} onClick={onClick} className={classes}>
         {children}
       </Link>
     );
   }
 
   return (
-    <a href={rest.href} onClick={onClick} className={classes} {...rest}>
+    <a {...rest} href={rest.href} onClick={onClick} className={classes}>
       {children}
     </a>
   );

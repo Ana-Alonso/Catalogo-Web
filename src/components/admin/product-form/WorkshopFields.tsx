@@ -24,8 +24,8 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
   return (
     <Box
       display="grid"
-      columns="1"
-      columnsMd="3"
+      columns={1}
+      columnsMd={3}
       gap="lg"
       padding="md"
       rounded="lg"

@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes } from 'react';
+import type { ElementType, HTMLAttributes, SubmitEventHandler } from 'react';
 import { cn } from '../../design-system/utils/cn';
 import {
   ALIGN,
@@ -73,7 +73,7 @@ import {
   type TransitionToken,
 } from './styles';
 
-export interface BoxProps extends HTMLAttributes<HTMLElement> {
+export interface BoxProps extends Omit<HTMLAttributes<HTMLElement>, 'onSubmit'> {
   as?: ElementType;
   display?: DisplayToken;
   direction?: keyof typeof DIRECTION;
@@ -162,6 +162,8 @@ export interface BoxProps extends HTMLAttributes<HTMLElement> {
   hideBelow?: keyof typeof HIDE_BELOW;
   hideFrom?: keyof typeof HIDE_FROM;
   showBelow?: keyof typeof SHOW_BELOW;
+  onSubmit?: SubmitEventHandler<HTMLFormElement>;
+  noValidate?: boolean;
 }
 
 export type DesignProps = Omit<BoxProps, 'as' | 'className'>;

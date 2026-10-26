@@ -36,6 +36,7 @@ export interface ImageProps {
   border?: boolean;
   shrink?: boolean;
   fullWidth?: boolean;
+  block?: boolean;
   displaySm?: keyof typeof DISPLAY_SM;
   loading?: 'lazy' | 'eager';
   className?: string;
@@ -46,7 +47,7 @@ export type ImageDesignProps = Omit<ImageProps, 'src' | 'alt' | 'loading' | 'cla
 const IMAGE_DESIGN_KEYS = new Set<string>([
   'width', 'height', 'widthSm', 'heightSm', 'maxWidth', 'maxHeight', 'fit',
   'color', 'cursor', 'position', 'effect', 'opacity', 'rounded', 'background',
-  'border', 'shrink', 'fullWidth', 'displaySm',
+  'border', 'shrink', 'fullWidth', 'block', 'displaySm',
 ]);
 
 export const splitImageProps = (
@@ -82,6 +83,7 @@ export const imageClasses = (p: ImageDesignProps, className?: string): string =>
     p.maxWidth && MAX_WIDTH[p.maxWidth],
     p.maxHeight && MAX_HEIGHT[p.maxHeight],
     p.fullWidth === true && 'w-full',
+    p.block === true && 'block',
     IMAGE_FIT[p.fit ?? 'cover'],
     p.color && TONE[p.color],
     p.cursor && CURSOR[p.cursor],

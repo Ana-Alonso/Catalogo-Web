@@ -60,7 +60,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
 
   return (
     <>
-      <Box display="grid" columns="1" columnsMd="2" gap="lg">
+      <Box display="grid" columns={1} columnsMd={2} gap="lg">
         <Input
           id="prod-title"
           label={t('admin.productFields.titleLabel')}
@@ -110,7 +110,7 @@ export const ProductDetailsFields: React.FC<ProductDetailsFieldsProps> = ({
       />
 
       {showLinks && (
-        <Box display="grid" columns="1" columnsMd="2" gap="lg">
+        <Box display="grid" columns={1} columnsMd={2} gap="lg">
           <Input
             id="prod-etsy"
             label={t('admin.productFields.etsyLinkLabel')}

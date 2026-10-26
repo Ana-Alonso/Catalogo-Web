@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent, type FormEvent } from 'react';
+import React, { useState, type ChangeEvent, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { Box, Icon, Typography } from '../ui';
@@ -140,7 +140,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     setExternalImageUrl('');
   };
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError(null);
 

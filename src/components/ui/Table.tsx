@@ -1,6 +1,6 @@
 import React, { type HTMLAttributes, type TdHTMLAttributes, type ThHTMLAttributes } from 'react';
 import { cn } from '../../design-system/utils/cn';
-import { HOVER_TONE, PADDING_CELL, TEXT_ALIGN, WEIGHT } from './styles';
+import { HOVER_TONE, PADDING_CELL, TEXT_ALIGN, TONE, WEIGHT } from './styles';
 
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   fullWidth?: boolean;
@@ -31,6 +31,10 @@ Table.displayName = 'Table';
 
 export interface TableSectionProps extends HTMLAttributes<HTMLTableSectionElement> {}
 
+export interface TableBodyProps extends TableSectionProps {
+  divide?: 'none' | 'subtle';
+}
+
 export const TableHead: React.FC<TableSectionProps> = ({
   className,
   children,
@@ -43,7 +47,7 @@ export const TableHead: React.FC<TableSectionProps> = ({
 
 TableHead.displayName = 'TableHead';
 
-export const TableBody: React.FC<TableSectionProps> = ({
+export const TableBody: React.FC<TableBodyProps> = ({
   divide = 'subtle',
   className,
   children,
@@ -95,16 +99,18 @@ interface TableCellLayout {
   padding?: keyof typeof PADDING_CELL;
   align?: keyof typeof TEXT_ALIGN;
   weight?: keyof typeof WEIGHT;
+  tone?: keyof typeof TONE;
 }
 
 export interface TableCellProps
-  extends TdHTMLAttributes<HTMLTableCellElement>,
+  extends Omit<TdHTMLAttributes<HTMLTableCellElement>, 'align'>,
     TableCellLayout {}
 
 export const TableCell: React.FC<TableCellProps> = ({
   padding = 'md',
   align,
   weight,
+  tone,
   className,
   children,
   ...props
@@ -114,6 +120,7 @@ export const TableCell: React.FC<TableCellProps> = ({
       padding && PADDING_CELL[padding],
       align && TEXT_ALIGN[align],
       weight && WEIGHT[weight],
+      tone && TONE[tone],
       className
     )}
     {...props}
@@ -125,7 +132,7 @@ export const TableCell: React.FC<TableCellProps> = ({
 TableCell.displayName = 'TableCell';
 
 export interface TableHeaderProps
-  extends ThHTMLAttributes<HTMLTableCellElement>,
+  extends Omit<ThHTMLAttributes<HTMLTableCellElement>, 'align'>,
     TableCellLayout {}
 
 export const TableHeader: React.FC<TableHeaderProps> = ({

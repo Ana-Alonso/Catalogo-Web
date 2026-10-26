@@ -38,7 +38,7 @@ export const PriceFields: React.FC<PriceFieldsProps> = ({
     : priceCents;
 
   return (
-    <Box display="grid" columns="1" columnsMd="3" gap="lg">
+    <Box display="grid" columns={1} columnsMd={3} gap="lg">
       <Box>
         <Input
           id="prod-price"

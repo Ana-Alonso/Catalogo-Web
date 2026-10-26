@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
 import { Box, Button, Icon, Image, Input, PasswordInput, Typography } from '../ui';
@@ -21,7 +21,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!email.trim() || !password) {
       return;

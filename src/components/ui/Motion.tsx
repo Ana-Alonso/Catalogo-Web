@@ -1,6 +1,5 @@
 import React from 'react';
 import { AnimatePresence, motion, type HTMLMotionProps } from 'framer-motion';
-import { cn } from '../../design-system/utils/cn';
 import { designClasses, splitDesignProps, type DesignProps } from './boxClasses';
 import { imageClasses, splitImageProps, type ImageProps } from './imageClasses';
 
@@ -20,15 +19,14 @@ const motionElements = {
 
 function MotionBox<T extends MotionTag>({
   tag,
-  className,
   ...rest
 }: AnimatedProps<T> & { tag: T }) {
-  const Element = motionElements[tag] as unknown as React.ElementType<MotionBaseProps<T>>;
+  const Component = motionElements[tag] as unknown as React.ComponentType<MotionBaseProps<T>>;
   const { design, dom } = splitDesignProps(rest as Record<string, unknown>);
   return (
-    <Element
+    <Component
       {...(dom as MotionBaseProps<T>)}
-      className={cn(designClasses(design), className)}
+      className={designClasses(design)}
     />
   );
 }
@@ -62,7 +60,6 @@ export type AnimatedImageProps = Omit<HTMLMotionProps<'img'>, 'className' | 'src
 export const AnimatedImage: React.FC<AnimatedImageProps> = ({
   src,
   alt,
-  className,
   loading,
   ...rest
 }) => {
@@ -73,7 +70,7 @@ export const AnimatedImage: React.FC<AnimatedImageProps> = ({
       src={src}
       alt={alt}
       loading={loading}
-      className={imageClasses(design, className)}
+      className={imageClasses(design)}
     />
   );
 };

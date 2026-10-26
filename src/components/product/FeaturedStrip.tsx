@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ShoppingBag, Sparkles, Tag } from 'lucide-react';
 import { Animated, AnimatedButton, AnimatedLink, Badge, Box, Container, Image, Section, Stack, Typography, Icon } from '../ui';
 import { isOfferActive } from '../../utils/price';
 import type { CatalogItem, CategoryType } from '../../types/catalog';

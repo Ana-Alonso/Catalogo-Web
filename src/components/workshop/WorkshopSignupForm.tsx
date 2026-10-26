@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useState, type SubmitEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
 import { Button, Input, Box, CalendarEventActions, TextLink, Typography, Icon } from '../ui';
@@ -36,7 +36,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   const instagramUrl = import.meta.env.VITE_INSTAGRAM_URL;
   const tiktokUrl = import.meta.env.VITE_TIKTOK_URL;
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorCode(null);
 
