@@ -1,7 +1,8 @@
 import React from 'react';
-import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../design-system/utils/cn';
 import { MARGIN, TONE, type MarginToken, type ToneToken } from './styles';
+
+export type IconGlyphProps = { className?: string; 'aria-hidden'?: 'true' };
 
 const ICON_SIZE = {
   xs: 'w-3 h-3',
@@ -14,7 +15,7 @@ const ICON_SIZE = {
 } as const;
 
 export interface IconProps {
-  as: LucideIcon;
+  as: React.ComponentType<IconGlyphProps>;
   size?: keyof typeof ICON_SIZE;
   tone?: ToneToken;
   spin?: boolean;

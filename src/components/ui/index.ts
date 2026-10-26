@@ -32,7 +32,8 @@ export { Box } from './Box';
 export type { BoxProps } from './boxClasses';
 export { Chip, type ChipProps, type ChipTone } from './Chip';
 export { Dot, type DotProps } from './Dot';
-export { Icon, type IconProps } from './Icon';
+export { Icon, type IconProps, type IconGlyphProps } from './Icon';
+export { Amazon, Instagram, Tiktok } from './BrandIcons';
 export { NavLink, type NavLinkProps, type NavLinkVariant } from './NavLink';
 export { OptionList, Option, type OptionListProps, type OptionProps } from './OptionList';
 export {

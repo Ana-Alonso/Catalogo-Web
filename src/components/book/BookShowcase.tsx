@@ -9,7 +9,8 @@ import libro4 from '../../assets/book/Libro4.jpeg';
 
 const images = [libro1, libro2, libro3, libro4];
 
-const AMAZON_BOOK_URL = import.meta.env.VITE_AMAZON_BOOK_URL;
+const AMAZON_BOOK_URL =
+  import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu/d/0dU00KQa';
 
 export const BookShowcase: React.FC = () => {
   const { t } = useTranslation();

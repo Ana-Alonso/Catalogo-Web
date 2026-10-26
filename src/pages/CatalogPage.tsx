@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
-import Footer from '../components/ui/Footer';
+import Footer from '../components/layout/Footer';
 import HeroSection from '../components/hero/HeroSection';
 import BookShowcase from '../components/book/BookShowcase';
 import GallerySection from '../components/catalog/GallerySection';
