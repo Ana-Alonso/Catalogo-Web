@@ -2,14 +2,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { ArrowRight, Tag } from 'lucide-react';
-import { ProductCard } from './ProductCard';
-import { ProductCardSkeleton } from './ProductCardSkeleton';
-import { Box, Container, Section, Typography, Button, ErrorState } from './ui';
-import { theme } from '../theme';
-import { categoryTranslationKeys } from '../i18n/labels';
-import { isOfferActive } from '../utils/price';
-import type { CatalogItem, CategoryType } from '../types/catalog';
-import type { RegistrationFormData } from '../types/registrations';
+import { ProductCard } from '../product/ProductCard';
+import { ProductCardSkeleton } from '../product/ProductCardSkeleton';
+import { Box, Container, Section, Typography, Button, ErrorState } from '../ui';
+import { theme } from '../../theme';
+import { categoryTranslationKeys } from '../../i18n/labels';
+import { isOfferActive } from '../../utils/price';
+import type { CatalogItem, CategoryType } from '../../types/catalog';
+import type { RegistrationFormData } from '../../types/registrations';
 
 export interface GallerySectionProps {
   items: CatalogItem[];

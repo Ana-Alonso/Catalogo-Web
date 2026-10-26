@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Sparkles, Tag } from 'lucide-react';
-import { Box, Container, Typography } from './ui';
-import { theme } from '../theme';
-import { isOfferActive } from '../utils/price';
-import type { CatalogItem, CategoryType } from '../types/catalog';
+import { Box, Container, Typography } from '../ui';
+import { theme } from '../../theme';
+import { isOfferActive } from '../../utils/price';
+import type { CatalogItem, CategoryType } from '../../types/catalog';
 import libro1 from '../assets/book/Libro1.jpeg';
 
 const AMAZON_BOOK_URL = import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu/d/0dU00KQa';

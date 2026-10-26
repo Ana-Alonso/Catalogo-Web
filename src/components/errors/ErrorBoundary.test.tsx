@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ErrorBoundary } from '../ErrorBoundary';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const ThrowingComponent = (): never => {
   throw new Error('Fallo de prueba');

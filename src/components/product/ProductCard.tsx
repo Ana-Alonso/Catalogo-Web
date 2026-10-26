@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, type Variants } from 'framer-motion';
 import { ShoppingBag, Tag, Calendar, MapPin, Users, UserPlus } from 'lucide-react';
-import { Badge, Box, Typography, Button } from './ui';
-import { Modal } from './ui/Modal';
-import { WorkshopSignupForm } from './WorkshopSignupForm';
-import { theme } from '../theme';
+import { Badge, Box, Typography, Button } from '../ui';
+import { Modal } from '../ui/Modal';
+import { WorkshopSignupForm } from '../workshop/WorkshopSignupForm';
+import { theme } from '../../theme';
 import {
   formatPriceForLanguage,
   formatWorkshopDateForLanguage,
-} from '../i18n/formatters';
+} from '../../i18n/formatters';
 import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
-} from '../i18n/labels';
-import { getDiscountedCents, isOfferActive } from '../utils/price';
-import type { CatalogItem, AvailabilityStatus } from '../types/catalog';
-import type { RegistrationFormData } from '../types/registrations';
+} from '../../i18n/labels';
+import { getDiscountedCents, isOfferActive } from '../../utils/price';
+import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
+import type { RegistrationFormData } from '../../types/registrations';
 
 interface ProductCardProps {
   item: CatalogItem;

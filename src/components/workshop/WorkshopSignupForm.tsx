@@ -1,15 +1,15 @@
 import React, { useState, type FormEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
-import { Button, Input, Box, CalendarEventActions } from './ui';
-import { Typography } from './ui';
-import { theme } from '../theme';
+import { Button, Input, Box, CalendarEventActions } from '../ui';
+import { Typography } from '../ui';
+import { theme } from '../../theme';
 import {
   getRegistrationErrorCode,
   type RegistrationErrorCode,
-} from '../errors/registrationError';
-import type { CatalogItem } from '../types/catalog';
-import type { RegistrationFormData } from '../types/registrations';
+} from '../../errors/registrationError';
+import type { CatalogItem } from '../../types/catalog';
+import type { RegistrationFormData } from '../../types/registrations';
 
 interface WorkshopSignupFormProps {
   workshop: CatalogItem;

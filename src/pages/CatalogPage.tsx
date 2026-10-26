@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
-import HeroSection from '../components/HeroSection';
-import BookShowcase from '../components/BookShowcase';
-import GallerySection from '../components/GallerySection';
+import Footer from '../components/ui/Footer';
+import HeroSection from '../components/hero/HeroSection';
+import BookShowcase from '../components/book/BookShowcase';
+import GallerySection from '../components/catalog/GallerySection';
 import JsonLd from '../components/seo/JsonLd';
 import { Container } from '../components/ui';
 import { useProducts } from '../hooks/useProducts';

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Skeleton } from './ui/Skeleton';
-import { theme } from '../theme';
+import { Skeleton } from '../ui/Skeleton';
+import { theme } from '../../theme';
 
 export const ProductCardSkeleton: React.FC = () => {
   return (

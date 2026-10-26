@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
 import { UNSAFE_FrameworkContext } from 'react-router';
-import JsonLd from '../JsonLd';
+import JsonLd from './JsonLd';
 
 const getJsonLdScript = (container: HTMLElement): HTMLScriptElement => {
   const script = container.querySelector<HTMLScriptElement>(

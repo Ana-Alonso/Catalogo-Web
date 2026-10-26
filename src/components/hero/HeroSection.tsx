@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
-import { Box, Container, Section, Typography } from './ui';
-import { theme } from '../theme';
-import type { CatalogItem } from '../types/catalog';
+import { Box, Container, Section, Typography } from '../ui';
+import { theme } from '../../theme';
+import type { CatalogItem } from '../../types/catalog';
 
 interface HeroSectionProps {
   items?: CatalogItem[];
