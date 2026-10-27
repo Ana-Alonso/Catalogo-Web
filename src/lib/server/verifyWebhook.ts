@@ -1,6 +1,4 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { ApiRequest } from './http';
-import { getHeader } from './http';
 
 const MAX_CLOCK_SKEW_SECONDS = 300;
 
@@ -13,13 +11,13 @@ const parseSignatures = (header: string): Buffer[] => {
 };
 
 export const verifyEtsyWebhook = (
-  req: ApiRequest,
+  headers: Headers,
   rawBody: string,
   secret: string
 ): boolean => {
-  const webhookId = getHeader(req, 'webhook-id');
-  const webhookTimestamp = getHeader(req, 'webhook-timestamp');
-  const webhookSignature = getHeader(req, 'webhook-signature');
+  const webhookId = headers.get('webhook-id');
+  const webhookTimestamp = headers.get('webhook-timestamp');
+  const webhookSignature = headers.get('webhook-signature');
 
   if (!webhookId || !webhookTimestamp || !webhookSignature) {
     return false;

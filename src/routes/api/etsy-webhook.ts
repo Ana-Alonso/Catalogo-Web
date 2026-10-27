@@ -1,13 +1,9 @@
-import { getServerEnv, type ServerEnv } from './_lib/env';
-import type { ApiRequest, ApiResponse } from './_lib/http';
-import { readRawBody } from './_lib/http';
-import { verifyEtsyWebhook } from './_lib/verifyWebhook';
+import { getServerEnv, type ServerEnv } from '../../lib/server/env';
 import {
   hideEtsyListing,
   syncSingleEtsyListing,
-} from './_lib/etsySync';
-
-export const config = { api: { bodyParser: false } };
+} from '../../lib/server/etsySync';
+import { verifyEtsyWebhook } from '../../lib/server/verifyWebhook';
 
 interface EtsyWebhookPayload {
   event_type?: string;
@@ -42,69 +38,68 @@ const toListingId = (value: number | string | undefined): number | null => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
-export default async function handler(
-  req: ApiRequest,
-  res: ApiResponse
-): Promise<void> {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Método no permitido.' });
-    return;
+const jsonError = (status: number, message: string, headers?: HeadersInit): Response =>
+  Response.json({ error: message }, { status, headers });
+
+export const loader = () =>
+  jsonError(405, 'Método no permitido.', { Allow: 'POST' });
+
+export const action = async ({
+  request,
+}: {
+  request: Request;
+}): Promise<Response> => {
+  if (request.method !== 'POST') {
+    return jsonError(405, 'Método no permitido.');
   }
 
   let env: ServerEnv;
 
   try {
     env = getServerEnv();
-  } catch (error) {
+  } catch (err) {
     console.error(
       '[etsy-webhook]',
-      error instanceof Error ? error.message : 'Configuración incompleta'
+      err instanceof Error ? err.message : 'Configuración incompleta'
     );
-    res.status(500).json({ error: 'Configuración del servidor incompleta.' });
-    return;
+    return jsonError(500, 'Configuración del servidor incompleta.');
   }
 
   let rawBody: string;
 
   try {
-    rawBody = await readRawBody(req);
+    rawBody = await request.text();
   } catch {
-    res.status(400).json({ error: 'No se pudo leer el cuerpo de la petición.' });
-    return;
+    return jsonError(400, 'No se pudo leer el cuerpo de la petición.');
   }
 
-  if (!verifyEtsyWebhook(req, rawBody, env.etsyWebhookSecret)) {
-    res.status(401).json({ error: 'Firma de webhook inválida.' });
-    return;
+  if (!verifyEtsyWebhook(request.headers, rawBody, env.etsyWebhookSecret)) {
+    return jsonError(401, 'Firma de webhook inválida.');
   }
 
   const payload = parsePayload(rawBody);
 
   if (!payload) {
-    res.status(400).json({ error: 'Payload inválido.' });
-    return;
+    return jsonError(400, 'Payload inválido.');
   }
 
   if (
     payload.shop_id != null &&
     String(payload.shop_id) !== String(env.etsyShopId)
   ) {
-    res.status(200).json({ received: true, ignored: 'otra tienda' });
-    return;
+    return Response.json({ received: true, ignored: 'otra tienda' });
   }
 
   const eventType = payload.event_type?.toLowerCase();
 
   if (!eventType || !LISTING_EVENTS.has(eventType)) {
-    res.status(200).json({ received: true, ignored: eventType ?? null });
-    return;
+    return Response.json({ received: true, ignored: eventType ?? null });
   }
 
   const listingId = toListingId(payload.listing_id);
 
   if (!listingId) {
-    res.status(400).json({ error: 'Falta listing_id.' });
-    return;
+    return jsonError(400, 'Falta listing_id.');
   }
 
   try {
@@ -116,12 +111,12 @@ export default async function handler(
         await syncSingleEtsyListing(listingId);
     }
 
-    res.status(200).json({ received: true });
-  } catch (error) {
+    return Response.json({ received: true });
+  } catch (err) {
     console.error(
       '[etsy-webhook]',
-      error instanceof Error ? error.message : 'Error desconocido'
+      err instanceof Error ? err.message : 'Error desconocido'
     );
-    res.status(500).json({ error: 'No se pudo procesar el webhook.' });
+    return jsonError(500, 'No se pudo procesar el webhook.');
   }
-}
+};
