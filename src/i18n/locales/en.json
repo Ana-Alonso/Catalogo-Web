@@ -72,7 +72,8 @@
       "tshirts": "T-shirts",
       "illustrations": "Illustrations",
       "workshops": "Workshops"
-    }
+    },
+    "vatNotice": "The prices shown in Etsy exclude VAT. The final amount including applicable taxes is the one shown in the shop where the purchase is completed."
   },
   "product": {
     "featured": "Featured",
@@ -284,13 +285,16 @@
       "listing": "Listing #{{id}}",
       "status": "Etsy status: {{state}}",
       "hidden": "Hidden on the site",
-      "offersNote": "Percentage offers are only available on local products. To change the price or remove this product, do it from Etsy.",
+      "offersNote": "Etsy offers are managed here and never mix with discounts on local products. The listing price and state still come from Etsy.",
       "saveError": "Could not save the changes. Please try again.",
       "categoryLabel": "Website category *",
       "featuredLabel": "Feature at the top of the catalog",
       "cancel": "Cancel",
       "saving": "Saving...",
-      "saveChanges": "Save Changes"
+      "saveChanges": "Save Changes",
+      "offerLabel": "Offer % (optional)",
+      "offerPlaceholder": "20",
+      "offerHint": "This Etsy product only. Between 1% and 90%. Leave it empty to hide the offer."
     },
     "etsySync": {
       "title": "Etsy Sync",
@@ -330,7 +334,9 @@
       "deleteConfirm": "Are you sure you want to delete \"{{title}}\"?",
       "etsyDeleteHint": "Etsy products are deleted from Etsy",
       "etsyDeleteAria": "{{title}} is deleted from Etsy",
-      "deleteAria": "Delete {{title}}"
+      "deleteAria": "Delete {{title}}",
+      "offerFromEtsy": "Etsy offer",
+      "offerManual": "manual offer"
     },
     "registrations": {
       "title": "Workshop Registrations ({{count}})",

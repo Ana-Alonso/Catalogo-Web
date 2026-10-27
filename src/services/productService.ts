@@ -330,6 +330,7 @@ export const updateEtsyProductMetadata = async (
       .from('products')
       .update({
         category: metadata.category,
+        etsyOfferPercent: metadata.etsyOfferPercent,
       })
       .eq('id', id)
       .eq('source', 'etsy')
@@ -353,6 +354,7 @@ export const updateEtsyProductMetadata = async (
     updatedProduct = {
       ...item,
       category: metadata.category,
+      etsyOfferPercent: metadata.etsyOfferPercent,
     };
     return updatedProduct;
   });

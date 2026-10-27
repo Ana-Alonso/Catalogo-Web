@@ -72,7 +72,8 @@
       "tshirts": "Camisetas",
       "illustrations": "Ilustraciones",
       "workshops": "Talleres"
-    }
+    },
+    "vatNotice": "Los precios de etsy mostrados no incluyen el IVA. El importe final con los impuestos aplicables es el que figura en la tienda donde se completa la compra."
   },
   "product": {
     "featured": "Destacado",
@@ -284,13 +285,16 @@
       "listing": "Listing #{{id}}",
       "status": "Estado en Etsy: {{state}}",
       "hidden": "Oculto en la web",
-      "offersNote": "Las ofertas porcentuales solo están disponibles en productos locales. Para cambiar el precio o retirar este producto, hazlo desde Etsy.",
+      "offersNote": "Las ofertas de Etsy se gestionan aquí y no se mezclan con los descuentos de los productos locales. El precio y el estado del listing siguen llegando desde Etsy.",
       "saveError": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
       "categoryLabel": "Categoría en la web *",
       "featuredLabel": "Destacar en la parte superior del catálogo",
       "cancel": "Cancelar",
       "saving": "Guardando...",
-      "saveChanges": "Guardar Cambios"
+      "saveChanges": "Guardar Cambios",
+      "offerLabel": "Oferta % (opcional)",
+      "offerPlaceholder": "20",
+      "offerHint": "Solo para este producto de Etsy. Entre 1 % y 90 %. Déjalo vacío para no mostrar oferta."
     },
     "etsySync": {
       "title": "Sincronización con Etsy",
@@ -330,7 +334,9 @@
       "deleteConfirm": "¿Seguro que deseas eliminar \"{{title}}\"?",
       "etsyDeleteHint": "Los productos de Etsy se eliminan desde Etsy",
       "etsyDeleteAria": "{{title}} se elimina desde Etsy",
-      "deleteAria": "Eliminar {{title}}"
+      "deleteAria": "Eliminar {{title}}",
+      "offerFromEtsy": "oferta de Etsy",
+      "offerManual": "oferta manual"
     },
     "registrations": {
       "title": "Inscripciones a Talleres ({{count}})",

@@ -3,6 +3,7 @@ import {
   parsePriceToCents,
   formatPrice,
   getDiscountedCents,
+  getOfferPercent,
   isOfferActive,
 } from '../price';
 
@@ -72,20 +73,88 @@ describe('getDiscountedCents', () => {
   });
 });
 
-describe('isOfferActive', () => {
-  it('es cierto solo para productos locales con precio y descuento válidos', () => {
+describe('getOfferPercent', () => {
+  it('usa el descuento manual en productos locales', () => {
     expect(
-      isOfferActive({ source: 'local', priceCents: 2500, discountPercent: 20 })
+      getOfferPercent({
+        source: 'local',
+        priceCents: 2500,
+        discountPercent: 20,
+        etsyOfferPercent: null,
+      })
+    ).toBe(20);
+  });
+
+  it('usa la oferta de Etsy en productos importados', () => {
+    expect(
+      getOfferPercent({
+        source: 'etsy',
+        priceCents: 495,
+        discountPercent: null,
+        etsyOfferPercent: 15,
+      })
+    ).toBe(15);
+  });
+
+  it('ignora el descuento manual en productos de Etsy', () => {
+    expect(
+      getOfferPercent({
+        source: 'etsy',
+        priceCents: 495,
+        discountPercent: 20,
+        etsyOfferPercent: null,
+      })
+    ).toBeNull();
+  });
+
+  it('ignora la oferta de Etsy en productos locales', () => {
+    expect(
+      getOfferPercent({
+        source: 'local',
+        priceCents: 2500,
+        discountPercent: null,
+        etsyOfferPercent: 30,
+      })
+    ).toBeNull();
+  });
+
+  it('descarta porcentajes fuera de rango o sin precio', () => {
+    expect(
+      getOfferPercent({ source: 'local', priceCents: 2500, discountPercent: 95 })
+    ).toBeNull();
+    expect(
+      getOfferPercent({ source: 'etsy', priceCents: 495, etsyOfferPercent: 0 })
+    ).toBeNull();
+    expect(
+      getOfferPercent({ source: 'etsy', priceCents: null, etsyOfferPercent: 10 })
+    ).toBeNull();
+  });
+});
+
+describe('isOfferActive', () => {
+  it('es cierto para ofertas locales y también para ofertas de Etsy', () => {
+    expect(
+      isOfferActive({
+        source: 'local',
+        priceCents: 2500,
+        discountPercent: 20,
+      })
+    ).toBe(true);
+    expect(
+      isOfferActive({ source: 'etsy', priceCents: 495, etsyOfferPercent: 15 })
     ).toBe(true);
   });
 
-  it('nunca aplica ofertas a productos de Etsy', () => {
+  it('es falso cuando el porcentaje pertenece al otro origen', () => {
     expect(
-      isOfferActive({ source: 'etsy', priceCents: 2500, discountPercent: 20 })
+      isOfferActive({ source: 'etsy', priceCents: 495, discountPercent: 15 })
+    ).toBe(false);
+    expect(
+      isOfferActive({ source: 'local', priceCents: 2500, etsyOfferPercent: 15 })
     ).toBe(false);
   });
 
-  it('es falso sin precio o sin descuento', () => {
+  it('es falso sin precio o sin porcentaje', () => {
     expect(
       isOfferActive({ source: 'local', priceCents: null, discountPercent: 20 })
     ).toBe(false);

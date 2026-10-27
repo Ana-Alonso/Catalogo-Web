@@ -18,6 +18,41 @@ export type ProductFormValidationError =
   | 'discountRange'
   | 'discountRequiresPrice';
 
+export const normalizeOfferPercent = (value: string): number | null => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const percent = Number(trimmed.replace(',', '.'));
+
+  if (!Number.isInteger(percent) || percent < 1 || percent > 90) {
+    return null;
+  }
+
+  return percent;
+};
+
+export const validateOfferPercent = (
+  value: string,
+  priceCents: number | null
+): ProductFormValidationError | null => {
+  if (!value.trim()) {
+    return null;
+  }
+
+  if (normalizeOfferPercent(value) == null) {
+    return 'discountRange';
+  }
+
+  if (priceCents == null) {
+    return 'discountRequiresPrice';
+  }
+
+  return null;
+};
+
 export const validateProductForm = (
   input: ProductFormValidationInput
 ): ProductFormValidationError | null => {
@@ -35,19 +70,5 @@ export const validateProductForm = (
     return 'price';
   }
 
-  if (!input.discountPercent.trim()) {
-    return null;
-  }
-
-  const discount = Number(input.discountPercent.replace(',', '.'));
-
-  if (!Number.isInteger(discount) || discount < 1 || discount > 90) {
-    return 'discountRange';
-  }
-
-  if (priceCents == null) {
-    return 'discountRequiresPrice';
-  }
-
-  return null;
+  return validateOfferPercent(input.discountPercent, priceCents);
 };

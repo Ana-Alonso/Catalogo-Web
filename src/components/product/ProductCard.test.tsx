@@ -54,4 +54,37 @@ describe('ProductCard', () => {
     expect(screen.queryByRole('button', { name: i18n.t('product.readMore') })).toBeNull();
     expect(screen.getByText(shortDescription)).not.toHaveClass('line-clamp-3');
   });
+
+  it('aplica la oferta de Etsy sobre el precio importado', () => {
+    const { container } = renderCard(
+      buildItem({
+        source: 'etsy',
+        currency: 'EUR',
+        priceCents: 1000,
+        etsyOfferPercent: 20,
+      })
+    );
+
+    expect(screen.getByText('-20%')).toBeInTheDocument();
+    expect(container.querySelector('s')).toHaveTextContent('10,00');
+    expect(container.querySelector('s')?.parentElement).toHaveTextContent('8,00');
+  });
+
+  it('ignora el descuento manual en un producto de Etsy', () => {
+    const { container } = renderCard(
+      buildItem({ source: 'etsy', currency: 'EUR', priceCents: 1000, discountPercent: 20 })
+    );
+
+    expect(screen.queryByText('-20%')).toBeNull();
+    expect(container.querySelector('s')).toBeNull();
+  });
+
+  it('ignora la oferta de Etsy en un producto local', () => {
+    const { container } = renderCard(
+      buildItem({ source: 'local', currency: 'EUR', priceCents: 1000, etsyOfferPercent: 20 })
+    );
+
+    expect(screen.queryByText('-20%')).toBeNull();
+    expect(container.querySelector('s')).toBeNull();
+  });
 });

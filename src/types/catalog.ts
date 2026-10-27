@@ -15,6 +15,7 @@ export interface CatalogItem {
   priceCents?: number | null;
   currency?: string;
   discountPercent?: number | null;
+  etsyOfferPercent?: number | null;
   source?: ProductSource;
   etsyListingId?: number | null;
   etsyState?: string | null;
@@ -51,4 +52,5 @@ export interface ProductFormData {
 
 export interface EtsyProductMetadata {
   category: Exclude<CategoryType, 'todas'>;
+  etsyOfferPercent: number | null;
 }

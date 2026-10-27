@@ -14,7 +14,7 @@ import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
 } from '../../i18n/labels';
-import { getDiscountedCents, isOfferActive } from '../../utils/price';
+import { getDiscountedCents, getOfferPercent } from '../../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
 
@@ -48,10 +48,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
-  const hasOffer = isOfferActive(item);
+  const offerPercent = getOfferPercent(item);
+  const hasOffer = offerPercent != null;
   const priceCents = item.priceCents ?? null;
   const finalCents = hasOffer
-    ? getDiscountedCents(priceCents, item.discountPercent)
+    ? getDiscountedCents(priceCents, offerPercent)
     : priceCents;
   const finalPrice = formatPriceForLanguage(finalCents, item.currency, language);
   const originalPrice = formatPriceForLanguage(priceCents, item.currency, language);
@@ -93,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
 
         <Box position="absolute" corner="top-right" display="flex" direction="column" align="end" gap="xs">
           {hasOffer && (
-            <Badge variant="solid">-{item.discountPercent}%</Badge>
+            <Badge variant="solid">-{offerPercent}%</Badge>
           )}
           <Badge
             variant="glass"
@@ -104,7 +105,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
                   ? t('product.offerAria', {
                       finalPrice,
                       originalPrice,
-                      discount: item.discountPercent,
+                      discount: offerPercent,
                     })
                   : t('product.priceAria', { price: finalPrice })
             }

@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer';
 import HeroSection from '../components/hero/HeroSection';
 import BookShowcase from '../components/book/BookShowcase';
 import GallerySection from '../components/catalog/GallerySection';
+import VatNotice from '../components/catalog/VatNotice';
 import JsonLd from '../components/seo/JsonLd';
 import { Box, Container, NavLink } from '../components/ui';
 import { useProducts } from '../hooks/useProducts';
@@ -83,6 +84,7 @@ export const CatalogPage: React.FC = () => {
         />
         <BookShowcase />
         <Container>
+        <VatNotice />
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 
