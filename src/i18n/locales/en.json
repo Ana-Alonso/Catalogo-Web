@@ -81,7 +81,7 @@
     "consult": "Ask",
     "priceOnRequest": "Price on request",
     "priceAria": "Price {{price}}",
-    "offerAria": "Offer price {{finalPrice}}, item on offer",
+    "offerAria": "Item on offer. Price {{finalPrice}}",
     "status": {
       "available": "Available",
       "reserved": "Reserved",
@@ -293,9 +293,8 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "saveChanges": "Save Changes",
-      "offerLabel": "Offer % (optional)",
-      "offerPlaceholder": "20",
-      "offerHint": "This Etsy product only. Between 1% and 90%. Customers see the 'On offer' badge and the reduced price, never the percentage."
+      "offerLabel": "On offer",
+      "offerHint": "Shows the 'On offer' badge on the card. Etsy applies the discount at checkout, so the price shown here stays the same."
     },
     "etsySync": {
       "title": "Etsy Sync",
@@ -310,6 +309,17 @@
         "unexpectedResponse": "Unexpected server response.",
         "unknown": "Could not sync with Etsy."
       }
+    },
+    "etsyOffers": {
+      "title": "Etsy offers",
+      "description": "Etsy applies the discount at checkout, so the price on the web stays the same. Show or hide the \"On offer\" badge across all Etsy products at once.",
+      "summary": "{{onSale}} of {{total}} Etsy products show \"On offer\".",
+      "markAll": "Mark everything on offer",
+      "clearAll": "Clear the offer from all",
+      "applied": "{{affected}} products updated: {{state}}.",
+      "error": "Could not update the offers.",
+      "stateOn": "on offer",
+      "stateOff": "no offer"
     },
     "productTable": {
       "empty": "There are no products registered in the catalog.",

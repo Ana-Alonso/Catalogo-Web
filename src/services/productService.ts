@@ -330,7 +330,7 @@ export const updateEtsyProductMetadata = async (
       .from('products')
       .update({
         category: metadata.category,
-        etsyOfferPercent: metadata.etsyOfferPercent,
+        etsyOnSale: metadata.etsyOnSale,
       })
       .eq('id', id)
       .eq('source', 'etsy')
@@ -354,7 +354,7 @@ export const updateEtsyProductMetadata = async (
     updatedProduct = {
       ...item,
       category: metadata.category,
-      etsyOfferPercent: metadata.etsyOfferPercent,
+      etsyOnSale: metadata.etsyOnSale,
     };
     return updatedProduct;
   });
@@ -366,4 +366,31 @@ export const updateEtsyProductMetadata = async (
   }
 
   return updatedProduct;
+};
+
+export const setAllEtsyOffers = async (onSale: boolean): Promise<number> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ etsyOnSale: onSale })
+      .eq('source', 'etsy')
+      .select('id');
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).length;
+  }
+
+  const currentProducts = getStoredLocalProducts();
+  const updatedProducts = currentProducts.map((item) =>
+    item.source === 'etsy' ? { ...item, etsyOnSale: onSale } : item
+  );
+
+  saveStoredLocalProducts(updatedProducts);
+
+  return updatedProducts.filter(
+    (item) => item.source === 'etsy' && item.etsyOnSale === onSale
+  ).length;
 };

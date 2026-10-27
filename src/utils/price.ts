@@ -82,19 +82,19 @@ const isPercentInRange = (percent?: number | null): percent is number =>
 
 type OfferFields = Pick<
   CatalogItem,
-  'source' | 'priceCents' | 'discountPercent' | 'etsyOfferPercent'
+  'source' | 'priceCents' | 'discountPercent' | 'etsyOnSale'
 >;
 
+export const isEtsyOffer = (item: OfferFields): boolean =>
+  item.source === 'etsy' && item.etsyOnSale === true;
+
 export const getOfferPercent = (item: OfferFields): number | null => {
-  if (item.priceCents == null) {
+  if (item.source === 'etsy' || item.priceCents == null) {
     return null;
   }
 
-  const percent =
-    item.source === 'etsy' ? item.etsyOfferPercent : item.discountPercent;
-
-  return isPercentInRange(percent) ? percent : null;
+  return isPercentInRange(item.discountPercent) ? item.discountPercent : null;
 };
 
 export const isOfferActive = (item: OfferFields): boolean =>
-  getOfferPercent(item) != null;
+  isEtsyOffer(item) || getOfferPercent(item) != null;

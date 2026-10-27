@@ -6,6 +6,7 @@ import {
   updateProduct,
   deleteProduct,
   updateEtsyProductMetadata,
+  setAllEtsyOffers,
 } from '../services/productService';
 import { logError } from '../utils/logger';
 import type {
@@ -21,6 +22,7 @@ interface UseProductsResult {
   addProduct: (data: ProductFormData) => Promise<boolean>;
   editProduct: (id: string, data: ProductFormData) => Promise<boolean>;
   editEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
+  applyEtsyOffers: (onSale: boolean) => Promise<number | null>;
   removeProduct: (id: string) => Promise<boolean>;
   refreshProducts: () => Promise<void>;
 }
@@ -115,6 +117,19 @@ export const useProducts = (): UseProductsResult => {
     }
   };
 
+  const applyEtsyOffers = async (onSale: boolean): Promise<number | null> => {
+    try {
+      const affected = await setAllEtsyOffers(onSale);
+      await loadProducts();
+      return affected;
+    } catch (err) {
+      logError('useProducts.applyEtsyOffers', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateProduct');
+      setError(msg);
+      return null;
+    }
+  };
+
   const removeProduct = async (id: string): Promise<boolean> => {
     try {
       await deleteProduct(id);
@@ -135,6 +150,7 @@ export const useProducts = (): UseProductsResult => {
     addProduct,
     editProduct,
     editEtsyMetadata,
+    applyEtsyOffers,
     removeProduct,
     refreshProducts: loadProducts,
   };

@@ -81,7 +81,7 @@
     "consult": "Consultar",
     "priceOnRequest": "Precio a consultar",
     "priceAria": "Precio {{price}}",
-    "offerAria": "Precio de la oferta {{finalPrice}}, artículo en oferta",
+    "offerAria": "Artículo en oferta. Precio {{finalPrice}}",
     "status": {
       "available": "Disponible",
       "reserved": "Reservado",
@@ -293,9 +293,8 @@
       "cancel": "Cancelar",
       "saving": "Guardando...",
       "saveChanges": "Guardar Cambios",
-      "offerLabel": "Oferta % (opcional)",
-      "offerPlaceholder": "20",
-      "offerHint": "Solo para este producto de Etsy. Entre 1 % y 90 %. El cliente ve la insignia «En oferta» y el precio rebajado, nunca el porcentaje."
+      "offerLabel": "En oferta",
+      "offerHint": "Muestra la insignia «En oferta» en la ficha. El descuento lo aplica Etsy al cobrar, así que el precio de la web no cambia."
     },
     "etsySync": {
       "title": "Sincronización con Etsy",
@@ -310,6 +309,17 @@
         "unexpectedResponse": "Respuesta inesperada del servidor.",
         "unknown": "No se pudo sincronizar con Etsy."
       }
+    },
+    "etsyOffers": {
+      "title": "Ofertas de Etsy",
+      "description": "El descuento lo aplica Etsy al cobrar, así que el precio de la web no cambia. Marca o quita la insignia «En oferta» a todos los productos de Etsy de una vez.",
+      "summary": "{{onSale}} de {{total}} productos de Etsy muestran «En oferta».",
+      "markAll": "Marcar todo en oferta",
+      "clearAll": "Quitar la oferta a todas",
+      "applied": "{{affected}} productos actualizados: {{state}}.",
+      "error": "No se pudieron actualizar las ofertas.",
+      "stateOn": "en oferta",
+      "stateOff": "sin oferta"
     },
     "productTable": {
       "empty": "No hay productos registrados en el catálogo.",

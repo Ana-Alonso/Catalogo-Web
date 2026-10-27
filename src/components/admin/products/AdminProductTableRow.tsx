@@ -7,7 +7,11 @@ import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
 } from '../../../i18n/labels';
-import { getDiscountedCents, getOfferPercent } from '../../../utils/price';
+import {
+  getDiscountedCents,
+  getOfferPercent,
+  isEtsyOffer,
+} from '../../../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../../../types/catalog';
 
 interface AdminProductTableRowProps {
@@ -34,6 +38,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
   const currentStatus = item.status || 'disponible';
   const currency = item.currency || 'EUR';
   const offerPercent = getOfferPercent(item);
+  const isOnSale = isEtsyOffer(item);
   const displayCents =
     offerPercent != null && item.priceCents != null
       ? getDiscountedCents(item.priceCents, offerPercent)
@@ -104,12 +109,13 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
                   -{offerPercent}%
                 </Typography>
                 <Typography as="span" size="xs" tone="subtle" marginLeft="sm">
-                  {t(
-                    item.source === 'etsy'
-                      ? 'admin.productTable.offerFromEtsy'
-                      : 'admin.productTable.offerManual'
-                  )}
+                  {t('admin.productTable.offerManual')}
                 </Typography>
+              </Typography>
+            )}
+            {isOnSale && (
+              <Typography as="span" size="xs" tone="warning">
+                {t('admin.productTable.offerFromEtsy')}
               </Typography>
             )}
           </Box>

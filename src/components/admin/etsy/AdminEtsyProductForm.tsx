@@ -3,12 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Check, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Box, Button, Icon, Image, Select, Typography } from '../../ui';
 import { EtsyOfferField } from './EtsyOfferField';
-import { EtsyPricePreview } from './EtsyPricePreview';
+import { formatPriceForLanguage } from '../../../i18n/formatters';
 import { categoryTranslationKeys } from '../../../i18n/labels';
-import {
-  normalizeOfferPercent,
-  validateOfferPercent,
-} from '../../../utils/productFormValidation';
 import type {
   CategoryType,
   CatalogItem,
@@ -34,43 +30,21 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
   isSubmitting,
   onCancelEdit,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const [category, setCategory] = useState<Exclude<CategoryType, 'todas'>>(
     product.category !== 'todas' && product.category !== 'talleres'
       ? product.category
       : 'ilustraciones'
   );
-  const [offerPercent, setOfferPercent] = useState(
-    product.etsyOfferPercent != null ? String(product.etsyOfferPercent) : ''
-  );
-  const [offerError, setOfferError] = useState<string | null>(null);
+  const [isOnSale, setIsOnSale] = useState(product.etsyOnSale === true);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const parsedOffer = normalizeOfferPercent(offerPercent);
-
-  const handleOfferChange = (value: string) => {
-    setOfferPercent(value);
-    setOfferError(null);
-  };
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError(null);
-    const validationError = validateOfferPercent(
-      offerPercent,
-      product.priceCents ?? null
-    );
 
-    if (validationError) {
-      setOfferError(t(`validation.${validationError}`));
-      return;
-    }
-
-    setOfferError(null);
-    const success = await onSubmit({
-      category,
-      etsyOfferPercent: parsedOffer,
-    });
+    const success = await onSubmit({ category, etsyOnSale: isOnSale });
     if (!success) {
       setFormError(t('admin.etsyForm.saveError'));
     }
@@ -124,7 +98,15 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
           <Typography variant="body" clamp={3}>
             {product.description}
           </Typography>
-          <EtsyPricePreview product={product} offerPercent={parsedOffer} />
+          <Typography variant="body" tone="muted">
+            {product.priceCents == null
+              ? t('admin.etsyForm.priceOnRequest')
+              : formatPriceForLanguage(
+                  product.priceCents,
+                  product.currency || 'EUR',
+                  language
+                )}
+          </Typography>
           <Box display="flex" wrap align="center" gap="sm" tone="subtle" size="xs">
             <Typography as="span" size="xs" tone="subtle" icon>
               <Icon as={RefreshCw} size="xs" />
@@ -183,11 +165,7 @@ export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({
             </Select>
           </Box>
 
-          <EtsyOfferField
-            value={offerPercent}
-            error={offerError ?? undefined}
-            onChange={handleOfferChange}
-          />
+          <EtsyOfferField checked={isOnSale} onChange={setIsOnSale} />
         </Box>
 
         <Box

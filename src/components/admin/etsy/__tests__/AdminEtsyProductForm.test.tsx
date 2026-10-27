@@ -20,7 +20,16 @@ const buildProduct = (overrides: Partial<CatalogItem>): CatalogItem => ({
   ...overrides,
 });
 
-const renderForm = (product: CatalogItem, onSubmit = vi.fn().mockResolvedValue(true)) => {
+const offerCheckbox = () =>
+  screen.getByRole('checkbox', { name: i18n.t('admin.etsyForm.offerLabel') });
+
+const saveButton = () =>
+  screen.getByRole('button', { name: i18n.t('admin.etsyForm.saveChanges') });
+
+const renderForm = (
+  product: CatalogItem,
+  onSubmit = vi.fn().mockResolvedValue(true)
+) => {
   render(
     <MemoryRouter>
       <AdminEtsyProductForm
@@ -34,67 +43,56 @@ const renderForm = (product: CatalogItem, onSubmit = vi.fn().mockResolvedValue(t
   return onSubmit;
 };
 
-const saveButton = () =>
-  screen.getByRole('button', { name: i18n.t('admin.etsyForm.saveChanges') });
-
 describe('AdminEtsyProductForm', () => {
-  it('envía la oferta escrita junto a la categoría', async () => {
+  it('envía el marcado de oferta junto a la categoría', async () => {
     const user = userEvent.setup();
     const onSubmit = renderForm(buildProduct({}));
 
-    await user.type(screen.getByLabelText(i18n.t('admin.etsyForm.offerLabel')), '25');
+    await user.click(offerCheckbox());
     await user.click(saveButton());
 
     expect(onSubmit).toHaveBeenCalledWith({
       category: 'ilustraciones',
-      etsyOfferPercent: 25,
+      etsyOnSale: true,
     });
   });
 
-  it('permite retirar una oferta existente', async () => {
+  it('arranca con la oferta ya marcada y permite quitarla', async () => {
     const user = userEvent.setup();
-    const onSubmit = renderForm(buildProduct({ etsyOfferPercent: 30 }));
+    const onSubmit = renderForm(buildProduct({ etsyOnSale: true }));
 
-    await user.clear(screen.getByLabelText(i18n.t('admin.etsyForm.offerLabel')));
+    expect(offerCheckbox()).toBeChecked();
+
+    await user.click(offerCheckbox());
     await user.click(saveButton());
 
     expect(onSubmit).toHaveBeenCalledWith({
       category: 'ilustraciones',
-      etsyOfferPercent: null,
+      etsyOnSale: false,
     });
   });
 
-  it('impide guardar una oferta fuera del rango permitido', async () => {
+  it('cambia la categoría sin tocar el marcado de oferta', async () => {
     const user = userEvent.setup();
-    const onSubmit = renderForm(buildProduct({}));
-    const offerField = screen.getByLabelText(i18n.t('admin.etsyForm.offerLabel'));
+    const onSubmit = renderForm(buildProduct({ etsyOnSale: true }));
 
-    await user.type(offerField, '120');
+    await user.selectOptions(
+      screen.getByLabelText(i18n.t('admin.etsyForm.categoryLabel')),
+      'camisetas'
+    );
     await user.click(saveButton());
 
-    expect(offerField).toHaveAttribute('min', '1');
-    expect(offerField).toHaveAttribute('max', '90');
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledWith({
+      category: 'camisetas',
+      etsyOnSale: true,
+    });
   });
 
-  it('exige un precio antes de ofrecer un descuento', async () => {
-    const user = userEvent.setup();
-    const onSubmit = renderForm(buildProduct({ priceCents: null }));
-
-    await user.type(screen.getByLabelText(i18n.t('admin.etsyForm.offerLabel')), '20');
-    await user.click(saveButton());
-
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(
-      await screen.findByText(i18n.t('validation.discountRequiresPrice'))
-    ).toBeInTheDocument();
-  });
-
-  it('muestra el precio de Etsy tachado cuando ya hay oferta', () => {
+  it('muestra el precio sincronizado sin porcentaje ni tachado', () => {
     const { container } = render(
       <MemoryRouter>
         <AdminEtsyProductForm
-          product={buildProduct({ etsyOfferPercent: 20 })}
+          product={buildProduct({ etsyOnSale: true })}
           onSubmit={vi.fn()}
           isSubmitting={false}
           onCancelEdit={vi.fn()}
@@ -102,10 +100,27 @@ describe('AdminEtsyProductForm', () => {
       </MemoryRouter>
     );
 
-    expect(container.querySelector('s')).toHaveTextContent('10,00');
-    expect(screen.getByText('-20%')).toBeInTheDocument();
+    expect(container.querySelector('s')).toBeNull();
+    expect(container.textContent).toContain('10,00');
+    expect(container.textContent).not.toContain('%');
+  });
+
+  it('indica que el precio no ha llegado todavía de Etsy', () => {
+    renderForm(buildProduct({ priceCents: null }));
+
     expect(
-      screen.getByRole('spinbutton', { name: i18n.t('admin.etsyForm.offerLabel') })
-    ).toHaveValue(20);
+      screen.getByText(i18n.t('admin.etsyForm.priceOnRequest'))
+    ).toBeInTheDocument();
+  });
+
+  it('avisa cuando el guardado falla', async () => {
+    const user = userEvent.setup();
+    renderForm(buildProduct({}), vi.fn().mockResolvedValue(false));
+
+    await user.click(saveButton());
+
+    expect(
+      await screen.findByText(i18n.t('admin.etsyForm.saveError'))
+    ).toBeInTheDocument();
   });
 });

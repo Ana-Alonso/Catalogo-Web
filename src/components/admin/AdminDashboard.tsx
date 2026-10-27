@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AdminProductForm } from './products/AdminProductForm';
 import { AdminEtsyProductForm } from './etsy/AdminEtsyProductForm';
 import { AdminEtsySyncPanel } from './etsy/AdminEtsySyncPanel';
+import { AdminEtsyOffersPanel } from './etsy/AdminEtsyOffersPanel';
 import { AdminProductTable } from './products/AdminProductTable';
 import { AdminRegistrationsPanel } from './registrations/AdminRegistrationsPanel';
 import { AdminWorkshopCalendarPanel } from './workshops/AdminWorkshopCalendarPanel';
@@ -29,6 +30,7 @@ interface AdminDashboardProps {
   onAddProduct: (data: ProductFormData) => Promise<boolean>;
   onEditProduct: (id: string, data: ProductFormData) => Promise<boolean>;
   onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
+  onApplyEtsyOffers: (onSale: boolean) => Promise<number | null>;
   onDeleteProduct: (id: string) => Promise<boolean>;
   onRefreshProducts: () => Promise<void>;
   onRefreshRegistrations: () => Promise<void>;
@@ -47,6 +49,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onAddProduct,
   onEditProduct,
   onEditEtsyMetadata,
+  onApplyEtsyOffers,
   onDeleteProduct,
   onRefreshProducts,
   onRefreshRegistrations,
@@ -234,6 +237,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {isSupabaseConfigured && <AdminEtsySyncPanel onSynced={onRefreshProducts} />}
+
+        <AdminEtsyOffersPanel
+          products={products}
+          onApply={onApplyEtsyOffers}
+        />
 
         {editingProduct?.source === 'etsy' ? (
           <AdminEtsyProductForm

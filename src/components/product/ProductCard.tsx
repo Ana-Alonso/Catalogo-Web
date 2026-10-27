@@ -14,7 +14,7 @@ import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
 } from '../../i18n/labels';
-import { getDiscountedCents, getOfferPercent } from '../../utils/price';
+import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
 
@@ -48,12 +48,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
-  const offerPercent = getOfferPercent(item);
-  const hasOffer = offerPercent != null;
+  const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
-  const finalCents = hasOffer
-    ? getDiscountedCents(priceCents, offerPercent)
-    : priceCents;
+  const finalCents = getDiscountedCents(priceCents, getOfferPercent(item));
   const finalPrice = formatPriceForLanguage(finalCents, item.currency, language);
   const cupo = item.cupo ?? null;
   const registeredCount = spotsCount ?? 0;

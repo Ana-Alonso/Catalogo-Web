@@ -1,40 +1,37 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Input, Typography } from '../../ui';
+import { Box, Checkbox, Typography } from '../../ui';
 
 interface EtsyOfferFieldProps {
-  value: string;
-  error?: string;
-  onChange: (value: string) => void;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 }
 
 export const EtsyOfferField: React.FC<EtsyOfferFieldProps> = ({
-  value,
-  error,
+  checked,
   onChange,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <Box>
-      <Input
-        id="etsy-offer-percent"
+    <Box
+      padding="md"
+      rounded="lg"
+      border
+      background="neutral"
+      display="flex"
+      direction="column"
+      gap="sm"
+    >
+      <Checkbox
+        id="etsy-on-sale"
+        checked={checked}
+        onChange={onChange}
         label={t('admin.etsyForm.offerLabel')}
-        type="number"
-        min={1}
-        max={90}
-        step={1}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={t('admin.etsyForm.offerPlaceholder')}
-        error={error}
-        aria-invalid={error ? true : undefined}
       />
-      {!error && (
-        <Typography variant="caption" tone="muted" marginTop="sm" display="block">
-          {t('admin.etsyForm.offerHint')}
-        </Typography>
-      )}
+      <Typography variant="caption" tone="muted">
+        {t('admin.etsyForm.offerHint')}
+      </Typography>
     </Box>
   );
 };
