@@ -97,6 +97,8 @@
     "viewVinted": "View on Vinted",
     "viewVintedAria": "Buy {{title}} on Vinted",
     "unavailable": "Piece unavailable",
+    "readMore": "Read more",
+    "readLess": "Read less",
     "signupModalTitle": "Workshop registration"
   },
   "workshop": {

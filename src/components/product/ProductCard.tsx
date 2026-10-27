@@ -5,6 +5,7 @@ import { ShoppingBag, Tag, Calendar, MapPin, Users, UserPlus } from 'lucide-reac
 import { AnimatedCard, Badge, Box, Button, Image, Typography, Icon } from '../ui';
 import { Modal } from '../ui/Modal';
 import { WorkshopSignupForm } from '../workshop/WorkshopSignupForm';
+import { ProductDescription } from './ProductDescription';
 import {
   formatPriceForLanguage,
   formatWorkshopDateForLanguage,
@@ -44,6 +45,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const currentStatus = item.status || 'disponible';
   const statusBadgeVariant = statusBadgeVariants[currentStatus];
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
   const hasOffer = isOfferActive(item);
@@ -164,9 +166,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           </Box>
         )}
 
-        <Typography variant="body" marginBottom="lg" grow>
-          {item.description}
-        </Typography>
+        <ProductDescription id={descriptionId} text={item.description} />
         
         <Box display="flex" direction="column" gap="sm" marginTop="auto">
           {isWorkshop && !isFinished && (
