@@ -81,7 +81,7 @@
     "consult": "Consultar",
     "priceOnRequest": "Precio a consultar",
     "priceAria": "Precio {{price}}",
-    "offerAria": "Precio {{finalPrice}}, antes {{originalPrice}}, {{discount}}% de descuento",
+    "offerAria": "Precio de la oferta {{finalPrice}}, artículo en oferta",
     "status": {
       "available": "Disponible",
       "reserved": "Reservado",
@@ -100,7 +100,8 @@
     "unavailable": "Pieza no disponible",
     "readMore": "Leer más",
     "readLess": "Leer menos",
-    "signupModalTitle": "Inscripción al taller"
+    "signupModalTitle": "Inscripción al taller",
+    "offerBadge": "En oferta"
   },
   "workshop": {
     "form": {
@@ -264,7 +265,7 @@
       "onRequest": "Precio a consultar",
       "discountLabel": "Descuento % (opcional)",
       "discountPlaceholder": "20",
-      "discountHint": "Se aplica solo a productos locales. Entre 1 % y 90 %.",
+      "discountHint": "Se aplica solo a productos locales. Entre 1 % y 90 %. El cliente ve la insignia «En oferta», nunca el porcentaje.",
       "preview": "Vista previa",
       "before": "antes"
     },
@@ -294,7 +295,7 @@
       "saveChanges": "Guardar Cambios",
       "offerLabel": "Oferta % (opcional)",
       "offerPlaceholder": "20",
-      "offerHint": "Solo para este producto de Etsy. Entre 1 % y 90 %. Déjalo vacío para no mostrar oferta."
+      "offerHint": "Solo para este producto de Etsy. Entre 1 % y 90 %. El cliente ve la insignia «En oferta» y el precio rebajado, nunca el porcentaje."
     },
     "etsySync": {
       "title": "Sincronización con Etsy",

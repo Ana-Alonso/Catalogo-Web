@@ -81,7 +81,7 @@
     "consult": "Ask",
     "priceOnRequest": "Price on request",
     "priceAria": "Price {{price}}",
-    "offerAria": "Price {{finalPrice}}, originally {{originalPrice}}, {{discount}}% off",
+    "offerAria": "Offer price {{finalPrice}}, item on offer",
     "status": {
       "available": "Available",
       "reserved": "Reserved",
@@ -100,7 +100,8 @@
     "unavailable": "Piece unavailable",
     "readMore": "Read more",
     "readLess": "Read less",
-    "signupModalTitle": "Workshop registration"
+    "signupModalTitle": "Workshop registration",
+    "offerBadge": "On offer"
   },
   "workshop": {
     "form": {
@@ -264,7 +265,7 @@
       "onRequest": "Price on request",
       "discountLabel": "Discount % (optional)",
       "discountPlaceholder": "20",
-      "discountHint": "Applies only to local products. Between 1% and 90%.",
+      "discountHint": "Applies only to local products. Between 1% and 90%. Customers see the 'On offer' badge, never the percentage.",
       "preview": "Preview",
       "before": "before"
     },
@@ -294,7 +295,7 @@
       "saveChanges": "Save Changes",
       "offerLabel": "Offer % (optional)",
       "offerPlaceholder": "20",
-      "offerHint": "This Etsy product only. Between 1% and 90%. Leave it empty to hide the offer."
+      "offerHint": "This Etsy product only. Between 1% and 90%. Customers see the 'On offer' badge and the reduced price, never the percentage."
     },
     "etsySync": {
       "title": "Etsy Sync",

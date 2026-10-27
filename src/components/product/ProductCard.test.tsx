@@ -55,7 +55,7 @@ describe('ProductCard', () => {
     expect(screen.getByText(shortDescription)).not.toHaveClass('line-clamp-3');
   });
 
-  it('aplica la oferta de Etsy sobre el precio importado', () => {
+  it('muestra la oferta de Etsy como insignia sin porcentaje ni precio tachado', () => {
     const { container } = renderCard(
       buildItem({
         source: 'etsy',
@@ -65,9 +65,21 @@ describe('ProductCard', () => {
       })
     );
 
-    expect(screen.getByText('-20%')).toBeInTheDocument();
-    expect(container.querySelector('s')).toHaveTextContent('10,00');
-    expect(container.querySelector('s')?.parentElement).toHaveTextContent('8,00');
+    expect(screen.getByText(i18n.t('product.offerBadge'))).toBeInTheDocument();
+    expect(container.querySelector('s')).toBeNull();
+    expect(container.textContent).toContain('8,00');
+    expect(container.textContent).not.toContain('10,00');
+  });
+
+  it('trata igual la oferta local: insignia y precio rebajado', () => {
+    const { container } = renderCard(
+      buildItem({ source: 'local', currency: 'EUR', priceCents: 1000, discountPercent: 20 })
+    );
+
+    expect(screen.getByText(i18n.t('product.offerBadge'))).toBeInTheDocument();
+    expect(container.querySelector('s')).toBeNull();
+    expect(container.textContent).toContain('8,00');
+    expect(container.textContent).not.toContain('10,00');
   });
 
   it('ignora el descuento manual en un producto de Etsy', () => {
@@ -75,8 +87,8 @@ describe('ProductCard', () => {
       buildItem({ source: 'etsy', currency: 'EUR', priceCents: 1000, discountPercent: 20 })
     );
 
-    expect(screen.queryByText('-20%')).toBeNull();
-    expect(container.querySelector('s')).toBeNull();
+    expect(screen.queryByText(i18n.t('product.offerBadge'))).toBeNull();
+    expect(container.textContent).toContain('10,00');
   });
 
   it('ignora la oferta de Etsy en un producto local', () => {
@@ -84,7 +96,7 @@ describe('ProductCard', () => {
       buildItem({ source: 'local', currency: 'EUR', priceCents: 1000, etsyOfferPercent: 20 })
     );
 
-    expect(screen.queryByText('-20%')).toBeNull();
-    expect(container.querySelector('s')).toBeNull();
+    expect(screen.queryByText(i18n.t('product.offerBadge'))).toBeNull();
+    expect(container.textContent).toContain('10,00');
   });
 });

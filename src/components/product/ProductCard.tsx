@@ -55,7 +55,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
     ? getDiscountedCents(priceCents, offerPercent)
     : priceCents;
   const finalPrice = formatPriceForLanguage(finalCents, item.currency, language);
-  const originalPrice = formatPriceForLanguage(priceCents, item.currency, language);
   const cupo = item.cupo ?? null;
   const registeredCount = spotsCount ?? 0;
   const spotsLeft = cupo === null ? null : Math.max(cupo - registeredCount, 0);
@@ -94,7 +93,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
 
         <Box position="absolute" corner="top-right" display="flex" direction="column" align="end" gap="xs">
           {hasOffer && (
-            <Badge variant="solid">-{offerPercent}%</Badge>
+            <Badge variant="solid">{t('product.offerBadge')}</Badge>
           )}
           <Badge
             variant="glass"
@@ -102,21 +101,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               priceCents == null
                 ? t('product.priceOnRequest')
                 : hasOffer
-                  ? t('product.offerAria', {
-                      finalPrice,
-                      originalPrice,
-                      discount: offerPercent,
-                    })
+                  ? t('product.offerAria', { finalPrice })
                   : t('product.priceAria', { price: finalPrice })
             }
           >
             {priceCents == null ? (
               t('product.consult')
             ) : hasOffer ? (
-              <Typography as="span" size="xs" tone="warning" icon>
-                <Typography as="s" size="xs" tone="muted" weight="medium" transform="none">
-                  {originalPrice}
-                </Typography>
+              <Typography as="span" size="xs" tone="warning" weight="medium" transform="none">
                 {finalPrice}
               </Typography>
             ) : (
