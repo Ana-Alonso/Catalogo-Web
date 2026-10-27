@@ -106,11 +106,15 @@
       "namePlaceholder": "Full name",
       "emailLabel": "Your email *",
       "emailPlaceholder": "you@email.com",
+      "privacyLabel": "I have read and accept the <privacy>privacy policy</privacy>. *",
+      "marketingLabel": "Notify me about future workshops and news (optional).",
+      "consentNote": "We use your data only to manage this registration and to contact you about the workshop.",
       "submit": "Join the workshop",
       "submitting": "Registering...",
       "errors": {
         "required": "Please enter your name and email.",
         "invalidEmail": "Enter a valid email.",
+        "privacyRequired": "You must accept the privacy policy to continue.",
         "alreadyRegistered": "You are already registered for this workshop with this email.",
         "workshopFull": "The workshop is full: no spots left.",
         "notFound": "Registration not found.",
@@ -145,7 +149,30 @@
     "tiktokAria": "Visit TikTok profile",
     "copyright": "© {{year}} Laurel en Lienzo. All rights reserved.",
     "accessibility": "Accessibility (WCAG)",
-    "legal": "Legal Notice"
+    "legal": "Legal Notice",
+    "privacy": "Privacy policy",
+    "cookies": "Cookie policy",
+    "cookieSettings": "Cookie settings"
+  },
+  "cookie": {
+    "bannerAria": "Cookie notice",
+    "title": "We use cookies",
+    "intro": "We use technical cookies so the website works and Google Analytics cookies to understand how many people visit it. You can accept, reject or configure them.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "configure": "Configure",
+    "policyLink": "Cookie policy",
+    "privacyLink": "Privacy policy",
+    "settingsTitle": "Cookie settings",
+    "alwaysActive": "Always on",
+    "requiredTitle": "Technical cookies",
+    "requiredDescription": "They are needed for the website to work: they store your language and the personalised products. They do not require consent.",
+    "analyticsLabel": "Google Analytics",
+    "analyticsDescription": "Third-party cookies managed by Google Ireland Limited that measure visitor numbers in aggregate form. They are only installed if you accept them and you can turn them off at any time.",
+    "save": "Save preferences"
+  },
+  "legal": {
+    "updatedAt": "Last updated: {{date}}"
   },
   "a11y": {
     "skipToContent": "Skip to main content",
@@ -313,6 +340,7 @@
       "attendee": "{{count}} registered",
       "attendees": "{{count}} registered",
       "empty": "No registrations yet.",
+      "marketingBadge": "Workshop alerts",
       "confirmAria": "Confirm registration for {{name}}",
       "cancelAria": "Cancel registration for {{name}}",
       "deleteAria": "Delete registration for {{name}}",

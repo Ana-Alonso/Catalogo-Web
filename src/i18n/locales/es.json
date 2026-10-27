@@ -106,11 +106,15 @@
       "namePlaceholder": "Nombre y apellidos",
       "emailLabel": "Tu email *",
       "emailPlaceholder": "tu@email.com",
+      "privacyLabel": "He leído y acepto la <privacy>política de privacidad</privacy>. *",
+      "marketingLabel": "Quiero que me aviséis de futuros talleres y novedades (opcional).",
+      "consentNote": "Usamos tus datos únicamente para gestionar esta inscripción y comunicarnos contigo sobre el taller.",
       "submit": "Apuntarme al taller",
       "submitting": "Inscribiendo...",
       "errors": {
         "required": "Por favor indica tu nombre y tu email.",
         "invalidEmail": "Introduce un email válido.",
+        "privacyRequired": "Debes aceptar la política de privacidad para continuar.",
         "alreadyRegistered": "Ya estás apuntado a este taller con este email.",
         "workshopFull": "El taller está completo: no quedan plazas.",
         "notFound": "Inscripción no encontrada.",
@@ -145,7 +149,30 @@
     "tiktokAria": "Visitar perfil de TikTok",
     "copyright": "© {{year}} Laurel en Lienzo. Todos los derechos reservados.",
     "accessibility": "Accesibilidad (WCAG)",
-    "legal": "Aviso Legal"
+    "legal": "Aviso Legal",
+    "privacy": "Política de privacidad",
+    "cookies": "Política de cookies",
+    "cookieSettings": "Configuración de cookies"
+  },
+  "cookie": {
+    "bannerAria": "Aviso de cookies",
+    "title": "Usamos cookies",
+    "intro": "Usamos cookies técnicas para que la web funcione y cookies analíticas de Google Analytics para conocer cuántas personas la visitan. Puedes aceptarlas, rechazarlas o configurarlas.",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "configure": "Configurar",
+    "policyLink": "Política de cookies",
+    "privacyLink": "Política de privacidad",
+    "settingsTitle": "Configuración de cookies",
+    "alwaysActive": "Siempre activas",
+    "requiredTitle": "Cookies técnicas",
+    "requiredDescription": "Son necesarias para el funcionamiento de la web: guardan el idioma escolhido y los productos personalizados. No requieren consentimiento.",
+    "analyticsLabel": "Google Analytics",
+    "analyticsDescription": "Cookies de terceros gestionadas por Google Ireland Limited que miden de forma agregada el número de visitantes. Se instalan solo si las aceptas y puedes desactivarlas cuando quieras.",
+    "save": "Guardar preferencias"
+  },
+  "legal": {
+    "updatedAt": "Última actualización: {{date}}"
   },
   "a11y": {
     "skipToContent": "Saltar al contenido principal",
@@ -313,6 +340,7 @@
       "attendee": "{{count}} inscrito",
       "attendees": "{{count}} inscritos",
       "empty": "Sin inscripciones todavía.",
+      "marketingBadge": "Avisa de talleres",
       "confirmAria": "Confirmar inscripción de {{name}}",
       "cancelAria": "Cancelar inscripción de {{name}}",
       "deleteAria": "Eliminar inscripción de {{name}}",

@@ -8,6 +8,7 @@ import {
 } from '../../errors/registrationError';
 import type { CatalogItem } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
+import { WorkshopConsentFields } from './WorkshopConsentFields';
 
 interface WorkshopSignupFormProps {
   workshop: CatalogItem;
@@ -20,6 +21,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type WorkshopFormErrorCode =
   | 'required'
   | 'invalidEmail'
+  | 'privacyRequired'
   | RegistrationErrorCode;
 
 export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
@@ -30,6 +32,8 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<WorkshopFormErrorCode | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -53,9 +57,19 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
       return;
     }
 
+    if (!privacyConsent) {
+      setErrorCode('privacyRequired');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onRegister({ name: trimmedName, email: trimmedEmail });
+      await onRegister({
+        name: trimmedName,
+        email: trimmedEmail,
+        privacyConsent,
+        marketingConsent,
+      });
       setIsSuccess(true);
     } catch (err) {
       setErrorCode(getRegistrationErrorCode(err));
@@ -182,7 +196,20 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         autoComplete="email"
       />
 
-      {errorCode && (
+      <WorkshopConsentFields
+        privacyConsent={privacyConsent}
+        marketingConsent={marketingConsent}
+        hasPrivacyError={errorCode === 'privacyRequired'}
+        onPrivacyConsentChange={(checked) => {
+          setPrivacyConsent(checked);
+          if (errorCode === 'privacyRequired') {
+            setErrorCode(null);
+          }
+        }}
+        onMarketingConsentChange={setMarketingConsent}
+      />
+
+      {errorCode && errorCode !== 'privacyRequired' && (
         <Box
           display="flex"
           align="center"

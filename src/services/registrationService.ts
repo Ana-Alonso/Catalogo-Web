@@ -78,11 +78,20 @@ export const createRegistration = async (
 ): Promise<WorkshopRegistration> => {
   const name = formData.name.trim();
   const email = formData.email.trim();
+  const privacyConsentAt = formData.privacyConsent ? new Date().toISOString() : null;
 
   if (!useMocks && isSupabaseConfigured && supabase) {
     const { data, error } = await supabase
       .from('workshop_registrations')
-      .insert([{ product_id: productId, name, email }])
+      .insert([
+        {
+          product_id: productId,
+          name,
+          email,
+          privacy_consent_at: privacyConsentAt,
+          marketing_consent: formData.marketingConsent,
+        },
+      ])
       .select()
       .single();
 
@@ -117,6 +126,8 @@ export const createRegistration = async (
     name,
     email,
     status: 'pendiente',
+    privacy_consent_at: privacyConsentAt,
+    marketing_consent: formData.marketingConsent,
     created_at: new Date().toISOString(),
   };
 

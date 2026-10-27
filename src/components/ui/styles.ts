@@ -460,6 +460,7 @@ export const EDGE = {
   'right-out': 'right-0 sm:-right-12',
   'bottom-center-md': 'bottom-4 left-1/2 -translate-x-1/2',
   'bottom-center-out': '-bottom-8 left-1/2 -translate-x-1/2',
+  'bottom-full': 'inset-x-0 bottom-0',
 } as const;
 
 export const TOP = {

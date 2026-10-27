@@ -4,6 +4,7 @@ import { Mail, ShoppingBag } from 'lucide-react';
 import {
   Amazon,
   Box,
+  Button,
   Container,
   Footer as FooterShell,
   Icon,
@@ -13,6 +14,8 @@ import {
   Typography,
   type IconGlyphProps,
 } from '../ui';
+import { LegalLink } from '../legal/LegalLink';
+import { OPEN_COOKIE_SETTINGS_EVENT } from '../../utils/cookieConsent';
 import logoImg from '../../assets/Logo.png';
 
 interface SocialLinkProps {
@@ -62,6 +65,10 @@ const Footer: React.FC = () => {
   const contactEmail = import.meta.env.VITE_CONTACT_EMAIL;
   const amazonBookUrl =
     import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu/d/0dU00KQa';
+
+  const handleOpenCookieSettings = (): void => {
+    window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS_EVENT));
+  };
 
   return (
     <FooterShell aria-labelledby="footer-heading" padding="lg">
@@ -128,13 +135,16 @@ const Footer: React.FC = () => {
           <Typography variant="body" size="sm" tone="subtle" align="center">
             {t('footer.copyright', { year: currentYear })}
           </Typography>
-          <Box display="flex" gap="md">
+          <Box display="flex" align="center" gap="md" wrap>
             <Typography as="span" size="xs" tone="subtle">
               {t('footer.accessibility')}
             </Typography>
-            <Typography as="span" size="xs" tone="subtle">
-              {t('footer.legal')}
-            </Typography>
+            <LegalLink kind="privacy">{t('footer.privacy')}</LegalLink>
+            <LegalLink kind="cookies">{t('footer.cookies')}</LegalLink>
+            <LegalLink kind="notice">{t('footer.legal')}</LegalLink>
+            <Button variant="ghost" size="sm" onClick={handleOpenCookieSettings}>
+              {t('footer.cookieSettings')}
+            </Button>
           </Box>
         </Box>
       </Container>

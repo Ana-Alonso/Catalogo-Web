@@ -163,6 +163,11 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                         <Badge variant={statusBadgeVariant[registration.status]}>
                           {t(registrationStatusTranslationKeys[registration.status])}
                         </Badge>
+                        {registration.marketing_consent && (
+                          <Badge variant="outline" size="micro">
+                            {t('admin.registrations.marketingBadge')}
+                          </Badge>
+                        )}
                         {registration.status !== 'confirmado' && (
                           <Button
                             variant="ghost"

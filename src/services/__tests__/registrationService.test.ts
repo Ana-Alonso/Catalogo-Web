@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { WorkshopRegistration } from '../../types/registrations';
+import type { RegistrationFormData, WorkshopRegistration } from '../../types/registrations';
 
 const { supabaseMock } = vi.hoisted(() => ({
   supabaseMock: { from: vi.fn() },
@@ -15,12 +15,26 @@ const loadService = async () => {
   return await import('../registrationService');
 };
 
+const formData = (
+  name: string,
+  email: string,
+  overrides?: Partial<RegistrationFormData>
+): RegistrationFormData => ({
+  name,
+  email,
+  privacyConsent: true,
+  marketingConsent: false,
+  ...overrides,
+});
+
 const registrationRow: WorkshopRegistration = {
   id: 'reg-1',
   product_id: 'prod-1',
   name: 'Ana García',
   email: 'ana@example.com',
   status: 'pendiente',
+  privacy_consent_at: '2026-11-01T10:00:00.000Z',
+  marketing_consent: false,
   created_at: '2026-11-01T10:00:00.000Z',
 };
 
@@ -38,7 +52,7 @@ describe('registrationService en modo mock (localStorage)', () => {
     const service = await loadService();
     const created = await service.createRegistration(
       'prod-1',
-      { name: '  Ana García  ', email: '  ana@example.com  ' },
+      formData('  Ana García  ', '  ana@example.com  '),
       null
     );
     expect(created.status).toBe('pendiente');
@@ -46,20 +60,32 @@ describe('registrationService en modo mock (localStorage)', () => {
     expect(created.email).toBe('ana@example.com');
   });
 
+  it('guarda la marca de consentimiento de privacidad en el mock local', async () => {
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+    expect(created.privacy_consent_at).toBeTruthy();
+    expect(created.marketing_consent).toBe(false);
+    expect(localStorage.getItem('laurel_workshop_registrations')).toContain('privacy_consent_at');
+  });
+
   it('rechaza email duplicado en el mismo taller', async () => {
     const service = await loadService();
-    await service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null);
+    await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null);
     await expect(
-      service.createRegistration('prod-1', { name: 'Ana Otra', email: 'ANA@example.com' }, null)
+      service.createRegistration('prod-1', formData('Ana Otra', 'ANA@example.com'), null)
     ).rejects.toMatchObject({ code: 'alreadyRegistered' });
   });
 
   it('permite el mismo email en talleres distintos', async () => {
     const service = await loadService();
-    await service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null);
+    await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null);
     const second = await service.createRegistration(
       'prod-2',
-      { name: 'Ana', email: 'ana@example.com' },
+      formData('Ana', 'ana@example.com'),
       null
     );
     expect(second.product_id).toBe('prod-2');
@@ -67,16 +93,16 @@ describe('registrationService en modo mock (localStorage)', () => {
 
   it('rechaza inscripción cuando el taller está lleno', async () => {
     const service = await loadService();
-    await service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, 1);
+    await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), 1);
     await expect(
-      service.createRegistration('prod-1', { name: 'Luis', email: 'luis@example.com' }, 1)
+      service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), 1)
     ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
   it('cuenta solo inscripciones no canceladas', async () => {
     const service = await loadService();
-    const first = await service.createRegistration('prod-1', { name: 'Ana', email: 'a@a.com' }, null);
-    await service.createRegistration('prod-1', { name: 'Luis', email: 'l@l.com' }, null);
+    const first = await service.createRegistration('prod-1', formData('Ana', 'a@a.com'), null);
+    await service.createRegistration('prod-1', formData('Luis', 'l@l.com'), null);
     await service.updateRegistrationStatus(first.id, 'cancelado');
     const counts = await service.fetchRegistrationCounts();
     expect(counts['prod-1']).toBe(1);
@@ -103,7 +129,7 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     });
     const service = await loadService();
     await expect(
-      service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
+      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'alreadyRegistered' });
   });
 
@@ -121,7 +147,7 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     });
     const service = await loadService();
     await expect(
-      service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
+      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
@@ -139,11 +165,11 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     });
     const service = await loadService();
     await expect(
-      service.createRegistration('prod-1', { name: 'Ana', email: 'ana@example.com' }, null)
+      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'unknown' });
   });
 
-  it('inserta únicamente product_id, name y email (el status lo pone el servidor)', async () => {
+  it('inserta product_id, name, email y las marcas de consentimiento', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
     const insertSpy = vi.fn(() => ({
       select: () => ({
@@ -152,13 +178,42 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     }));
     supabaseMock.from.mockReturnValue({ insert: insertSpy });
     const service = await loadService();
-    const created = await service.createRegistration(
-      'prod-1',
-      { name: 'Ana', email: 'ana@example.com' },
-      5
-    );
-    expect(insertSpy).toHaveBeenCalledWith([{ product_id: 'prod-1', name: 'Ana', email: 'ana@example.com' }]);
+    const created = await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), 5);
+    expect(insertSpy).toHaveBeenCalledWith([
+      {
+        product_id: 'prod-1',
+        name: 'Ana',
+        email: 'ana@example.com',
+        privacy_consent_at: expect.any(String),
+        marketing_consent: false,
+      },
+    ]);
     expect(created.id).toBe('reg-1');
+  });
+
+  it('no fabrica la marca de consentimiento cuando no se dio', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const insertSpy = vi.fn(() => ({
+      select: () => ({
+        single: async () => ({ data: registrationRow, error: null }),
+      }),
+    }));
+    supabaseMock.from.mockReturnValue({ insert: insertSpy });
+    const service = await loadService();
+    await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { privacyConsent: false, marketingConsent: true }),
+      null
+    );
+    expect(insertSpy).toHaveBeenCalledWith([
+      {
+        product_id: 'prod-1',
+        name: 'Ana',
+        email: 'ana@example.com',
+        privacy_consent_at: null,
+        marketing_consent: true,
+      },
+    ]);
   });
 
   it('lanza error si fetchRegistrations recibe un error de Supabase', async () => {

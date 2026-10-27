@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, type ReactNode } from 'react';
+import React, { useEffect, useId, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
@@ -12,6 +12,7 @@ export interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     if (!isOpen) {
@@ -52,13 +53,13 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="workshop-signup-title"
+        aria-labelledby={titleId}
         tabIndex={-1}
         className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl p-6 shadow-2xl focus:outline-none"
       >
         <div className="flex items-center justify-between mb-5">
           <h2
-            id="workshop-signup-title"
+            id={titleId}
             className="text-lg font-bold text-white uppercase tracking-wider pr-4"
           >
             {title}
