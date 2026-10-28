@@ -838,6 +838,29 @@ BEGIN
   END;
 END $$;
 
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000003',
+      'Obra Falsa',
+      'obra@test.com',
+      now(),
+      false
+    );
+    RAISE EXCEPTION 'FAIL: register_for_workshop permitio inscribirse a una obra';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'not_a_workshop' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al inscribirse a una obra: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
 RESET ROLE;
 
 SET ROLE authenticated;
