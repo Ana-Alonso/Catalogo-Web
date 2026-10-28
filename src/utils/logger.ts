@@ -1,4 +1,15 @@
 export const logError = (context: string, error: unknown): void => {
-  const normalized = error instanceof Error ? error : new Error(String(error));
-  console.error(`[${context}]`, normalized);
+  if (error instanceof Error) {
+    console.error(`[${context}]`, error);
+    return;
+  }
+  if (typeof error === 'object' && error !== null) {
+    try {
+      console.error(`[${context}]`, JSON.stringify(error));
+    } catch {
+      console.error(`[${context}]`, error);
+    }
+    return;
+  }
+  console.error(`[${context}]`, new Error(String(error)));
 };
