@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCookieConsent } from '../../hooks/useCookieConsent';
 import { useToast } from '../../hooks/useToast';
 import { LegalLink } from '../legal/LegalLink';
-import { Badge, Box, Button, Checkbox, Typography } from '../ui';
+import { Box, Button, Checkbox, Typography } from '../ui';
 import { Modal } from '../ui/Modal';
 
 interface CookiePreferencesProps {
@@ -23,20 +23,6 @@ const CookiePreferences: React.FC<CookiePreferencesProps> = ({ initialAnalytics,
   return (
     <Box as="form" display="flex" direction="column" gap="md" onSubmit={handleSubmit}>
       <Box display="flex" direction="column" gap="xs">
-        <Box display="flex" align="center" gap="sm">
-          <Typography as="span" variant="body" size="sm" weight="semibold">
-            {t('cookie.requiredTitle')}
-          </Typography>
-          <Badge variant="neutral" fit>
-            {t('cookie.alwaysActive')}
-          </Badge>
-        </Box>
-        <Typography variant="body" size="xs" tone="muted">
-          {t('cookie.requiredDescription')}
-        </Typography>
-      </Box>
-
-      <Box display="flex" direction="column" gap="xs" divider="top" paddingTop="md">
         <Checkbox
           id="cookie-analytics-preference"
           checked={analytics}
