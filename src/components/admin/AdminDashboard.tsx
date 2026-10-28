@@ -16,7 +16,7 @@ import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { useAdminTab } from '../../hooks/useAdminTab';
 import { useNow } from '../../hooks/useNow';
 import { useToast } from '../../hooks/useToast';
-import { isSupabaseConfigured } from '../../utils/supabase';
+import { isMockMode, isSupabaseConfigured } from '../../utils/supabase';
 import { getProtectedWorkshopIds } from '../../utils/workshopSummary';
 import { groupWorkshops } from '../../utils/workshopPhase';
 import type {
@@ -129,7 +129,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setTab('productos');
   };
 
-  const isAuthDegraded = !isSupabaseConfigured;
+  const isAuthDegraded = isMockMode;
   const isAuthenticated = isAuthDegraded || (user !== null && isAdmin);
 
   const handleLogin = async (email: string, password: string) => {

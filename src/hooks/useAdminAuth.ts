@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { supabase, isSupabaseConfigured, isMockMode } from '../utils/supabase';
 import { isAdminUser } from '../utils/adminAccess';
 
 interface SignInResult {
   success: boolean;
-  errorKey?: 'admin.login.invalidCredentials' | 'admin.login.notAdmin';
+  errorKey?:
+    | 'admin.login.invalidCredentials'
+    | 'admin.login.notAdmin'
+    | 'admin.login.authNotConfigured';
 }
 
 interface UseAdminAuthReturn {
@@ -50,7 +53,10 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
   const signIn = useCallback(
     async (email: string, password: string): Promise<SignInResult> => {
       if (!isSupabaseConfigured || !supabase) {
-        return { success: true };
+        if (isMockMode) {
+          return { success: true };
+        }
+        return { success: false, errorKey: 'admin.login.authNotConfigured' };
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
