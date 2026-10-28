@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { isAdminUser } from '../utils/adminAccess';
 
 interface SignInResult {
   success: boolean;
@@ -14,15 +15,6 @@ interface UseAdminAuthReturn {
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
 }
-
-const isAdminUser = (user: User | null): boolean => {
-  if (!user) {
-    return false;
-  }
-  const appRole = (user.app_metadata as Record<string, unknown> | undefined)?.role;
-  const userRole = (user.user_metadata as Record<string, unknown> | undefined)?.role;
-  return appRole === 'admin' || userRole === 'admin';
-};
 
 export const useAdminAuth = (): UseAdminAuthReturn => {
   const [user, setUser] = useState<User | null>(null);
