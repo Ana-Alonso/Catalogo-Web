@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { timingSafeEqual } from 'node:crypto';
 import { getServerEnv, type ServerEnv } from '../../lib/server/env';
 import { syncEtsyListings } from '../../lib/server/etsySync';
+import { isAdminUser } from '../../utils/adminAccess';
 
 const bearerToken = (headers: Headers): string | null => {
   const header = headers.get('authorization');
@@ -27,7 +28,7 @@ const authorizeUser = async (token: string): Promise<boolean> => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const { data, error } = await client.auth.getUser(token);
-  return !error && Boolean(data.user);
+  return !error && isAdminUser(data.user);
 };
 
 const runSync = async (): Promise<Response> => {
