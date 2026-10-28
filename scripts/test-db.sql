@@ -109,10 +109,10 @@ BEGIN
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'products'
-      AND policyname = 'Gestion autenticada de productos'
+      AND policyname = 'Permitir gestion de productos solo a admins'
       AND roles = '{authenticated}'
   ) THEN
-    RAISE EXCEPTION 'FAIL: política autenticada en products ausente';
+    RAISE EXCEPTION 'FAIL: política de gestión de productos para admins ausente';
   END IF;
 
   IF EXISTS (
@@ -120,9 +120,29 @@ BEGIN
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'products'
-      AND policyname = 'Permitir gestion de productos'
+      AND policyname IN ('Gestion autenticada de productos', 'Permitir gestion de productos')
   ) THEN
     RAISE EXCEPTION 'FAIL: política abierta antigua en products todavía existe';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'workshop_registrations'
+      AND policyname LIKE 'Gestion autenticada de inscripciones%'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: política abierta antigua en workshop_registrations todavía existe';
+  END IF;
+
+  IF has_table_privilege('anon', 'public.products', 'INSERT')
+     OR has_table_privilege('anon', 'public.products', 'UPDATE')
+     OR has_table_privilege('anon', 'public.products', 'DELETE') THEN
+    RAISE EXCEPTION 'FAIL: anon puede escribir en products';
+  END IF;
+
+  IF pg_get_functiondef('public.is_admin()'::regprocedure) LIKE '%user_metadata%' THEN
+    RAISE EXCEPTION 'FAIL: is_admin confía en user_metadata';
   END IF;
 
   IF NOT EXISTS (
@@ -788,12 +808,49 @@ BEGIN
   FROM public.products
   WHERE id = '00000000-0000-0000-0000-000000000004';
 
-  IF ocultos <> 1 THEN
-    RAISE EXCEPTION 'FAIL: el admin autenticado no ve el producto oculto';
+  IF ocultos <> 0 THEN
+    RAISE EXCEPTION 'FAIL: un usuario autenticado sin rol admin ve el producto oculto';
+  END IF;
+
+  UPDATE public.products
+  SET "isVisible" = true
+  WHERE id = '00000000-0000-0000-0000-000000000004';
+
+  IF FOUND THEN
+    RAISE EXCEPTION 'FAIL: un usuario autenticado sin rol admin puede editar productos';
   END IF;
 END $$;
 
 RESET ROLE;
+
+SET request.jwt.claims = '{"role":"authenticated","app_metadata":{"role":"admin"}}';
+
+SET ROLE authenticated;
+
+DO $$
+DECLARE
+  ocultos INTEGER;
+BEGIN
+  SELECT count(*) INTO ocultos
+  FROM public.products
+  WHERE id = '00000000-0000-0000-0000-000000000004';
+
+  IF ocultos <> 1 THEN
+    RAISE EXCEPTION 'FAIL: el admin autenticado no ve el producto oculto';
+  END IF;
+
+  UPDATE public.products
+  SET "isVisible" = false
+  WHERE id = '00000000-0000-0000-0000-000000000004';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'FAIL: el admin autenticado no puede editar productos';
+  END IF;
+END $$;
+
+RESET ROLE;
+
+RESET request.jwt.claims;
 
 UPDATE public.workshop_registrations SET marketing_consent = false WHERE marketing_consent;
 
