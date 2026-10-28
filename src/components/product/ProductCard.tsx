@@ -163,13 +163,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             <Box display="flex" align="center" gap="sm">
               <Icon as={Users} size="sm" tone="warning" shrink={false} />
               {cupo === null ? (
-                <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
+                <Box display="flex" direction="column" gap="xs">
+                  <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
+                  {item.registrationDeadline && (() => {
+                    const deadlineMs = new Date(item.registrationDeadline).getTime();
+                    if (!Number.isNaN(deadlineMs) && deadlineMs > Date.now()) {
+                      const diffMs = deadlineMs - Date.now();
+                      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                      if (days > 0) {
+                        return <Typography variant="caption" tone="muted">{t('product.registrationDaysLeft', { days })}</Typography>;
+                      }
+                    }
+                    return null;
+                  })()}
+                </Box>
               ) : isFull ? (
                 <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
               ) : (
-                <Typography variant="caption" tone="success">
-                  {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
-                </Typography>
+                <Box display="flex" direction="column" gap="xs">
+                  <Typography variant="caption" tone="success">
+                    {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
+                  </Typography>
+                  {item.registrationDeadline && (() => {
+                    const deadlineMs = new Date(item.registrationDeadline).getTime();
+                    if (!Number.isNaN(deadlineMs) && deadlineMs > Date.now()) {
+                      const diffMs = deadlineMs - Date.now();
+                      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                      if (days > 0) {
+                        return <Typography variant="caption" tone="muted">{t('product.registrationDaysLeft', { days })}</Typography>;
+                      }
+                    }
+                    return null;
+                  })()}
+                </Box>
               )}
             </Box>
           )}

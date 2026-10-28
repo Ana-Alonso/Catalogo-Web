@@ -89,6 +89,7 @@
       "sold": "Sold / Finished"
     },
     "spotsOpen": "Registration open",
+    "registrationDaysLeft": "{{days}} day{{days, plural, one{} other{s}}} left to register",
     "spotsFull": "Full · no spots left",
     "spotsLeft": "{{spots}} of {{total}} spots left",
     "signup": "Join the workshop",
@@ -195,7 +196,8 @@
     "image": "Please upload an image for the product or enter a URL.",
     "price": "The price entered is not valid.",
     "discountRange": "The discount must be a whole number between 1% and 90%.",
-    "discountRequiresPrice": "To apply a discount you must first enter a price."
+    "discountRequiresPrice": "To apply a discount you must first enter a price.",
+    "registrationDeadlineAfterEvent": "Registration deadline cannot be after the workshop date"
   },
   "errors": {
     "notFound": {

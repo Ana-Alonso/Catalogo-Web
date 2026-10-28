@@ -89,6 +89,7 @@
       "sold": "Vendido / Finalizado"
     },
     "spotsOpen": "Inscripción abierta",
+    "registrationDaysLeft": "Quedan {{days}} día{{days, plural, one{} other{s}}} para inscribirse",
     "spotsFull": "Completo · no quedan plazas",
     "spotsLeft": "Quedan {{spots}} de {{total}} plazas",
     "signup": "Apuntarse al taller",
@@ -195,7 +196,8 @@
     "image": "Por favor sube una imagen para el producto o introduce una URL.",
     "price": "El precio introducido no es válido.",
     "discountRange": "El descuento debe ser un número entero entre 1 % y 90 %.",
-    "discountRequiresPrice": "Para aplicar un descuento primero debes indicar un precio."
+    "discountRequiresPrice": "Para aplicar un descuento primero debes indicar un precio.",
+    "registrationDeadlineAfterEvent": "El plazo de inscripción no puede ser posterior a la fecha del taller"
   },
   "errors": {
     "notFound": {

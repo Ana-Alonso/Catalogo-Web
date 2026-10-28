@@ -40,7 +40,7 @@ const validationErrorKeys = {
   price: 'validation.price',
   discountRange: 'validation.discountRange',
   discountRequiresPrice: 'validation.discountRequiresPrice',
-  registrationDeadlineAfterEvent: 'admin.productForm.validation.registrationDeadlineAfterEvent',
+  registrationDeadlineAfterEvent: 'validation.registrationDeadlineAfterEvent',
 } as const satisfies Record<ProductFormValidationError, string>;
 
 const imageValidationKeys = {
