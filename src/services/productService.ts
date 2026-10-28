@@ -36,6 +36,21 @@ const resolveWorkshopFields = (formData: ProductFormData): WorkshopFields => ({
   registrationDeadline: toUtcDeadline(formData.registrationDeadline) ?? null,
 });
 
+const resolveWorkshopPayload = (formData: ProductFormData): Record<string, unknown> => {
+  if (formData.category !== 'talleres') {
+    return {};
+  }
+
+  const fields = resolveWorkshopFields(formData);
+
+  return {
+    eventDate: fields.eventDate ?? null,
+    eventLocation: fields.eventLocation ?? null,
+    cupo: fields.cupo,
+    registrationDeadline: fields.registrationDeadline,
+  };
+};
+
 interface LocalPriceFields {
   priceCents: number | null;
   currency: string;
@@ -194,7 +209,9 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
           eventDate: newProduct.eventDate || null,
           eventLocation: newProduct.eventLocation || null,
           cupo: newProduct.cupo ?? null,
-          registrationDeadline: newProduct.registrationDeadline ?? null
+          ...(newProduct.category === 'talleres'
+            ? { registrationDeadline: newProduct.registrationDeadline ?? null }
+            : {})
         }
       ])
       .select()
@@ -230,7 +247,7 @@ export const updateProduct = async (
   }
 
   if (!useMocks && isSupabaseConfigured && supabase) {
-    const payload: Partial<CatalogItem> = {
+    const payload: Record<string, unknown> = {
       title: formData.title.trim(),
       description: formData.description.trim(),
       category: formData.category,
@@ -238,7 +255,7 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      ...resolveWorkshopFields(formData)
+      ...resolveWorkshopPayload(formData)
     };
 
     if (imageUrl) {
