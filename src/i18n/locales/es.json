@@ -189,7 +189,7 @@
     "save": "Guardar preferencias",
     "saved": "Preferencias de cookies guardadas.",
     "accepted": "Has aceptado las cookies.",
-    "rejected": "Has rechazado las cookies no esenciales."
+    "rejected": "Solo se usarán las cookies necesarias."
   },
   "legal": {
     "updatedAt": "Última actualización: {{date}}"
