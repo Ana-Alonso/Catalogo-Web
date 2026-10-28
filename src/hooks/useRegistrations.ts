@@ -72,6 +72,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const setStatus = async (id: string, status: RegistrationStatus): Promise<boolean> => {
     try {
       const updated = await updateRegistrationStatus(id, status);
+      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) => (registration.id === id ? updated : registration))
       );
@@ -87,6 +88,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const remove = async (id: string): Promise<boolean> => {
     try {
       await deleteRegistration(id);
+      setError(null);
       setRegistrations((prev) => prev.filter((registration) => registration.id !== id));
       return true;
     } catch (err) {
@@ -100,6 +102,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const withdrawMarketingConsent = async (id: string): Promise<boolean> => {
     try {
       const updated = await withdrawMarketingConsentService(id);
+      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) =>
           registration.id === id ? updated : registration
@@ -119,6 +122,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
   ): Promise<boolean> => {
     try {
       await cancelWorkshopRegistrationsService(productId);
+      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) =>
           registration.product_id === productId &&

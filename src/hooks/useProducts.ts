@@ -83,6 +83,7 @@ export const useProducts = (): UseProductsResult => {
   const addProduct = async (data: ProductFormData): Promise<boolean> => {
     try {
       const created = await createProduct(data);
+      setError(null);
       setProducts((prev) => [created, ...prev]);
       return true;
     } catch (err) {
@@ -96,6 +97,7 @@ export const useProducts = (): UseProductsResult => {
   const editProduct = async (id: string, data: ProductFormData): Promise<boolean> => {
     try {
       const updated = await updateProduct(id, data);
+      setError(null);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       return true;
     } catch (err) {
@@ -112,6 +114,7 @@ export const useProducts = (): UseProductsResult => {
   ): Promise<boolean> => {
     try {
       const updated = await updateEtsyProductMetadata(id, metadata);
+      setError(null);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       return true;
     } catch (err) {
@@ -138,6 +141,7 @@ export const useProducts = (): UseProductsResult => {
   const removeProduct = async (id: string): Promise<boolean> => {
     try {
       await deleteProduct(id);
+      setError(null);
       setProducts((prev) => prev.filter((item) => item.id !== id));
       return true;
     } catch (err) {
@@ -158,6 +162,7 @@ export const useProducts = (): UseProductsResult => {
   const setVisibility = async (id: string, isVisible: boolean): Promise<boolean> => {
     try {
       const updated = await setProductVisibility(id, isVisible);
+      setError(null);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       return true;
     } catch (err) {
@@ -174,6 +179,7 @@ export const useProducts = (): UseProductsResult => {
   ): Promise<boolean> => {
     try {
       const updated = await setWorkshopCancelled(id, isCancelled);
+      setError(null);
       setProducts((prev) =>
         prev.map((item) => (String(item.id) === id ? updated : item))
       );
