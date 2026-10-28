@@ -186,8 +186,7 @@
     "analyticsDescription": "Cookies de terceros gestionadas por Google Ireland Limited que miden de forma agregada el número de visitantes. Se instalan solo si las aceptas y puedes desactivarlas cuando quieras.",
     "save": "Guardar preferencias",
     "saved": "Preferencias de cookies guardadas.",
-    "accepted": "Has aceptado las cookies.",
-    "rejected": "Solo se usarán las cookies necesarias."
+    "accepted": "Has aceptado las cookies."
   },
   "legal": {
     "updatedAt": "Última actualización: {{date}}"

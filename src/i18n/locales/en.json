@@ -186,8 +186,7 @@
     "analyticsDescription": "Third-party cookies managed by Google Ireland Limited that measure visitor numbers in aggregate form. They are only installed if you accept them and you can turn them off at any time.",
     "save": "Save preferences",
     "saved": "Cookie preferences saved.",
-    "accepted": "You have accepted the cookies.",
-    "rejected": "Only the necessary cookies will be used."
+    "accepted": "You have accepted the cookies."
   },
   "legal": {
     "updatedAt": "Last updated: {{date}}"
