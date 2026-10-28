@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   fetchRegistrations,
@@ -26,6 +26,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const [registrations, setRegistrations] = useState<WorkshopRegistration[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const loadRegistrations = useCallback(async () => {
     setIsLoading(true);
@@ -33,7 +34,9 @@ export const useRegistrations = (): UseRegistrationsResult => {
     try {
       const data = await fetchRegistrations();
       setRegistrations(data);
+      hasLoadedRef.current = true;
     } catch (err) {
+      hasLoadedRef.current = false;
       logError('useRegistrations.loadRegistrations', err);
       const msg = err instanceof Error ? err.message : t('admin.errors.loadRegistrations');
       setError(msg);
@@ -41,6 +44,15 @@ export const useRegistrations = (): UseRegistrationsResult => {
       setIsLoading(false);
     }
   }, [t]);
+
+  const recoverAfterMutation = useCallback(async () => {
+    if (hasLoadedRef.current) {
+      setError(null);
+      return;
+    }
+
+    await loadRegistrations();
+  }, [loadRegistrations]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -50,10 +62,12 @@ export const useRegistrations = (): UseRegistrationsResult => {
         const data = await fetchRegistrations();
         if (!isCancelled) {
           setRegistrations(data);
+          hasLoadedRef.current = true;
           setIsLoading(false);
         }
       } catch (err) {
         if (!isCancelled) {
+          hasLoadedRef.current = false;
           logError('useRegistrations.init', err);
           const msg = err instanceof Error ? err.message : t('admin.errors.loadRegistrations');
           setError(msg);
@@ -72,10 +86,10 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const setStatus = async (id: string, status: RegistrationStatus): Promise<boolean> => {
     try {
       const updated = await updateRegistrationStatus(id, status);
-      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) => (registration.id === id ? updated : registration))
       );
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useRegistrations.setStatus', err);
@@ -88,8 +102,8 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const remove = async (id: string): Promise<boolean> => {
     try {
       await deleteRegistration(id);
-      setError(null);
       setRegistrations((prev) => prev.filter((registration) => registration.id !== id));
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useRegistrations.remove', err);
@@ -102,12 +116,12 @@ export const useRegistrations = (): UseRegistrationsResult => {
   const withdrawMarketingConsent = async (id: string): Promise<boolean> => {
     try {
       const updated = await withdrawMarketingConsentService(id);
-      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) =>
           registration.id === id ? updated : registration
         )
       );
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useRegistrations.withdrawMarketingConsent', err);
@@ -122,7 +136,6 @@ export const useRegistrations = (): UseRegistrationsResult => {
   ): Promise<boolean> => {
     try {
       await cancelWorkshopRegistrationsService(productId);
-      setError(null);
       setRegistrations((prev) =>
         prev.map((registration) =>
           registration.product_id === productId &&
@@ -131,6 +144,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
             : registration
         )
       );
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useRegistrations.cancelWorkshopRegistrations', err);

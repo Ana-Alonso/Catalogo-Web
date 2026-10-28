@@ -62,4 +62,31 @@ describe('useProducts', () => {
     expect(added).toBe(true);
     expect(result.current.error).toBeNull();
   });
+
+  it('recarga el catalogo tras una accion correcta cuando la carga inicial fallo', async () => {
+    vi.mocked(fetchProducts)
+      .mockRejectedValueOnce(new Error('sin conexion'))
+      .mockResolvedValue([producto]);
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBe('sin conexion');
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.error).toBeNull();
+    expect(result.current.products.map((item) => item.id)).toEqual(['1']);
+  });
+
+  it('mantiene el error de carga si la recarga tambien falla', async () => {
+    vi.mocked(fetchProducts).mockRejectedValue(new Error('sin conexion'));
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBe('sin conexion');
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.error).toBe('sin conexion');
+  });
 });
