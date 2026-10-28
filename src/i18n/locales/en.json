@@ -281,6 +281,8 @@
       },
       "cancelWorkshop": "Cancel workshop",
       "cancelWorkshopAria": "Cancel the workshop {{title}} and all its registrations",
+      "restoreWorkshop": "Reinstate workshop",
+      "restoreWorkshopAria": "Reinstate the workshop {{title}} to accept new signups",
       "cancelConfirm": "Are you sure you want to cancel the workshop \"{{title}}\"? All its registrations will be cancelled and it will move to finished.",
       "cancelConfirmAction": "Yes, cancel workshop"
     },
@@ -309,7 +311,9 @@
       "productRestored": "Product published on the website again.",
       "productVisibilityError": "Could not change the product visibility.",
       "workshopCancelled": "Workshop \"{{title}}\" cancelled and moved to finished.",
-      "workshopCancelError": "Could not cancel the workshop. Please try again."
+      "workshopCancelError": "Could not cancel the workshop. Please try again.",
+      "workshopRestored": "Workshop \"{{title}}\" reinstated.",
+      "workshopRestoreError": "Could not reinstate the workshop. Please try again."
     },
     "productForm": {
       "editTitle": "Edit Product",

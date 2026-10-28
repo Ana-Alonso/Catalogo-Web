@@ -281,6 +281,8 @@
       },
       "cancelWorkshop": "Cancelar taller",
       "cancelWorkshopAria": "Cancelar el taller {{title}} y todas sus inscripciones",
+      "restoreWorkshop": "Reactivar taller",
+      "restoreWorkshopAria": "Reactivar el taller {{title}} para aceptar nuevas inscripciones",
       "cancelConfirm": "¿Seguro que quieres cancelar el taller \"{{title}}\"? Se cancelarán todas sus inscripciones y pasará a finalizados.",
       "cancelConfirmAction": "Sí, cancelar taller"
     },
@@ -309,7 +311,9 @@
       "productRestored": "Producto publicado de nuevo en la web.",
       "productVisibilityError": "No se pudo cambiar la visibilidad del producto.",
       "workshopCancelled": "Taller \"{{title}}\" cancelado y movido a finalizados.",
-      "workshopCancelError": "No se pudo cancelar el taller. Inténtalo de nuevo."
+      "workshopCancelError": "No se pudo cancelar el taller. Inténtalo de nuevo.",
+      "workshopRestored": "Taller \"{{title}}\" reactivado.",
+      "workshopRestoreError": "No se pudo reactivar el taller. Inténtalo de nuevo."
     },
     "productForm": {
       "editTitle": "Modificar Producto",

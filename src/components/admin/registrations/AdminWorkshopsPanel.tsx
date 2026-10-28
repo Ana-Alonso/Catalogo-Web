@@ -32,6 +32,8 @@ interface AdminWorkshopsPanelProps {
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (workshop: CatalogItem) => Promise<void>;
   isCancellingWorkshop: boolean;
+  onRestoreWorkshop: (workshop: CatalogItem) => Promise<void>;
+  isRestoringWorkshop: boolean;
 }
 
 export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
@@ -48,6 +50,8 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
   onDeleteRegistration,
   onCancelWorkshop,
   isCancellingWorkshop,
+  onRestoreWorkshop,
+  isRestoringWorkshop,
 }) => {
   const { t } = useTranslation();
   const nowMs = useNow();
@@ -97,6 +101,8 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
         onDeleteRegistration={onDeleteRegistration}
         onCancelWorkshop={onCancelWorkshop}
         isCancellingWorkshop={isCancellingWorkshop}
+        onRestoreWorkshop={onRestoreWorkshop}
+        isRestoringWorkshop={isRestoringWorkshop}
       />
     );
   };

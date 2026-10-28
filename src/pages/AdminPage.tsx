@@ -74,6 +74,7 @@ export const AdminPage: React.FC = () => {
       onWithdrawMarketingConsent={withdrawMarketingConsent}
       onDeleteRegistration={remove}
       onCancelWorkshop={handleCancelWorkshop}
+      onRestoreWorkshop={restoreWorkshop}
       onClose={() => navigate('/')}
     />
   );
