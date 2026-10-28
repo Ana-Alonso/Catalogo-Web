@@ -34,6 +34,7 @@ AGENTS.md
 !supabase-rls-hardening.sql
 
 supabase/
+!supabase/migrations/
 scripts/
 .etsy-oauth.json
 .vercel
