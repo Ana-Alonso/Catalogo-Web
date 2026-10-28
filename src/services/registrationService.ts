@@ -1,12 +1,13 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
 import { RegistrationError } from '../errors/registrationError';
+import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
 import type {
   WorkshopRegistration,
   RegistrationFormData,
   RegistrationStatus,
 } from '../types/registrations';
 
-const LOCAL_STORAGE_KEY = 'laurel_workshop_registrations';
+const LOCAL_STORAGE_KEY = MOCK_STORAGE_KEYS.registrations;
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
 const getStoredLocalRegistrations = (): WorkshopRegistration[] => {

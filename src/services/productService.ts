@@ -4,6 +4,7 @@ import { parsePriceToCents } from '../utils/price';
 import { resolvePurchaseLinks } from '../utils/productLinks';
 import { toUtcDeadline } from '../utils/deadlineTime';
 import { mockCatalogItems } from '../mocks/catalogMocks';
+import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
 import { hasMarketingConsentRegistrations } from './registrationService';
 import type {
   CatalogItem,
@@ -12,7 +13,7 @@ import type {
 } from '../types/catalog';
 
 const STORAGE_BUCKET = 'products';
-const LOCAL_STORAGE_KEY = 'laurel_custom_products_v2';
+const LOCAL_STORAGE_KEY = MOCK_STORAGE_KEYS.products;
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
 const parseCupo = (value?: string): number | null => {
