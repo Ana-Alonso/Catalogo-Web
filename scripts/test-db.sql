@@ -170,6 +170,11 @@ BEGIN
     RAISE EXCEPTION 'FAIL: register_for_workshop no usa hora del servidor para el consentimiento';
   END IF;
 
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+     NOT LIKE '%not_a_workshop%' THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no valida la categoria de taller';
+  END IF;
+
   IF EXISTS (
     SELECT 1
     FROM pg_policies
@@ -829,6 +834,29 @@ BEGIN
     WHEN others THEN
       IF SQLERRM <> 'registration_closed' THEN
         RAISE EXCEPTION 'FAIL: error inesperado en la RPC fuera de plazo: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000003',
+      'Obra Falsa',
+      'obra@test.com',
+      now(),
+      false
+    );
+    RAISE EXCEPTION 'FAIL: register_for_workshop permitio inscribirse a una obra';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'not_a_workshop' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al inscribirse a una obra: %', SQLERRM;
       END IF;
   END;
 END $$;

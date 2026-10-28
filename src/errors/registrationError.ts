@@ -45,6 +45,9 @@ export const mapRegistrationDatabaseError = (
   if (message.includes('registration_closed')) {
     return 'registrationClosed';
   }
+  if (message.includes('not_a_workshop')) {
+    return 'invalidData';
+  }
   if (message.includes('workshop_full')) {
     return 'workshopFull';
   }
