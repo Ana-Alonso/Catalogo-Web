@@ -8,6 +8,7 @@ import { WorkshopSignupForm } from '../workshop/WorkshopSignupForm';
 import { ProductDescription } from './ProductDescription';
 import {
   formatPriceForLanguage,
+  formatRegistrationDeadlineForLanguage,
   formatWorkshopDateForLanguage,
 } from '../../i18n/formatters';
 import {
@@ -15,7 +16,9 @@ import {
   categoryTranslationKeys,
 } from '../../i18n/labels';
 import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
-import { useDaysUntilRegistrationDeadline } from '../../hooks/useDaysUntilRegistrationDeadline';
+import { getDaysUntilRegistrationDeadline } from '../../utils/registrationDeadline';
+import { getWorkshopSignupState } from '../../utils/workshopSignupState';
+import { useMountedNow } from '../../hooks/useMountedNow';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
 
@@ -49,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
-  const daysLeft = useDaysUntilRegistrationDeadline(item.registrationDeadline);
+  const nowMs = useMountedNow();
   const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
   const finalCents = getDiscountedCents(priceCents, getOfferPercent(item));
@@ -59,7 +62,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const spotsLeft = cupo === null ? null : Math.max(cupo - registeredCount, 0);
   const isFull = spotsLeft === 0;
   const isFinished = currentStatus === 'vendido';
-  const canSignup = isWorkshop && Boolean(onRegister) && !isFull && !isFinished;
+  const signupState = isWorkshop ? getWorkshopSignupState(item, registeredCount, nowMs) : null;
+  const canSignup = signupState === 'abierto' && Boolean(onRegister);
+  const daysLeft = getDaysUntilRegistrationDeadline(item.registrationDeadline, nowMs);
+  const registrationDeadlineLabel = item.registrationDeadline
+    ? formatRegistrationDeadlineForLanguage(item.registrationDeadline, language)
+    : null;
 
   return (
     <>
@@ -164,33 +172,43 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           {isWorkshop && !isFinished && (
             <Box display="flex" align="center" gap="sm">
               <Icon as={Users} size="sm" tone="warning" shrink={false} />
-              {cupo === null ? (
-                <Box display="flex" direction="column" gap="xs">
+              <Box display="flex" direction="column" gap="xs">
+                {cupo === null ? (
                   <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
-                  {daysLeft !== null && daysLeft > 0 && (
-                    <Typography variant="caption" tone="muted">
-                      {daysLeft === 1
-                        ? t('product.registrationDayLeft')
-                        : t('product.registrationDaysLeft', { days: daysLeft })}
-                    </Typography>
-                  )}
-                </Box>
-              ) : isFull ? (
-                <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
-              ) : (
-                <Box display="flex" direction="column" gap="xs">
+                ) : isFull ? (
+                  <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
+                ) : (
                   <Typography variant="caption" tone="success">
                     {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
                   </Typography>
-                  {daysLeft !== null && daysLeft > 0 && (
-                    <Typography variant="caption" tone="muted">
-                      {daysLeft === 1
-                        ? t('product.registrationDayLeft')
-                        : t('product.registrationDaysLeft', { days: daysLeft })}
-                    </Typography>
-                  )}
-                </Box>
-              )}
+                )}
+                {registrationDeadlineLabel && signupState === 'abierto' && (
+                  <Typography variant="caption" tone="muted">
+                    {t('product.registrationDeadline', { date: registrationDeadlineLabel })}
+                  </Typography>
+                )}
+                {signupState === 'abierto' && daysLeft !== null && daysLeft > 0 && (
+                  <Typography variant="caption" tone="muted">
+                    {daysLeft === 1
+                      ? t('product.registrationDayLeft')
+                      : t('product.registrationDaysLeft', { days: daysLeft })}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
+          {isWorkshop && !isFinished && signupState === 'cerrado' && (
+            <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
+              <Typography variant="caption" tone="muted">
+                {registrationDeadlineLabel
+                  ? t('product.registrationClosed', { date: registrationDeadlineLabel })
+                  : t('product.registrationClosedNoDate')}
+              </Typography>
+            </Box>
+          )}
+          {isWorkshop && !isFinished && signupState === 'terminado' && !isFull && (
+            <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
+              <Typography variant="caption" tone="muted">{t('product.workshopPassed')}</Typography>
             </Box>
           )}
           {canSignup && (
@@ -205,7 +223,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               {t('product.signup')}
             </Button>
           )}
-          {isWorkshop && isFull && !isFinished && (
+          {isWorkshop && !isFinished && signupState === 'lleno' && (
             <Box textAlign="center" paddingY="sm" background="dangerSoft" border borderTone="danger" rounded="sm">
               <Typography variant="caption" tone="danger">{t('product.workshopFull')}</Typography>
             </Box>

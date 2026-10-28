@@ -89,6 +89,10 @@
       "sold": "Vendido / Finalizado"
     },
     "spotsOpen": "Inscripción abierta",
+    "registrationDeadline": "Inscripciones hasta el {{date}}",
+    "registrationClosed": "El plazo de inscripción finalizó el {{date}}",
+    "registrationClosedNoDate": "El plazo de inscripción está cerrado",
+    "workshopPassed": "Este taller ya ha tenido lugar",
     "registrationDaysLeft": "Quedan {{days}} días para inscribirse",
     "registrationDayLeft": "Queda 1 día para inscribirse",
     "spotsFull": "Completo · no quedan plazas",

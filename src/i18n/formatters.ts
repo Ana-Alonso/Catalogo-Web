@@ -39,6 +39,9 @@ export const formatRegistrationDeadlineForLanguage = (
 
   return new Intl.DateTimeFormat(getIntlLocale(language), {
     day: 'numeric',
-    month: 'short',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(date);
 };

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { RegistrationFormData, WorkshopRegistration } from '../../types/registrations';
 
 const { supabaseMock } = vi.hoisted(() => ({
-  supabaseMock: { from: vi.fn() },
+  supabaseMock: { from: vi.fn(), rpc: vi.fn() },
 }));
 
 vi.mock('../../utils/supabase', () => ({
@@ -115,18 +115,13 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     vi.clearAllMocks();
   });
 
+  const mockRpcError = (code: string, message: string) => {
+    supabaseMock.rpc.mockResolvedValue({ data: null, error: { code, message } });
+  };
+
   it('mapea el error 23505 de duplicado al código alreadyRegistered', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    supabaseMock.from.mockReturnValue({
-      insert: () => ({
-        select: () => ({
-          single: async () => ({
-            data: null,
-            error: { code: '23505', message: 'duplicate key value violates unique constraint' },
-          }),
-        }),
-      }),
-    });
+    mockRpcError('23505', 'duplicate key value violates unique constraint');
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
@@ -135,85 +130,89 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
 
   it('mapea workshop_full al código workshopFull', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    supabaseMock.from.mockReturnValue({
-      insert: () => ({
-        select: () => ({
-          single: async () => ({
-            data: null,
-            error: { code: 'P0001', message: 'workshop_full: no hay plazas' },
-          }),
-        }),
-      }),
-    });
+    mockRpcError('P0001', 'workshop_full');
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
+  it('mapea registration_closed al código registrationClosed', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    mockRpcError('P0001', 'registration_closed');
+    const service = await loadService();
+    await expect(
+      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
+    ).rejects.toMatchObject({ code: 'registrationClosed' });
+  });
+
   it('devuelve el código unknown ante un error desconocido', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    supabaseMock.from.mockReturnValue({
-      insert: () => ({
-        select: () => ({
-          single: async () => ({
-            data: null,
-            error: { code: 'XX000', message: 'algo raro' },
-          }),
-        }),
-      }),
-    });
+    mockRpcError('XX000', 'algo raro');
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'unknown' });
   });
 
-  it('inserta product_id, name, email y las marcas de consentimiento', async () => {
+  it('registra la inscripción a través de la RPC con los datos del formulario', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    const insertSpy = vi.fn(() => ({
-      select: () => ({
-        single: async () => ({ data: registrationRow, error: null }),
-      }),
-    }));
-    supabaseMock.from.mockReturnValue({ insert: insertSpy });
+    const rpcSpy = supabaseMock.rpc.mockResolvedValue({ data: registrationRow, error: null });
     const service = await loadService();
-    const created = await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), 5);
-    expect(insertSpy).toHaveBeenCalledWith([
-      {
-        product_id: 'prod-1',
-        name: 'Ana',
-        email: 'ana@example.com',
-        privacy_consent_at: expect.any(String),
-        marketing_consent: false,
-      },
-    ]);
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('  Ana  ', '  ana@example.com  '),
+      5
+    );
+    expect(rpcSpy).toHaveBeenCalledWith('register_for_workshop', {
+      p_product_id: 'prod-1',
+      p_name: 'Ana',
+      p_email: 'ana@example.com',
+      p_privacy_consent_at: expect.any(String),
+      p_marketing_consent: false,
+    });
     expect(created.id).toBe('reg-1');
   });
 
   it('no fabrica la marca de consentimiento cuando no se dio', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    const insertSpy = vi.fn(() => ({
-      select: () => ({
-        single: async () => ({ data: registrationRow, error: null }),
-      }),
-    }));
-    supabaseMock.from.mockReturnValue({ insert: insertSpy });
+    const rpcSpy = supabaseMock.rpc.mockResolvedValue({ data: registrationRow, error: null });
     const service = await loadService();
     await service.createRegistration(
       'prod-1',
       formData('Ana', 'ana@example.com', { privacyConsent: false, marketingConsent: true }),
       null
     );
-    expect(insertSpy).toHaveBeenCalledWith([
-      {
-        product_id: 'prod-1',
-        name: 'Ana',
-        email: 'ana@example.com',
-        privacy_consent_at: null,
-        marketing_consent: true,
-      },
-    ]);
+    expect(rpcSpy).toHaveBeenCalledWith('register_for_workshop', {
+      p_product_id: 'prod-1',
+      p_name: 'Ana',
+      p_email: 'ana@example.com',
+      p_privacy_consent_at: null,
+      p_marketing_consent: true,
+    });
+  });
+
+  it('calcula las plazas ocupadas con la RPC sin leer inscripciones', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    supabaseMock.rpc.mockResolvedValue({
+      data: [
+        { product_id: 'prod-1', taken: 2 },
+        { product_id: 'prod-2', taken: '3' },
+      ],
+      error: null,
+    });
+    const service = await loadService();
+    await expect(service.fetchRegistrationCounts()).resolves.toEqual({
+      'prod-1': 2,
+      'prod-2': 3,
+    });
+  });
+
+  it('propaga el error de la RPC de recuentos', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    supabaseMock.rpc.mockResolvedValue({ data: null, error: { message: 'permission denied' } });
+    const service = await loadService();
+    await expect(service.fetchRegistrationCounts()).rejects.toBeTruthy();
   });
 
   it('lanza error si fetchRegistrations recibe un error de Supabase', async () => {

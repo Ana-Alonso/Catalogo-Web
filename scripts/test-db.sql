@@ -24,6 +24,36 @@ BEGIN
     RAISE EXCEPTION 'FAIL: tabla workshop_registrations ausente';
   END IF;
 
+  IF to_regprocedure('public.register_for_workshop(uuid,text,text,timestamptz,boolean)') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: función register_for_workshop ausente';
+  END IF;
+
+  IF to_regprocedure('public.workshop_spots()') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: función workshop_spots ausente';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'workshop_registrations'
+      AND policyname IN ('public_read_registrations', 'admin_all_registrations', 'public_insert_pending')
+  ) THEN
+    RAISE EXCEPTION 'FAIL: políticas abiertas de la migración 013 todavía existen';
+  END IF;
+
+  IF has_table_privilege('anon', 'public.workshop_registrations', 'SELECT') THEN
+    RAISE EXCEPTION 'FAIL: anon puede leer inscripciones';
+  END IF;
+
+  IF NOT has_function_privilege('anon', 'public.workshop_spots()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon no puede ejecutar workshop_spots';
+  END IF;
+
+  IF NOT has_function_privilege('anon', 'public.register_for_workshop(uuid,text,text,timestamptz,boolean)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon no puede ejecutar register_for_workshop';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM pg_indexes
@@ -528,6 +558,72 @@ BEGIN
       RAISE;
     WHEN insufficient_privilege THEN
       NULL;
+  END;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    PERFORM 1 FROM public.workshop_registrations;
+    RAISE EXCEPTION 'FAIL: anon puede leer las inscripciones';
+  EXCEPTION
+    WHEN raise_exception THEN
+      RAISE;
+    WHEN insufficient_privilege THEN
+      NULL;
+  END;
+END $$;
+
+DO $$
+DECLARE
+  ocupadas BIGINT;
+BEGIN
+  SELECT taken INTO ocupadas
+  FROM public.workshop_spots()
+  WHERE product_id = '00000000-0000-0000-0000-000000000001';
+
+  IF ocupadas <> 1 THEN
+    RAISE EXCEPTION 'FAIL: workshop_spots devuelve % plazas en vez de 1', ocupadas;
+  END IF;
+END $$;
+
+DO $$
+DECLARE
+  creada public.workshop_registrations;
+BEGIN
+  creada := public.register_for_workshop(
+    '00000000-0000-0000-0000-000000000002',
+    'Elena Rpc',
+    'elena@test.com',
+    now(),
+    false
+  );
+
+  IF creada.id IS NULL OR creada.status <> 'pendiente' THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no devolvió una inscripción pendiente';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000011',
+      'Tarde Rpc',
+      'tarde@test.com',
+      now(),
+      false
+    );
+    RAISE EXCEPTION 'FAIL: register_for_workshop ignoró el plazo cerrado';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'registration_closed' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado en la RPC fuera de plazo: %', SQLERRM;
+      END IF;
   END;
 END $$;
 

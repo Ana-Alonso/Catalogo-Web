@@ -89,6 +89,10 @@
       "sold": "Sold / Finished"
     },
     "spotsOpen": "Registration open",
+    "registrationDeadline": "Registration open until {{date}}",
+    "registrationClosed": "Registration closed on {{date}}",
+    "registrationClosedNoDate": "Registration is closed",
+    "workshopPassed": "This workshop has already taken place",
     "registrationDaysLeft": "{{days}} days left to register",
     "registrationDayLeft": "1 day left to register",
     "spotsFull": "Full · no spots left",

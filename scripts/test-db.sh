@@ -59,33 +59,37 @@ run_file() {
   docker exec -i "$CONTAINER" psql -U "$PSQL_USER" -d "$db" -v ON_ERROR_STOP=1 -q < "$file"
 }
 
-echo "==> BBDD 1 (laurel): stub storage + migración legacy x2 + hardening x2 + ofertas x2 + talleres x2 + rls hardening + plazo de inscripción"
+echo "==> BBDD 1 (laurel): stub storage + migraciones legacy y posteriores"
 create_storage_stub laurel
 run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
 run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/002_hardening.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/002_hardening.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
-run_file laurel "$ROOT_DIR/supabase/migrations/008_workshop_deadline.sql"
+
+run_latest_migrations() {
+  local db="$1"
+  local skip_initial="$2"
+  for migration in "$ROOT_DIR"/supabase/migrations/0*.sql; do
+    local name
+    name="$(basename "$migration")"
+    if [[ "$skip_initial" == "skip-initial" && "$name" == 001_* ]]; then
+      continue
+    fi
+    run_file "$db" "$migration"
+    if [[ "$name" =~ ^00[234] ]]; then
+      run_file "$db" "$migration"
+    fi
+  done
+}
+
+run_latest_migrations laurel skip-initial
 
 echo "==> BBDD 1: suite de aserciones"
 run_file laurel "$ROOT_DIR/scripts/test-db.sql"
 
-echo "==> BBDD 2 (laurel_fresh): stub storage + schema + hardening + ofertas x2 + talleres x2 + rls hardening + plazo de inscripción"
+echo "==> BBDD 2 (laurel_fresh): stub storage + schema y migraciones posteriores"
 docker exec "$CONTAINER" createdb -U "$PSQL_USER" laurel_fresh
 create_storage_stub laurel_fresh
 run_file laurel_fresh "$ROOT_DIR/supabase/migrations/001_initial_schema.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/002_hardening.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
-run_file laurel_fresh "$ROOT_DIR/supabase/migrations/008_workshop_deadline.sql"
+run_latest_migrations laurel_fresh skip-initial
 run_file laurel_fresh "$ROOT_DIR/scripts/test-db.sql"
 
 echo "==> TODO OK: 2 bases de datos y aserciones superadas"

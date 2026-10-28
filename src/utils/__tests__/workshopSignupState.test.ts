@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CatalogItem } from '../../types/catalog';
 import {
   getWorkshopSignupState,
+  hasWorkshopHappened,
   isWorkshopRegistrationClosed,
 } from '../workshopSignupState';
 
@@ -42,6 +43,17 @@ describe('isWorkshopRegistrationClosed', () => {
   it('no cierra con nowMs de SSR o plazo ilegible', () => {
     expect(isWorkshopRegistrationClosed('2020-01-01T00:00:00.000Z', 0)).toBe(false);
     expect(isWorkshopRegistrationClosed('mañana', Date.now())).toBe(false);
+  });
+});
+
+describe('hasWorkshopHappened', () => {
+  it('detecta talleres ya celebrados y descarta fechas futuras o ilegibles', () => {
+    const now = Date.parse('2026-11-05T12:00:00.000Z');
+    expect(hasWorkshopHappened('2026-11-04T18:00:00.000Z', now)).toBe(true);
+    expect(hasWorkshopHappened('2026-11-06T18:00:00.000Z', now)).toBe(false);
+    expect(hasWorkshopHappened(undefined, now)).toBe(false);
+    expect(hasWorkshopHappened('próximamente', now)).toBe(false);
+    expect(hasWorkshopHappened('2026-11-04T18:00:00.000Z', 0)).toBe(false);
   });
 });
 
@@ -88,5 +100,25 @@ describe('getWorkshopSignupState', () => {
     expect(
       getWorkshopSignupState(itemWith({ registrationDeadline: '15 Nov 2026 - 18:00h' }), 1, now)
     ).toBe('abierto');
+  });
+
+  it('marca terminado cuando el taller ya se celebró', () => {
+    expect(
+      getWorkshopSignupState(itemWith({ eventDate: '2026-11-04T18:00:00.000Z' }), 1, now)
+    ).toBe('terminado');
+  });
+
+  it('da prioridad al plazo cerrado sobre el lleno y no al revés', () => {
+    expect(
+      getWorkshopSignupState(
+        itemWith({ cupo: 1, registrationDeadline: '2026-11-05T11:59:00.000Z' }),
+        1,
+        now
+      )
+    ).toBe('cerrado');
+  });
+
+  it('ignora una fecha de taller ilegible', () => {
+    expect(getWorkshopSignupState(itemWith({ eventDate: 'próximamente' }), 1, now)).toBe('abierto');
   });
 });

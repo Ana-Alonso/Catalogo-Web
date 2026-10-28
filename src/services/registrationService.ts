@@ -33,6 +33,9 @@ const mapRegistrationError = (
   if (code === '23505') {
     return new RegistrationError('alreadyRegistered');
   }
+  if (message.includes('registration_closed')) {
+    return new RegistrationError('registrationClosed');
+  }
   if (message.includes('workshop_full')) {
     return new RegistrationError('workshopFull');
   }
@@ -61,6 +64,21 @@ export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
 };
 
 export const fetchRegistrationCounts = async (): Promise<Record<string, number>> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase.rpc('workshop_spots');
+
+    if (error) {
+      throw error;
+    }
+
+    return ((data ?? []) as Array<{ product_id: string; taken: number }>).reduce<
+      Record<string, number>
+    >((counts, row) => {
+      counts[row.product_id] = Number(row.taken) || 0;
+      return counts;
+    }, {});
+  }
+
   const registrations = await fetchRegistrations();
 
   return registrations.reduce<Record<string, number>>((counts, registration) => {
@@ -81,31 +99,19 @@ export const createRegistration = async (
   const privacyConsentAt = formData.privacyConsent ? new Date().toISOString() : null;
 
   if (!useMocks && isSupabaseConfigured && supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('workshop_registrations')
-        .insert([
-          {
-            product_id: productId,
-            name,
-            email,
-            privacy_consent_at: privacyConsentAt,
-            marketing_consent: formData.marketingConsent,
-          },
-        ])
-        .select()
-        .single();
+    const { data, error } = await supabase.rpc('register_for_workshop', {
+      p_product_id: productId,
+      p_name: name,
+      p_email: email,
+      p_privacy_consent_at: privacyConsentAt,
+      p_marketing_consent: formData.marketingConsent,
+    });
 
-      if (error) {
-        throw mapRegistrationError(error.code, error.message);
-      }
-
-      return data as WorkshopRegistration;
-    } catch (err) {
-      if (err instanceof RegistrationError) {
-        throw err;
-      }
+    if (error) {
+      throw mapRegistrationError(error.code, error.message);
     }
+
+    return data as WorkshopRegistration;
   }
 
   const localRegistrations = getStoredLocalRegistrations();

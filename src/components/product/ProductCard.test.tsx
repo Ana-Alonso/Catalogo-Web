@@ -106,3 +106,66 @@ describe('ProductCard', () => {
     expect(screen.getByText(i18n.t('product.consult'))).toBeInTheDocument();
   });
 });
+
+describe('ProductCard · plazo de inscripción de talleres', () => {
+  const inDays = (days: number) =>
+    new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+  const workshop = (overrides: Partial<CatalogItem> = {}) =>
+    buildItem({
+      category: 'talleres',
+      title: 'Taller de acuarela',
+      ...overrides,
+    });
+
+  it('permite inscribirse y anuncia la fecha límite cuando el plazo sigue abierto', () => {
+    renderCard(workshop({ registrationDeadline: inDays(3) }));
+
+    expect(
+      screen.getByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+    ).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('product.registrationDaysLeft', { days: 3 }))).toBeInTheDocument();
+  });
+
+  it('oculta el botón y avisa cuando el plazo ya venció', () => {
+    const deadline = inDays(-2);
+    renderCard(workshop({ registrationDeadline: deadline }));
+
+    expect(
+      screen.queryByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+    ).toBeNull();
+    expect(screen.getByText(/registration closed|plazo de inscripción finalizó/i)).toBeInTheDocument();
+  });
+
+  it('oculta el botón y avisa cuando el taller ya se celebró', () => {
+    renderCard(workshop({ eventDate: inDays(-1) }));
+
+    expect(
+      screen.queryByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+    ).toBeNull();
+    expect(
+      screen.getByText(i18n.t('product.workshopPassed'))
+    ).toBeInTheDocument();
+  });
+
+  it('oculta el botón cuando no quedan plazas', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard item={workshop({ cupo: 2 })} spotsCount={2} onRegister={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.queryByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+    ).toBeNull();
+    expect(screen.getByText(i18n.t('product.workshopFull'))).toBeInTheDocument();
+  });
+
+  it('mantiene la inscripción abierta sin plazo definido', () => {
+    renderCard(workshop({ registrationDeadline: null }));
+
+    expect(
+      screen.getByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+    ).toBeInTheDocument();
+  });
+});
