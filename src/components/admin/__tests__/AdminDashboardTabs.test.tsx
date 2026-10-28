@@ -4,8 +4,8 @@ import { MemoryRouter } from 'react-router';
 import { AdminDashboardTabs } from '../AdminDashboardTabs';
 import type { AdminTab } from '../../../hooks/useAdminTab';
 
-const counts: Record<AdminTab, number> = {
-  productos: 4,
+const counts: Partial<Record<AdminTab, number>> = {
+  catalogo: 4,
   talleres: 2,
   archivados: 7,
 };
@@ -25,9 +25,9 @@ describe('AdminDashboardTabs', () => {
       'aria-current',
       'page'
     );
-    expect(screen.getByRole('link', { name: /Productos/ })).not.toHaveAttribute(
-      'aria-current'
-    );
+    expect(
+      screen.getByRole('link', { name: /Añadir producto/ })
+    ).not.toHaveAttribute('aria-current');
     expect(
       screen.getByRole('link', { name: /Archivados/ })
     ).not.toHaveAttribute('aria-current');
@@ -36,6 +36,13 @@ describe('AdminDashboardTabs', () => {
   it('enlaza cada pestaña con su parámetro de búsqueda', () => {
     renderTabs('productos');
 
+    expect(
+      screen.getByRole('link', { name: /Añadir producto/ })
+    ).toHaveAttribute('href', '/admin?tab=productos');
+    expect(screen.getByRole('link', { name: /Catálogo/ })).toHaveAttribute(
+      'href',
+      '/admin?tab=catalogo'
+    );
     expect(screen.getByRole('link', { name: /Talleres/ })).toHaveAttribute(
       'href',
       '/admin?tab=talleres'
@@ -46,10 +53,10 @@ describe('AdminDashboardTabs', () => {
     );
   });
 
-  it('muestra el contador de cada sección', () => {
+  it('muestra el contador de cada sección con datos', () => {
     renderTabs('archivados');
 
-    expect(screen.getByRole('link', { name: /Productos/ })).toHaveTextContent(
+    expect(screen.getByRole('link', { name: /Catálogo/ })).toHaveTextContent(
       '4'
     );
     expect(screen.getByRole('link', { name: /Talleres/ })).toHaveTextContent(
@@ -58,12 +65,15 @@ describe('AdminDashboardTabs', () => {
     expect(screen.getByRole('link', { name: /Archivados/ })).toHaveTextContent(
       '7'
     );
+    expect(
+      screen.getByRole('link', { name: /Añadir producto/ })
+    ).not.toHaveTextContent(/\d/);
   });
 
-  it('marca la pestaña de productos cuando está activa', () => {
-    renderTabs('productos');
+  it('marca la pestaña de catálogo cuando está activa', () => {
+    renderTabs('catalogo');
 
-    expect(screen.getByRole('link', { name: /Productos/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Catálogo/ })).toHaveAttribute(
       'aria-current',
       'page'
     );

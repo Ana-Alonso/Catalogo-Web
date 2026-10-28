@@ -7,11 +7,12 @@ import { ADMIN_TABS, type AdminTab } from '../../hooks/useAdminTab';
 
 interface AdminDashboardTabsProps {
   activeTab: AdminTab;
-  counts: Record<AdminTab, number>;
+  counts: Partial<Record<AdminTab, number>>;
 }
 
 const tabLabelKeys = {
   productos: 'admin.tabs.products',
+  catalogo: 'admin.tabs.catalog',
   talleres: 'admin.tabs.workshops',
   archivados: 'admin.tabs.archived',
 } as const satisfies Record<AdminTab, string>;
@@ -36,6 +37,7 @@ export const AdminDashboardTabs: React.FC<AdminDashboardTabsProps> = ({
     >
       {ADMIN_TABS.map((tab) => {
         const isActive = activeTab === tab;
+        const count = counts[tab];
 
         return (
           <Link
@@ -50,16 +52,18 @@ export const AdminDashboardTabs: React.FC<AdminDashboardTabsProps> = ({
             )}
           >
             {t(tabLabelKeys[tab])}
-            <span
-              className={cn(
-                'rounded-full px-2 py-0.5 text-[10px] font-bold',
-                isActive
-                  ? 'bg-white/20 text-white'
-                  : 'bg-neutral-800 text-neutral-300'
-              )}
-            >
-              {counts[tab]}
-            </span>
+            {count !== undefined && (
+              <span
+                className={cn(
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                  isActive
+                    ? 'bg-white/20 text-white'
+                    : 'bg-neutral-800 text-neutral-300'
+                )}
+              >
+                {count}
+              </span>
+            )}
           </Link>
         );
       })}

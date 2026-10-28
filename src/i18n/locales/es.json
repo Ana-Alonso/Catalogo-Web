@@ -225,7 +225,8 @@
     "logout": "Cerrar sesión",
     "tabs": {
       "label": "Secciones del panel",
-      "products": "Productos",
+      "products": "Añadir producto",
+      "catalog": "Catálogo",
       "workshops": "Talleres",
       "archived": "Archivados"
     },
@@ -436,7 +437,13 @@
       "protectedDeleteHint": "Tiene contactos con consentimiento de avisos: archiva el taller en lugar de eliminarlo",
       "protectedDeleteAria": "{{title}} no se puede eliminar porque tiene contactos con consentimiento de avisos",
       "offerFromEtsy": "oferta de Etsy",
-      "offerManual": "oferta manual"
+      "offerManual": "oferta manual",
+      "pagination": {
+        "label": "Paginación del catálogo",
+        "summary": "Página {{page}} de {{pages}}",
+        "previous": "Anterior",
+        "next": "Siguiente"
+      }
     },
     "registrations": {
       "title": "Inscripciones a Talleres ({{count}})",

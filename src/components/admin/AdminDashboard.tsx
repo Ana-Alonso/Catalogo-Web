@@ -107,7 +107,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   );
 
   const tabCounts = {
-    productos: visibleProducts.length,
+    catalogo: visibleProducts.length,
     talleres: workshopGroups.active.length,
     archivados: archivedProducts.length,
   };
@@ -323,20 +323,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               )}
             </Box>
-
-            <AdminProductTable
-              products={visibleProducts}
-              blockedDeletionIds={protectedProductIds}
-              onDelete={handleDelete}
-              onEdit={handleEditProduct}
-              onSetVisibility={handleSetVisibility}
-              isDeleting={isDeleting}
-              isUpdatingVisibility={isUpdatingVisibility}
-              isLoading={isLoadingProducts}
-              error={productsError}
-              onRetry={onRefreshProducts}
-            />
           </>
+        )}
+
+        {activeTab === 'catalogo' && (
+          <AdminProductTable
+            products={visibleProducts}
+            blockedDeletionIds={protectedProductIds}
+            onDelete={handleDelete}
+            onEdit={handleEditProduct}
+            onSetVisibility={handleSetVisibility}
+            isDeleting={isDeleting}
+            isUpdatingVisibility={isUpdatingVisibility}
+            isLoading={isLoadingProducts}
+            error={productsError}
+            onRetry={onRefreshProducts}
+          />
         )}
 
         {activeTab === 'talleres' && (

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-export const ADMIN_TABS = ['productos', 'talleres', 'archivados'] as const;
+export const ADMIN_TABS = ['productos', 'catalogo', 'talleres', 'archivados'] as const;
 
 export type AdminTab = (typeof ADMIN_TABS)[number];
 

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Box, ErrorState, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../../ui';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button, Card, Box, ErrorState, Icon, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../../ui';
 import { AdminProductCard } from './AdminProductCard';
 import { AdminProductTableRow } from './AdminProductTableRow';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
@@ -19,6 +20,8 @@ interface AdminProductTableProps {
   onRetry: () => void | Promise<void>;
 }
 
+const PAGE_SIZE = 10;
+
 export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   products,
   blockedDeletionIds,
@@ -32,6 +35,11 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   onRetry,
 }) => {
   const { t } = useTranslation();
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(products.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const pagedProducts = products.slice(startIndex, startIndex + PAGE_SIZE);
 
   if (isLoading) {
     return (
@@ -90,7 +98,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {products.map((item) => (
+            {pagedProducts.map((item) => (
               <AdminProductTableRow
                 key={item.id}
                 item={item}
@@ -113,7 +121,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
         gap="md"
         padding="md"
       >
-        {products.map((item) => (
+        {pagedProducts.map((item) => (
           <AdminProductCard
             key={item.id}
             item={item}
@@ -126,6 +134,47 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
           />
         ))}
       </Box>
+
+      {totalPages > 1 && (
+        <Box
+          as="nav"
+          aria-label={t('admin.productTable.pagination.label')}
+          display="flex"
+          wrap
+          align="center"
+          justify="between"
+          gap="tight"
+          padding="md"
+          divider="top"
+        >
+          <Typography size="xs" tone="subtle">
+            {t('admin.productTable.pagination.summary', {
+              page: currentPage,
+              pages: totalPages,
+            })}
+          </Typography>
+          <Box display="flex" align="center" gap="xs">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setPage(currentPage - 1)}
+            >
+              <Icon as={ChevronLeft} size="sm" />
+              {t('admin.productTable.pagination.previous')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setPage(currentPage + 1)}
+            >
+              {t('admin.productTable.pagination.next')}
+              <Icon as={ChevronRight} size="sm" />
+            </Button>
+          </Box>
+        </Box>
+      )}
     </Card>
   );
 };

@@ -225,7 +225,8 @@
     "logout": "Log out",
     "tabs": {
       "label": "Panel sections",
-      "products": "Products",
+      "products": "Add product",
+      "catalog": "Catalog",
       "workshops": "Workshops",
       "archived": "Archived"
     },
@@ -436,7 +437,13 @@
       "protectedDeleteHint": "It has contacts who agreed to alerts: archive the workshop instead of deleting it",
       "protectedDeleteAria": "{{title}} cannot be deleted because it has contacts who agreed to alerts",
       "offerFromEtsy": "Etsy offer",
-      "offerManual": "manual offer"
+      "offerManual": "manual offer",
+      "pagination": {
+        "label": "Catalog pagination",
+        "summary": "Page {{page}} of {{pages}}",
+        "previous": "Previous",
+        "next": "Next"
+      }
     },
     "registrations": {
       "title": "Workshop Registrations ({{count}})",
