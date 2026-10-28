@@ -89,7 +89,8 @@
       "sold": "Vendido / Finalizado"
     },
     "spotsOpen": "Inscripción abierta",
-    "registrationDaysLeft": "Quedan {{days}} día{{days, plural, one{} other{s}}} para inscribirse",
+    "registrationDaysLeft": "Quedan {{days}} días para inscribirse",
+    "registrationDayLeft": "Queda 1 día para inscribirse",
     "spotsFull": "Completo · no quedan plazas",
     "spotsLeft": "Quedan {{spots}} de {{total}} plazas",
     "signup": "Apuntarse al taller",

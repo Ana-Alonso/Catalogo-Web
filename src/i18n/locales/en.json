@@ -89,7 +89,8 @@
       "sold": "Sold / Finished"
     },
     "spotsOpen": "Registration open",
-    "registrationDaysLeft": "{{days}} day{{days, plural, one{} other{s}}} left to register",
+    "registrationDaysLeft": "{{days}} days left to register",
+    "registrationDayLeft": "1 day left to register",
     "spotsFull": "Full · no spots left",
     "spotsLeft": "{{spots}} of {{total}} spots left",
     "signup": "Join the workshop",

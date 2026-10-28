@@ -1,6 +1,6 @@
 export const getDaysUntilRegistrationDeadline = (
   deadline: string | null | undefined,
-  nowMs: number = Date.now()
+  nowMs: number
 ): number | null => {
   if (!deadline) {
     return null;

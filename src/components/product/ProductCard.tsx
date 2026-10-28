@@ -15,6 +15,7 @@ import {
   categoryTranslationKeys,
 } from '../../i18n/labels';
 import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
+import { useDaysUntilRegistrationDeadline } from '../../hooks/useDaysUntilRegistrationDeadline';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
 
@@ -48,6 +49,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
+  const daysLeft = useDaysUntilRegistrationDeadline(item.registrationDeadline);
   const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
   const finalCents = getDiscountedCents(priceCents, getOfferPercent(item));
@@ -165,17 +167,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               {cupo === null ? (
                 <Box display="flex" direction="column" gap="xs">
                   <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
-                  {item.registrationDeadline && (() => {
-                    const deadlineMs = new Date(item.registrationDeadline).getTime();
-                    if (!Number.isNaN(deadlineMs) && deadlineMs > Date.now()) {
-                      const diffMs = deadlineMs - Date.now();
-                      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                      if (days > 0) {
-                        return <Typography variant="caption" tone="muted">{t('product.registrationDaysLeft', { days })}</Typography>;
-                      }
-                    }
-                    return null;
-                  })()}
+                  {daysLeft !== null && daysLeft > 0 && (
+                    <Typography variant="caption" tone="muted">
+                      {daysLeft === 1
+                        ? t('product.registrationDayLeft')
+                        : t('product.registrationDaysLeft', { days: daysLeft })}
+                    </Typography>
+                  )}
                 </Box>
               ) : isFull ? (
                 <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
@@ -184,17 +182,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
                   <Typography variant="caption" tone="success">
                     {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
                   </Typography>
-                  {item.registrationDeadline && (() => {
-                    const deadlineMs = new Date(item.registrationDeadline).getTime();
-                    if (!Number.isNaN(deadlineMs) && deadlineMs > Date.now()) {
-                      const diffMs = deadlineMs - Date.now();
-                      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-                      if (days > 0) {
-                        return <Typography variant="caption" tone="muted">{t('product.registrationDaysLeft', { days })}</Typography>;
-                      }
-                    }
-                    return null;
-                  })()}
+                  {daysLeft !== null && daysLeft > 0 && (
+                    <Typography variant="caption" tone="muted">
+                      {daysLeft === 1
+                        ? t('product.registrationDayLeft')
+                        : t('product.registrationDaysLeft', { days: daysLeft })}
+                    </Typography>
+                  )}
                 </Box>
               )}
             </Box>
