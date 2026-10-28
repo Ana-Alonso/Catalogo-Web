@@ -133,11 +133,11 @@ const Footer: React.FC = () => {
           paddingTop="xl"
           divider="top"
         >
-          <Box display="flex" direction="column" align="center" gap="xs">
-            <Typography variant="body" size="sm" tone="subtle" align="center">
+          <Box display="flex" align="center" gap="sm" wrap justify="center">
+            <Typography variant="body" size="sm" tone="subtle">
               {t('footer.copyright', { year: currentYear })}
             </Typography>
-            <Box as="p" align="center">
+            <Typography as="span" variant="body" size="sm" tone="subtle">
               <Trans
                 i18nKey="footer.credit"
                 components={{
@@ -146,14 +146,14 @@ const Footer: React.FC = () => {
                       href="https://github.com/Ana-Alonso"
                       target="_blank"
                       rel="noopener noreferrer"
-                      size="xs"
+                      size="sm"
                       tone="accent"
                       underline
                     />
                   ),
                 }}
               />
-            </Box>
+            </Typography>
           </Box>
           <Box display="flex" align="center" gap="md" wrap>
             <Typography as="span" size="xs" tone="subtle">
