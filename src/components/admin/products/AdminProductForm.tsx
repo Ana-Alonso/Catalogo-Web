@@ -40,6 +40,7 @@ const validationErrorKeys = {
   price: 'validation.price',
   discountRange: 'validation.discountRange',
   discountRequiresPrice: 'validation.discountRequiresPrice',
+  registrationDeadlineAfterEvent: 'admin.productForm.validation.registrationDeadlineAfterEvent',
 } as const satisfies Record<ProductFormValidationError, string>;
 
 const imageValidationKeys = {
@@ -158,6 +159,9 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       discountPercent,
       imageFile,
       externalImageUrl,
+      category,
+      eventDate: category === 'talleres' ? eventDate : undefined,
+      registrationDeadline: category === 'talleres' ? registrationDeadline : undefined,
     });
 
     if (validationError) {

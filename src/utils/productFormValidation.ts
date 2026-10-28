@@ -9,6 +9,9 @@ export interface ProductFormValidationInput {
   discountPercent: string;
   imageFile: File | null;
   externalImageUrl: string;
+  category?: string;
+  eventDate?: string;
+  registrationDeadline?: string;
 }
 
 export type ProductFormValidationError =
@@ -16,7 +19,8 @@ export type ProductFormValidationError =
   | 'image'
   | 'price'
   | 'discountRange'
-  | 'discountRequiresPrice';
+  | 'discountRequiresPrice'
+  | 'registrationDeadlineAfterEvent';
 
 export const normalizeOfferPercent = (value: string): number | null => {
   const trimmed = value.trim();
@@ -68,6 +72,14 @@ export const validateProductForm = (
 
   if (!input.priceOnRequest && input.price.trim() && priceCents == null) {
     return 'price';
+  }
+
+  if (input.category === 'talleres' && input.registrationDeadline && input.eventDate) {
+    const deadlineTime = new Date(input.registrationDeadline).getTime();
+    const eventTime = new Date(input.eventDate).getTime();
+    if (!Number.isNaN(deadlineTime) && !Number.isNaN(eventTime) && deadlineTime > eventTime) {
+      return 'registrationDeadlineAfterEvent';
+    }
   }
 
   return validateOfferPercent(input.discountPercent, priceCents);
