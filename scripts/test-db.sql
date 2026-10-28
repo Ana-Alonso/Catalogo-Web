@@ -170,6 +170,11 @@ BEGIN
     RAISE EXCEPTION 'FAIL: register_for_workshop no usa hora del servidor para el consentimiento';
   END IF;
 
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+     NOT LIKE '%not_a_workshop%' THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no valida la categoria de taller';
+  END IF;
+
   IF EXISTS (
     SELECT 1
     FROM pg_policies

@@ -120,6 +120,18 @@ describe('POST /api/registrations', () => {
     expect(await closed.json()).toEqual({ error: 'registrationClosed' });
   });
 
+  it('traduce not_a_workshop a 400 invalidData', async () => {
+    rpcMock.mockResolvedValue({
+      data: null,
+      error: { code: 'P0001', message: 'not_a_workshop' },
+    });
+    const { action } = await loadRoute();
+    const response = await action({ request: postJson(validBody(), '203.0.113.26') });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalidData' });
+  });
+
   it('traduce una clave foránea inexistente en 400 invalidData', async () => {
     rpcMock.mockResolvedValue({
       data: null,
