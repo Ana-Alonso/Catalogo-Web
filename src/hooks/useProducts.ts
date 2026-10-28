@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   fetchProducts,
@@ -37,6 +37,7 @@ export const useProducts = (): UseProductsResult => {
   const [products, setProducts] = useState<CatalogItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -44,7 +45,9 @@ export const useProducts = (): UseProductsResult => {
     try {
       const data = await fetchProducts();
       setProducts(data);
+      hasLoadedRef.current = true;
     } catch (err) {
+      hasLoadedRef.current = false;
       logError('useProducts.loadProducts', err);
       const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
       setError(msg);
@@ -52,6 +55,15 @@ export const useProducts = (): UseProductsResult => {
       setIsLoading(false);
     }
   }, [t]);
+
+  const recoverAfterMutation = useCallback(async () => {
+    if (hasLoadedRef.current) {
+      setError(null);
+      return;
+    }
+
+    await loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -61,10 +73,12 @@ export const useProducts = (): UseProductsResult => {
         const data = await fetchProducts();
         if (!isCancelled) {
           setProducts(data);
+          hasLoadedRef.current = true;
           setIsLoading(false);
         }
       } catch (err) {
         if (!isCancelled) {
+          hasLoadedRef.current = false;
           logError('useProducts.init', err);
           const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
           setError(msg);
@@ -84,6 +98,7 @@ export const useProducts = (): UseProductsResult => {
     try {
       const created = await createProduct(data);
       setProducts((prev) => [created, ...prev]);
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.addProduct', err);
@@ -97,6 +112,7 @@ export const useProducts = (): UseProductsResult => {
     try {
       const updated = await updateProduct(id, data);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.editProduct', err);
@@ -113,6 +129,7 @@ export const useProducts = (): UseProductsResult => {
     try {
       const updated = await updateEtsyProductMetadata(id, metadata);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.editEtsyMetadata', err);
@@ -139,6 +156,7 @@ export const useProducts = (): UseProductsResult => {
     try {
       await deleteProduct(id);
       setProducts((prev) => prev.filter((item) => item.id !== id));
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.removeProduct', err);
@@ -159,6 +177,7 @@ export const useProducts = (): UseProductsResult => {
     try {
       const updated = await setProductVisibility(id, isVisible);
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.setVisibility', err);
@@ -177,6 +196,7 @@ export const useProducts = (): UseProductsResult => {
       setProducts((prev) =>
         prev.map((item) => (String(item.id) === id ? updated : item))
       );
+      await recoverAfterMutation();
       return true;
     } catch (err) {
       logError('useProducts.setWorkshopCancelled', err);
