@@ -89,4 +89,37 @@ describe('useProducts', () => {
     expect(added).toBe(true);
     expect(result.current.error).toBe('sin conexion');
   });
+
+  it('descarta un refresco en vuelo cuando hay una mutación más reciente', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let resolveStale: ((value: CatalogItem[]) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockResolvedValueOnce([producto])
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveStale = resolve;
+          })
+      );
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      void result.current.refreshProducts();
+    });
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+
+    await act(async () => {
+      resolveStale?.([]);
+      await Promise.resolve();
+    });
+
+    expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+  });
 });

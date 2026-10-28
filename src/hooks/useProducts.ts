@@ -37,22 +37,32 @@ export const useProducts = (): UseProductsResult => {
   const [products, setProducts] = useState<CatalogItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
+  const mutationCountRef = useRef(0);
   const hasLoadedRef = useRef(false);
 
   const loadProducts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    const requestId = ++requestIdRef.current;
+    const mutationsAtStart = mutationCountRef.current;
     try {
       const data = await fetchProducts();
-      setProducts(data);
-      hasLoadedRef.current = true;
+      if (
+        requestId === requestIdRef.current &&
+        mutationCountRef.current === mutationsAtStart
+      ) {
+        setProducts(data);
+        setError(null);
+        setIsLoading(false);
+        hasLoadedRef.current = true;
+      }
     } catch (err) {
-      hasLoadedRef.current = false;
-      logError('useProducts.loadProducts', err);
-      const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
-      setError(msg);
-    } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        logError('useProducts.loadProducts', err);
+        const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
+        setError(msg);
+        setIsLoading(false);
+        hasLoadedRef.current = false;
+      }
     }
   }, [t]);
 
@@ -66,37 +76,17 @@ export const useProducts = (): UseProductsResult => {
   }, [loadProducts]);
 
   useEffect(() => {
-    let isCancelled = false;
-
     const init = async () => {
-      try {
-        const data = await fetchProducts();
-        if (!isCancelled) {
-          setProducts(data);
-          hasLoadedRef.current = true;
-          setIsLoading(false);
-        }
-      } catch (err) {
-        if (!isCancelled) {
-          hasLoadedRef.current = false;
-          logError('useProducts.init', err);
-          const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
-          setError(msg);
-          setIsLoading(false);
-        }
-      }
+      await loadProducts();
     };
 
     void init();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [t]);
+  }, [loadProducts]);
 
   const addProduct = async (data: ProductFormData): Promise<boolean> => {
     try {
       const created = await createProduct(data);
+      mutationCountRef.current += 1;
       setProducts((prev) => [created, ...prev]);
       await recoverAfterMutation();
       return true;
@@ -111,6 +101,7 @@ export const useProducts = (): UseProductsResult => {
   const editProduct = async (id: string, data: ProductFormData): Promise<boolean> => {
     try {
       const updated = await updateProduct(id, data);
+      mutationCountRef.current += 1;
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       await recoverAfterMutation();
       return true;
@@ -128,6 +119,7 @@ export const useProducts = (): UseProductsResult => {
   ): Promise<boolean> => {
     try {
       const updated = await updateEtsyProductMetadata(id, metadata);
+      mutationCountRef.current += 1;
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       await recoverAfterMutation();
       return true;
@@ -155,6 +147,7 @@ export const useProducts = (): UseProductsResult => {
   const removeProduct = async (id: string): Promise<boolean> => {
     try {
       await deleteProduct(id);
+      mutationCountRef.current += 1;
       setProducts((prev) => prev.filter((item) => item.id !== id));
       await recoverAfterMutation();
       return true;
@@ -176,6 +169,7 @@ export const useProducts = (): UseProductsResult => {
   const setVisibility = async (id: string, isVisible: boolean): Promise<boolean> => {
     try {
       const updated = await setProductVisibility(id, isVisible);
+      mutationCountRef.current += 1;
       setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
       await recoverAfterMutation();
       return true;
@@ -193,6 +187,7 @@ export const useProducts = (): UseProductsResult => {
   ): Promise<boolean> => {
     try {
       const updated = await setWorkshopCancelled(id, isCancelled);
+      mutationCountRef.current += 1;
       setProducts((prev) =>
         prev.map((item) => (String(item.id) === id ? updated : item))
       );
