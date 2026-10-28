@@ -13,15 +13,19 @@ import type { CatalogItem } from '../../../types/catalog';
 interface AdminProductTableRowProps {
   item: CatalogItem;
   isDeleting: boolean;
+  isUpdatingVisibility: boolean;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
+  onSetVisibility: (id: string, isVisible: boolean) => void;
 }
 
 export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
   item,
   isDeleting,
+  isUpdatingVisibility,
   onDelete,
   onEdit,
+  onSetVisibility,
 }) => (
   <TableRow hoverable>
     <TableCell>
@@ -43,8 +47,10 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
       <AdminProductActions
         item={item}
         isDeleting={isDeleting}
+        isUpdatingVisibility={isUpdatingVisibility}
         onDelete={onDelete}
         onEdit={onEdit}
+        onSetVisibility={onSetVisibility}
       />
     </TableCell>
   </TableRow>

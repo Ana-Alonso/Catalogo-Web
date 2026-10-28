@@ -103,3 +103,88 @@ describe('productService · payload de talleres', () => {
     expect(payload.cupo).toBeNull();
   });
 });
+
+const STORAGE_KEY = 'laurel_custom_products_v2';
+
+const mockVisibilityUpdate = () => {
+  const updateSpy = vi.fn((payload: Record<string, unknown>) => {
+    void payload;
+    return {
+      eq: () => ({
+        select: () => ({
+          single: async () => ({ data: { ...row, ...payload }, error: null }),
+        }),
+      }),
+    };
+  });
+  supabaseMock.from.mockReturnValue({ update: updateSpy });
+  return updateSpy;
+};
+
+describe('productService · visibilidad de productos', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    localStorage.clear();
+  });
+
+  it('archiva un producto local enviando isVisible false', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const updateSpy = mockVisibilityUpdate();
+    const { setProductVisibility } = await loadService();
+
+    const updated = await setProductVisibility('prod-1', false);
+
+    expect(updateSpy).toHaveBeenCalledWith({ isVisible: false });
+    expect(updated.isVisible).toBe(false);
+  });
+
+  it('vuelve a publicar un producto enviando isVisible true', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const updateSpy = mockVisibilityUpdate();
+    const { setProductVisibility } = await loadService();
+
+    const updated = await setProductVisibility('prod-1', true);
+
+    expect(updateSpy).toHaveBeenCalledWith({ isVisible: true });
+    expect(updated.isVisible).toBe(true);
+  });
+
+  it('propaga el error de Supabase al cambiar la visibilidad', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    supabaseMock.from.mockReturnValue({
+      update: () => ({
+        eq: () => ({
+          select: () => ({
+            single: async () => ({ data: null, error: { message: 'permission denied' } }),
+          }),
+        }),
+      }),
+    });
+    const { setProductVisibility } = await loadService();
+
+    await expect(setProductVisibility('prod-1', false)).rejects.toBeTruthy();
+  });
+
+  it('archiva en localStorage cuando la app funciona con mocks', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([row, { ...row, id: 'prod-2' }]));
+    const { setProductVisibility } = await loadService();
+
+    const updated = await setProductVisibility('prod-1', false);
+
+    expect(updated.isVisible).toBe(false);
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as CatalogItem[];
+    expect(stored.find((item) => item.id === 'prod-1')?.isVisible).toBe(false);
+    expect(stored.find((item) => item.id === 'prod-2')?.isVisible).toBe(true);
+  });
+
+  it('lanza error si el producto no existe en localStorage', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const { setProductVisibility } = await loadService();
+
+    await expect(setProductVisibility('desconocido', false)).rejects.toThrow(
+      'Producto no encontrado.'
+    );
+  });
+});

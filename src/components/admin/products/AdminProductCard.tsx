@@ -14,15 +14,19 @@ import type { CatalogItem } from '../../../types/catalog';
 interface AdminProductCardProps {
   item: CatalogItem;
   isDeleting: boolean;
+  isUpdatingVisibility: boolean;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
+  onSetVisibility: (id: string, isVisible: boolean) => void;
 }
 
 export const AdminProductCard: React.FC<AdminProductCardProps> = ({
   item,
   isDeleting,
+  isUpdatingVisibility,
   onDelete,
   onEdit,
+  onSetVisibility,
 }) => {
   const { t } = useTranslation();
   const currentStatus = item.status || 'disponible';
@@ -54,8 +58,10 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       <AdminProductActions
         item={item}
         isDeleting={isDeleting}
+        isUpdatingVisibility={isUpdatingVisibility}
         onDelete={onDelete}
         onEdit={onEdit}
+        onSetVisibility={onSetVisibility}
       />
     </Box>
   );

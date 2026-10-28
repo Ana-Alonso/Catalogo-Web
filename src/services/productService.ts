@@ -318,6 +318,45 @@ export const updateProduct = async (
   return found;
 };
 
+export const setProductVisibility = async (
+  id: string,
+  isVisible: boolean
+): Promise<CatalogItem> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ isVisible })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as CatalogItem;
+  }
+
+  const currentProducts = getStoredLocalProducts();
+  let updatedProduct: CatalogItem | null = null;
+
+  const updatedProducts = currentProducts.map((item) => {
+    if (item.id !== id) {
+      return item;
+    }
+    updatedProduct = { ...item, isVisible };
+    return updatedProduct;
+  });
+
+  saveStoredLocalProducts(updatedProducts);
+
+  if (!updatedProduct) {
+    throw new Error('Producto no encontrado.');
+  }
+
+  return updatedProduct;
+};
+
 export const deleteProduct = async (id: string): Promise<void> => {
   if (!useMocks && isSupabaseConfigured && supabase) {
     const { data, error } = await supabase

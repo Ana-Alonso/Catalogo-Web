@@ -240,7 +240,10 @@
       "productOperationError": "Could not complete the operation.",
       "etsyUpdated": "Etsy product updated successfully.",
       "etsyUpdateError": "Could not update the Etsy product.",
-      "productDeleteError": "Could not delete the product."
+      "productDeleteError": "Could not delete the product.",
+      "productArchived": "Product archived: it is no longer shown on the website.",
+      "productRestored": "Product published on the website again.",
+      "productVisibilityError": "Could not change the product visibility."
     },
     "productForm": {
       "editTitle": "Edit Product",
@@ -363,6 +366,10 @@
       "etsyDeleteHint": "Etsy products are deleted from Etsy",
       "etsyDeleteAria": "{{title}} is deleted from Etsy",
       "deleteAria": "Delete {{title}}",
+      "archiveAria": "Archive {{title}}",
+      "restoreAria": "Publish {{title}} again",
+      "etsyVisibilityHint": "Etsy products are hidden from Etsy",
+      "etsyVisibilityAria": "{{title}} is hidden from Etsy",
       "offerFromEtsy": "Etsy offer",
       "offerManual": "manual offer"
     },

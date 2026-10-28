@@ -7,6 +7,7 @@ import {
   deleteProduct,
   updateEtsyProductMetadata,
   setAllEtsyOffers,
+  setProductVisibility,
 } from '../services/productService';
 import { logError } from '../utils/logger';
 import type {
@@ -24,6 +25,7 @@ interface UseProductsResult {
   editEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   applyEtsyOffers: (onSale: boolean) => Promise<number | null>;
   removeProduct: (id: string) => Promise<boolean>;
+  setVisibility: (id: string, isVisible: boolean) => Promise<boolean>;
   refreshProducts: () => Promise<void>;
 }
 
@@ -143,6 +145,19 @@ export const useProducts = (): UseProductsResult => {
     }
   };
 
+  const setVisibility = async (id: string, isVisible: boolean): Promise<boolean> => {
+    try {
+      const updated = await setProductVisibility(id, isVisible);
+      setProducts((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      return true;
+    } catch (err) {
+      logError('useProducts.setVisibility', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateProduct');
+      setError(msg);
+      return false;
+    }
+  };
+
   return {
     products,
     isLoading,
@@ -152,6 +167,7 @@ export const useProducts = (): UseProductsResult => {
     editEtsyMetadata,
     applyEtsyOffers,
     removeProduct,
+    setVisibility,
     refreshProducts: loadProducts,
   };
 };

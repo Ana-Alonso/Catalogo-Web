@@ -20,6 +20,7 @@ export const AdminPage: React.FC = () => {
     editEtsyMetadata,
     applyEtsyOffers,
     removeProduct,
+    setVisibility,
     refreshProducts,
   } = useProducts();
   const {
@@ -44,6 +45,7 @@ export const AdminPage: React.FC = () => {
       onEditEtsyMetadata={editEtsyMetadata}
       onApplyEtsyOffers={applyEtsyOffers}
       onDeleteProduct={removeProduct}
+      onSetProductVisibility={setVisibility}
       onRefreshProducts={refreshProducts}
       onRefreshRegistrations={refreshRegistrations}
       onSetRegistrationStatus={setStatus}

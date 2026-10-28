@@ -16,7 +16,9 @@ const buildProps = () => ({
   products: [],
   onDelete: vi.fn(),
   onEdit: vi.fn(),
+  onSetVisibility: vi.fn(),
   isDeleting: false,
+  isUpdatingVisibility: false,
   isLoading: false,
   error: null,
   onRetry: vi.fn(),
@@ -99,5 +101,51 @@ describe('AdminProductTable', () => {
     }));
 
     expect(onEdit).toHaveBeenCalledWith(producto);
+  });
+
+  it('archiva un producto local poniendo isVisible a false', async () => {
+    const user = userEvent.setup();
+    const onSetVisibility = vi.fn();
+    const local = { ...producto, source: 'local' as const, isVisible: true };
+
+    renderTable({ ...buildProps(), products: [local], onSetVisibility });
+
+    const archivar = screen.getAllByRole('button', {
+      name: 'Archivar Ilustración en acuarela',
+    });
+    expect(archivar).toHaveLength(2);
+
+    await user.click(archivar[0]);
+
+    expect(onSetVisibility).toHaveBeenCalledWith('1', false);
+  });
+
+  it('vuelve a publicar un producto archivado', async () => {
+    const user = userEvent.setup();
+    const onSetVisibility = vi.fn();
+    const local = { ...producto, source: 'local' as const, isVisible: false };
+
+    renderTable({ ...buildProps(), products: [local], onSetVisibility });
+
+    expect(screen.getAllByText('Oculto').length).toBeGreaterThan(0);
+
+    const publicar = screen.getAllByRole('button', {
+      name: 'Volver a publicar Ilustración en acuarela',
+    });
+
+    await user.click(publicar[0]);
+
+    expect(onSetVisibility).toHaveBeenCalledWith('1', true);
+  });
+
+  it('no permite archivar productos de Etsy porque su visibilidad viene de Etsy', () => {
+    renderTable({ ...buildProps(), products: [producto] });
+
+    const etsy = screen.getAllByRole('button', {
+      name: 'Ilustración en acuarela se oculta desde Etsy',
+    });
+
+    expect(etsy).toHaveLength(2);
+    etsy.forEach((button) => expect(button).toBeDisabled());
   });
 });

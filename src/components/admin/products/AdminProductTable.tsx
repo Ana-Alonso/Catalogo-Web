@@ -10,7 +10,9 @@ interface AdminProductTableProps {
   products: CatalogItem[];
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
+  onSetVisibility: (id: string, isVisible: boolean) => void;
   isDeleting: boolean;
+  isUpdatingVisibility: boolean;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void | Promise<void>;
@@ -20,7 +22,9 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   products,
   onDelete,
   onEdit,
+  onSetVisibility,
   isDeleting,
+  isUpdatingVisibility,
   isLoading,
   error,
   onRetry,
@@ -89,8 +93,10 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                 key={item.id}
                 item={item}
                 isDeleting={isDeleting}
+                isUpdatingVisibility={isUpdatingVisibility}
                 onDelete={onDelete}
                 onEdit={onEdit}
+                onSetVisibility={onSetVisibility}
               />
             ))}
           </TableBody>
@@ -109,8 +115,10 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
             key={item.id}
             item={item}
             isDeleting={isDeleting}
+            isUpdatingVisibility={isUpdatingVisibility}
             onDelete={onDelete}
             onEdit={onEdit}
+            onSetVisibility={onSetVisibility}
           />
         ))}
       </Box>

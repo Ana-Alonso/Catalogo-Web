@@ -33,6 +33,7 @@ interface AdminDashboardProps {
   onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
   onApplyEtsyOffers: (onSale: boolean) => Promise<number | null>;
   onDeleteProduct: (id: string) => Promise<boolean>;
+  onSetProductVisibility: (id: string, isVisible: boolean) => Promise<boolean>;
   onRefreshProducts: () => Promise<void>;
   onRefreshRegistrations: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
@@ -52,6 +53,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onEditEtsyMetadata,
   onApplyEtsyOffers,
   onDeleteProduct,
+  onSetProductVisibility,
   onRefreshProducts,
   onRefreshRegistrations,
   onSetRegistrationStatus,
@@ -64,6 +66,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
@@ -156,6 +159,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const handleSetVisibility = async (id: string, isVisible: boolean) => {
+    setIsUpdatingVisibility(true);
+    const isSaved = await onSetProductVisibility(id, isVisible);
+    setIsUpdatingVisibility(false);
+
+    if (isSaved) {
+      notifySuccess(
+        t(
+          isVisible
+            ? 'admin.feedback.productRestored'
+            : 'admin.feedback.productArchived'
+        )
+      );
+      return;
+    }
+
+    notifyError(t('admin.feedback.productVisibilityError'));
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -238,7 +260,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           products={products}
           onDelete={handleDelete}
           onEdit={setEditingProduct}
+          onSetVisibility={handleSetVisibility}
           isDeleting={isDeleting}
+          isUpdatingVisibility={isUpdatingVisibility}
           isLoading={isLoadingProducts}
           error={productsError}
           onRetry={onRefreshProducts}

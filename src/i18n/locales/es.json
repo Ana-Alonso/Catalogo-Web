@@ -240,7 +240,10 @@
       "productOperationError": "Error al procesar la operación.",
       "etsyUpdated": "Producto de Etsy actualizado correctamente.",
       "etsyUpdateError": "Error al actualizar el producto de Etsy.",
-      "productDeleteError": "Error al eliminar el producto."
+      "productDeleteError": "Error al eliminar el producto.",
+      "productArchived": "Producto archivado: ya no se muestra en la web.",
+      "productRestored": "Producto publicado de nuevo en la web.",
+      "productVisibilityError": "No se pudo cambiar la visibilidad del producto."
     },
     "productForm": {
       "editTitle": "Modificar Producto",
@@ -363,6 +366,10 @@
       "etsyDeleteHint": "Los productos de Etsy se eliminan desde Etsy",
       "etsyDeleteAria": "{{title}} se elimina desde Etsy",
       "deleteAria": "Eliminar {{title}}",
+  "archiveAria": "Archivar {{title}}",
+  "restoreAria": "Volver a publicar {{title}}",
+  "etsyVisibilityHint": "Los productos de Etsy se ocultan desde Etsy",
+  "etsyVisibilityAria": "{{title}} se oculta desde Etsy",
       "offerFromEtsy": "oferta de Etsy",
       "offerManual": "oferta manual"
     },
