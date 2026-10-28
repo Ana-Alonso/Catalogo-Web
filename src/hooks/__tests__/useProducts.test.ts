@@ -127,6 +127,7 @@ describe('useProducts', () => {
     await waitFor(() => {
       expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
       expect(result.current.error).toBeNull();
+      expect(result.current.isLoading).toBe(false);
     });
   });
 
@@ -167,6 +168,39 @@ describe('useProducts', () => {
     await waitFor(() => {
       expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
       expect(result.current.error).toBeNull();
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  it('libera la carga cuando la respuesta inicial llega tarde tras una mutación', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let resolveInitial: ((value: CatalogItem[]) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveInitial = resolve;
+          })
+      )
+      .mockResolvedValueOnce([otro, producto]);
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    expect(result.current.isLoading).toBe(true);
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+
+    await act(async () => {
+      resolveInitial?.([producto]);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
     });
   });
 });
