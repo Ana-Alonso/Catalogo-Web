@@ -51,6 +51,8 @@ const buildProps = () => ({
   onDeleteRegistration: vi.fn().mockResolvedValue(true),
   onCancelWorkshop: vi.fn().mockResolvedValue(undefined),
   isCancellingWorkshop: false,
+  onRestoreWorkshop: vi.fn().mockResolvedValue(undefined),
+  isRestoringWorkshop: false,
 });
 
 const renderPanel = (props: Parameters<typeof AdminWorkshopsPanel>[0]) =>
@@ -271,6 +273,33 @@ describe('AdminWorkshopsPanel', () => {
         name: 'Cancelar el taller Taller cancelado y todas sus inscripciones',
       })
     ).not.toBeInTheDocument();
+  });
+
+  it('ofrece reactivar un taller cancelado y avisa al panel', async () => {
+    const user = userEvent.setup();
+    const onRestoreWorkshop = vi.fn().mockResolvedValue(undefined);
+
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({
+          id: 'w-2',
+          title: 'Taller cancelado',
+          workshopCancelled: true,
+        }),
+      ],
+      onRestoreWorkshop,
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Reactivar el taller Taller cancelado para aceptar nuevas inscripciones',
+      })
+    );
+
+    expect(onRestoreWorkshop).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'w-2' })
+    );
   });
 
   it('muestra el estado vacío y el error de carga', () => {

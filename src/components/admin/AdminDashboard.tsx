@@ -46,6 +46,7 @@ interface AdminDashboardProps {
   onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (id: string) => Promise<boolean>;
+  onRestoreWorkshop: (id: string) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -68,6 +69,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onWithdrawMarketingConsent,
   onDeleteRegistration,
   onCancelWorkshop,
+  onRestoreWorkshop,
   onClose
 }) => {
   const { t } = useTranslation();
@@ -80,6 +82,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const [isCancellingWorkshop, setIsCancellingWorkshop] = useState(false);
+  const [isRestoringWorkshop, setIsRestoringWorkshop] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
@@ -242,6 +245,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     notifyError(t('admin.feedback.workshopCancelError'));
   };
 
+  const handleRestoreWorkshop = async (workshop: CatalogItem) => {
+    setIsRestoringWorkshop(true);
+    const isRestored = await onRestoreWorkshop(String(workshop.id));
+    setIsRestoringWorkshop(false);
+
+    if (isRestored) {
+      notifySuccess(
+        t('admin.feedback.workshopRestored', { title: workshop.title })
+      );
+      return;
+    }
+
+    notifyError(t('admin.feedback.workshopRestoreError'));
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -358,6 +376,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onDeleteRegistration={onDeleteRegistration}
             onCancelWorkshop={handleCancelWorkshop}
             isCancellingWorkshop={isCancellingWorkshop}
+            onRestoreWorkshop={handleRestoreWorkshop}
+            isRestoringWorkshop={isRestoringWorkshop}
           />
         )}
 

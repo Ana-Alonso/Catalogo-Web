@@ -9,6 +9,7 @@ import {
   Clock,
   Edit3,
   MapPin,
+  RotateCcw,
   Users,
 } from 'lucide-react';
 import { Badge, Box, Button, Card, Icon, Typography } from '../../ui';
@@ -40,6 +41,8 @@ interface AdminWorkshopCardProps {
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (workshop: CatalogItem) => Promise<void>;
   isCancellingWorkshop: boolean;
+  onRestoreWorkshop: (workshop: CatalogItem) => Promise<void>;
+  isRestoringWorkshop: boolean;
 }
 
 export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
@@ -58,6 +61,8 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
   onDeleteRegistration,
   onCancelWorkshop,
   isCancellingWorkshop,
+  onRestoreWorkshop,
+  isRestoringWorkshop,
 }) => {
   const { t, i18n } = useTranslation();
   const confirm = useConfirm();
@@ -152,6 +157,20 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               >
                 <Icon as={Ban} size="sm" tone="danger" />
                 {t('admin.workshops.cancelWorkshop')}
+              </Button>
+            )}
+            {finishedReason === 'cancelado' && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isRestoringWorkshop}
+                onClick={() => void onRestoreWorkshop(workshop)}
+                aria-label={t('admin.workshops.restoreWorkshopAria', {
+                  title: workshop.title,
+                })}
+              >
+                <Icon as={RotateCcw} size="sm" tone="accent" />
+                {t('admin.workshops.restoreWorkshop')}
               </Button>
             )}
             <Button
