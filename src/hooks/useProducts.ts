@@ -8,6 +8,7 @@ import {
   updateEtsyProductMetadata,
   setAllEtsyOffers,
   setProductVisibility,
+  setWorkshopCancelled,
 } from '../services/productService';
 import { logError } from '../utils/logger';
 import type {
@@ -26,6 +27,8 @@ interface UseProductsResult {
   applyEtsyOffers: (onSale: boolean) => Promise<number | null>;
   removeProduct: (id: string) => Promise<boolean>;
   setVisibility: (id: string, isVisible: boolean) => Promise<boolean>;
+  cancelWorkshop: (id: string) => Promise<boolean>;
+  restoreWorkshop: (id: string) => Promise<boolean>;
   refreshProducts: () => Promise<void>;
 }
 
@@ -165,6 +168,24 @@ export const useProducts = (): UseProductsResult => {
     }
   };
 
+  const setWorkshopCancelledState = async (
+    id: string,
+    isCancelled: boolean
+  ): Promise<boolean> => {
+    try {
+      const updated = await setWorkshopCancelled(id, isCancelled);
+      setProducts((prev) =>
+        prev.map((item) => (String(item.id) === id ? updated : item))
+      );
+      return true;
+    } catch (err) {
+      logError('useProducts.setWorkshopCancelled', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateWorkshop');
+      setError(msg);
+      return false;
+    }
+  };
+
   return {
     products,
     isLoading,
@@ -175,6 +196,8 @@ export const useProducts = (): UseProductsResult => {
     applyEtsyOffers,
     removeProduct,
     setVisibility,
+    cancelWorkshop: (id: string) => setWorkshopCancelledState(id, true),
+    restoreWorkshop: (id: string) => setWorkshopCancelledState(id, false),
     refreshProducts: loadProducts,
   };
 };

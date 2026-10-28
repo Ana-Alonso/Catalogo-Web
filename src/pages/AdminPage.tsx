@@ -21,6 +21,8 @@ export const AdminPage: React.FC = () => {
     applyEtsyOffers,
     removeProduct,
     setVisibility,
+    cancelWorkshop,
+    restoreWorkshop,
     refreshProducts,
   } = useProducts();
   const {
@@ -29,8 +31,27 @@ export const AdminPage: React.FC = () => {
     error: registrationsError,
     setStatus,
     remove,
+    cancelWorkshopRegistrations,
     refreshRegistrations,
   } = useRegistrations();
+
+  const handleCancelWorkshop = async (id: string): Promise<boolean> => {
+    const isMarked = await cancelWorkshop(id);
+
+    if (!isMarked) {
+      return false;
+    }
+
+    const isCancelled = await cancelWorkshopRegistrations(id);
+    await refreshRegistrations();
+
+    if (!isCancelled) {
+      await restoreWorkshop(id);
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <AdminDashboard
@@ -50,6 +71,7 @@ export const AdminPage: React.FC = () => {
       onRefreshRegistrations={refreshRegistrations}
       onSetRegistrationStatus={setStatus}
       onDeleteRegistration={remove}
+      onCancelWorkshop={handleCancelWorkshop}
       onClose={() => navigate('/')}
     />
   );

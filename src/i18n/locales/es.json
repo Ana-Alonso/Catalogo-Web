@@ -86,7 +86,8 @@
     "status": {
       "available": "Disponible",
       "reserved": "Reservado",
-      "sold": "Vendido / Finalizado"
+      "sold": "Vendido / Finalizado",
+      "cancelled": "Cancelado"
     },
     "spotsOpen": "Inscripción abierta",
     "registrationDeadline": "Inscripciones hasta el {{date}}",
@@ -108,7 +109,8 @@
     "readMore": "Leer más",
     "readLess": "Leer menos",
     "signupModalTitle": "Inscripción al taller",
-    "offerBadge": "En oferta"
+    "offerBadge": "En oferta",
+    "workshopCancelled": "Este taller se ha cancelado. Si te habías inscrito, contactaremos contigo."
   },
   "workshop": {
     "form": {
@@ -271,8 +273,13 @@
       "finishedReasons": {
         "celebrado": "Celebrado",
         "vendido": "Vendido",
-        "archivado": "Archivado"
-      }
+        "archivado": "Archivado",
+        "cancelado": "Cancelado"
+      },
+      "cancelWorkshop": "Cancelar taller",
+      "cancelWorkshopAria": "Cancelar el taller {{title}} y todas sus inscripciones",
+      "cancelConfirm": "¿Seguro que quieres cancelar el taller \"{{title}}\"? Se cancelarán todas sus inscripciones y pasará a finalizados.",
+      "cancelConfirmAction": "Sí, cancelar taller"
     },
     "login": {
       "title": "Acceso Administrador",
@@ -297,7 +304,9 @@
       "productDeleteError": "Error al eliminar el producto.",
       "productArchived": "Producto archivado: ya no se muestra en la web.",
       "productRestored": "Producto publicado de nuevo en la web.",
-      "productVisibilityError": "No se pudo cambiar la visibilidad del producto."
+      "productVisibilityError": "No se pudo cambiar la visibilidad del producto.",
+      "workshopCancelled": "Taller \"{{title}}\" cancelado y movido a finalizados.",
+      "workshopCancelError": "No se pudo cancelar el taller. Inténtalo de nuevo."
     },
     "productForm": {
       "editTitle": "Modificar Producto",
@@ -442,7 +451,6 @@
       "marketingBadge": "Avisa de talleres",
       "export": "CSV de avisos",
       "exportAria": "Extraer CSV de las personas que quieren que se les avise de futuros talleres",
-      "exportDisabledHint": "Nadie ha marcado todavía el aviso de talleres",
       "exportDone": "CSV generado con {{count}} personas",
       "csv": {
         "name": "Nombre",
@@ -463,7 +471,9 @@
         "pending": "Pendiente",
         "confirmed": "Confirmado",
         "cancelled": "Cancelado"
-      }
+      },
+      "exportEmpty": "No hay contactos con consentimiento de avisos en la base de datos.",
+      "exportError": "No se pudo generar el CSV de avisos. Inténtalo de nuevo."
     },
     "calendarPanel": {
       "published": "Taller «{{title}}» publicado. Añade el evento a tu calendario:"
@@ -476,7 +486,9 @@
       "deleteProductProtected": "No se puede eliminar el taller: tiene contactos que pidieron avisos. Archívalo en su lugar.",
       "loadRegistrations": "Error desconocido al cargar inscripciones",
       "updateRegistration": "Error al actualizar la inscripción",
-      "deleteRegistration": "Error al eliminar la inscripción"
+      "deleteRegistration": "Error al eliminar la inscripción",
+      "updateWorkshop": "Error al actualizar el taller",
+      "cancelWorkshop": "Error al cancelar las inscripciones del taller"
     }
   }
 }

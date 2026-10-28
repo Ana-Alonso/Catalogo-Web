@@ -44,6 +44,7 @@ interface AdminDashboardProps {
   onRefreshRegistrations: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
+  onCancelWorkshop: (id: string) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -64,6 +65,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onRefreshRegistrations,
   onSetRegistrationStatus,
   onDeleteRegistration,
+  onCancelWorkshop,
   onClose
 }) => {
   const { t } = useTranslation();
@@ -75,6 +77,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
+  const [isCancellingWorkshop, setIsCancellingWorkshop] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
@@ -222,6 +225,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     notifyError(t('admin.feedback.productVisibilityError'));
   };
 
+  const handleCancelWorkshop = async (workshop: CatalogItem) => {
+    setIsCancellingWorkshop(true);
+    const isCancelled = await onCancelWorkshop(String(workshop.id));
+    setIsCancellingWorkshop(false);
+
+    if (isCancelled) {
+      notifySuccess(
+        t('admin.feedback.workshopCancelled', { title: workshop.title })
+      );
+      return;
+    }
+
+    notifyError(t('admin.feedback.workshopCancelError'));
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -333,6 +351,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onSetVisibility={handleSetVisibility}
             onSetStatus={onSetRegistrationStatus}
             onDeleteRegistration={onDeleteRegistration}
+            onCancelWorkshop={handleCancelWorkshop}
+            isCancellingWorkshop={isCancellingWorkshop}
           />
         )}
 

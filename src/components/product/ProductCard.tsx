@@ -63,6 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const isFull = spotsLeft === 0;
   const isFinished = currentStatus === 'vendido';
   const signupState = isWorkshop ? getWorkshopSignupState(item, registeredCount, nowMs) : null;
+  const isCancelled = isWorkshop && Boolean(item.workshopCancelled);
   const canSignup = signupState === 'abierto' && Boolean(onRegister);
   const daysLeft = getDaysUntilRegistrationDeadline(item.registrationDeadline, nowMs);
   const registrationDeadlineLabel = item.registrationDeadline
@@ -131,8 +132,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             <Badge variant="primary">
               {t(categoryTranslationKeys[item.category])}
             </Badge>
-            <Badge variant={statusBadgeVariant}>
-              {t(availabilityTranslationKeys[currentStatus])}
+            <Badge variant={isCancelled ? 'outline' : statusBadgeVariant}>
+              {isCancelled
+                ? t('product.status.cancelled')
+                : t(availabilityTranslationKeys[currentStatus])}
             </Badge>
           </Box>
           <Typography variant="h4" marginTop="xs" clamp={2} title={item.title}>
@@ -211,6 +214,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           {isWorkshop && !isFinished && signupState === 'terminado' && (
             <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
               <Typography variant="caption" tone="muted">{t('product.workshopPassed')}</Typography>
+            </Box>
+          )}
+          {isWorkshop && signupState === 'cancelado' && (
+            <Box textAlign="center" paddingY="sm" background="dangerSoft" border borderTone="danger" rounded="sm">
+              <Typography variant="caption" tone="danger">{t('product.workshopCancelled')}</Typography>
             </Box>
           )}
           {canSignup && (

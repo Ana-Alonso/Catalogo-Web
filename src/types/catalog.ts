@@ -26,6 +26,7 @@ export interface CatalogItem {
   eventLocation?: string;
   cupo?: number | null;
   registrationDeadline?: string | null;
+  workshopCancelled?: boolean;
   created_at?: string;
 }
 

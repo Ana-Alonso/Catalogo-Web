@@ -52,6 +52,9 @@ const resolveWorkshopPayload = (formData: ProductFormData): Record<string, unkno
   };
 };
 
+const resolveCancelledReset = (formData: ProductFormData): Record<string, unknown> =>
+  formData.category === 'talleres' ? {} : { workshopCancelled: false };
+
 interface LocalPriceFields {
   priceCents: number | null;
   currency: string;
@@ -256,7 +259,8 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      ...resolveWorkshopPayload(formData)
+      ...resolveWorkshopPayload(formData),
+      ...resolveCancelledReset(formData)
     };
 
     if (imageUrl) {
@@ -294,7 +298,8 @@ export const updateProduct = async (
         vintedLink: purchaseLinks.vintedLink ?? null,
         ...priceFields,
         status: formData.status,
-        ...resolveWorkshopFields(formData)
+        ...resolveWorkshopFields(formData),
+        ...resolveCancelledReset(formData)
       };
     }
     return item;
@@ -346,6 +351,45 @@ export const setProductVisibility = async (
       return item;
     }
     updatedProduct = { ...item, isVisible };
+    return updatedProduct;
+  });
+
+  saveStoredLocalProducts(updatedProducts);
+
+  if (!updatedProduct) {
+    throw new Error('Producto no encontrado.');
+  }
+
+  return updatedProduct;
+};
+
+export const setWorkshopCancelled = async (
+  id: string,
+  isCancelled: boolean
+): Promise<CatalogItem> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ workshopCancelled: isCancelled })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as CatalogItem;
+  }
+
+  const currentProducts = getStoredLocalProducts();
+  let updatedProduct: CatalogItem | null = null;
+
+  const updatedProducts = currentProducts.map((item) => {
+    if (item.id !== id) {
+      return item;
+    }
+    updatedProduct = { ...item, workshopCancelled: isCancelled };
     return updatedProduct;
   });
 

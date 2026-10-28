@@ -6,7 +6,6 @@ import { AdminProductActions } from './AdminProductActions';
 import { AdminProductCategoryBadge } from './AdminProductBadges';
 import { AdminProductIdentity } from './AdminProductIdentity';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
-import { AdminRegistrationsExportButton } from '../registrations/AdminRegistrationsExportButton';
 import { AdminWorkshopRegistrations } from '../registrations/AdminWorkshopRegistrations';
 import { formatDate } from '../../../utils/dateFormat';
 import { sortRegistrationsByDate } from '../../../utils/workshopSummary';
@@ -160,19 +159,11 @@ export const AdminArchivedPanel: React.FC<AdminArchivedPanelProps> = ({
                   </Box>
 
                   {isWorkshop && isExpanded && (
-                    <Box display="flex" direction="column" gap="md">
-                      <Box display="flex" justify="end">
-                        <AdminRegistrationsExportButton
-                          registrations={workshopRegistrations}
-                          workshops={[item]}
-                        />
-                      </Box>
-                      <AdminWorkshopRegistrations
-                        registrations={workshopRegistrations}
-                        onSetStatus={onSetStatus}
-                        onDelete={onDeleteRegistration}
-                      />
-                    </Box>
+                    <AdminWorkshopRegistrations
+                      registrations={workshopRegistrations}
+                      onSetStatus={onSetStatus}
+                      onDelete={onDeleteRegistration}
+                    />
                   )}
                 </Box>
               );

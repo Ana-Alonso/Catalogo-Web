@@ -1,7 +1,7 @@
 import type { CatalogItem } from '../types/catalog';
 import { hasWorkshopHappened } from './workshopSignupState';
 
-export type WorkshopFinishedReason = 'archivado' | 'vendido' | 'celebrado';
+export type WorkshopFinishedReason = 'archivado' | 'cancelado' | 'vendido' | 'celebrado';
 export type WorkshopPhase = 'activo' | 'finalizado';
 
 export interface WorkshopGroups {
@@ -15,6 +15,10 @@ export const getWorkshopFinishedReason = (
 ): WorkshopFinishedReason | null => {
   if (workshop.isVisible === false) {
     return 'archivado';
+  }
+
+  if (workshop.workshopCancelled) {
+    return 'cancelado';
   }
 
   if (workshop.status === 'vendido') {

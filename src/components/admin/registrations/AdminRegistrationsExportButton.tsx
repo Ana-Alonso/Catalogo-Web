@@ -1,29 +1,30 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Download, LoaderCircle } from 'lucide-react';
 import { Button, Icon } from '../../ui';
 import { useToast } from '../../../hooks/useToast';
 import { registrationStatusTranslationKeys } from '../../../i18n/labels';
+import { fetchMarketingRegistrations } from '../../../services/registrationService';
+import { logError } from '../../../utils/logger';
 import {
   buildCsv,
   buildMarketingCsvRows,
   downloadCsvFile,
 } from '../../../utils/registrationsCsv';
 import type { CatalogItem } from '../../../types/catalog';
-import type { WorkshopRegistration } from '../../../types/registrations';
 
 const EXPORT_FILENAME_PREFIX = 'avisos-talleres';
 
 interface AdminRegistrationsExportButtonProps {
-  registrations: WorkshopRegistration[];
   workshops: CatalogItem[];
 }
 
 export const AdminRegistrationsExportButton: React.FC<
   AdminRegistrationsExportButtonProps
-> = ({ registrations, workshops }) => {
+> = ({ workshops }) => {
   const { t } = useTranslation();
-  const { success: notifySuccess } = useToast();
+  const { success: notifySuccess, error: notifyError } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   const workshopTitleById = useMemo(
     () =>
@@ -33,31 +34,42 @@ export const AdminRegistrationsExportButton: React.FC<
     [workshops]
   );
 
-  const rows = useMemo(
-    () =>
-      buildMarketingCsvRows(
+  const handleExport = async () => {
+    setIsExporting(true);
+
+    try {
+      const registrations = await fetchMarketingRegistrations();
+      const rows = buildMarketingCsvRows(
         registrations,
         workshopTitleById,
         (status) => t(registrationStatusTranslationKeys[status])
-      ),
-    [registrations, workshopTitleById, t]
-  );
+      );
 
-  const handleExport = () => {
-    const headers = [
-      t('admin.registrations.csv.name'),
-      t('admin.registrations.csv.email'),
-      t('admin.registrations.csv.workshop'),
-      t('admin.registrations.csv.date'),
-      t('admin.registrations.csv.status'),
-    ];
-    const date = new Date().toISOString().slice(0, 10);
+      if (rows.length === 0) {
+        notifyError(t('admin.registrations.exportEmpty'));
+        return;
+      }
 
-    downloadCsvFile(
-      `${EXPORT_FILENAME_PREFIX}-${date}.csv`,
-      buildCsv(headers, rows)
-    );
-    notifySuccess(t('admin.registrations.exportDone', { count: rows.length }));
+      const headers = [
+        t('admin.registrations.csv.name'),
+        t('admin.registrations.csv.email'),
+        t('admin.registrations.csv.workshop'),
+        t('admin.registrations.csv.date'),
+        t('admin.registrations.csv.status'),
+      ];
+      const date = new Date().toISOString().slice(0, 10);
+
+      downloadCsvFile(
+        `${EXPORT_FILENAME_PREFIX}-${date}.csv`,
+        buildCsv(headers, rows)
+      );
+      notifySuccess(t('admin.registrations.exportDone', { count: rows.length }));
+    } catch (err) {
+      logError('AdminRegistrationsExportButton.handleExport', err);
+      notifyError(t('admin.registrations.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -65,15 +77,10 @@ export const AdminRegistrationsExportButton: React.FC<
       variant="outline"
       size="sm"
       onClick={handleExport}
-      disabled={rows.length === 0}
+      disabled={isExporting}
       aria-label={t('admin.registrations.exportAria')}
-      title={
-        rows.length === 0
-          ? t('admin.registrations.exportDisabledHint')
-          : undefined
-      }
     >
-      <Icon as={Download} size="sm" />
+      <Icon as={isExporting ? LoaderCircle : Download} size="sm" spin={isExporting} />
       {t('admin.registrations.export')}
     </Button>
   );

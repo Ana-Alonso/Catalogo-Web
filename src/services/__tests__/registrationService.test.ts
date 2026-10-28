@@ -305,3 +305,128 @@ describe('registrationService · protección del consentimiento de marketing', (
     });
   });
 });
+
+describe('registrationService · avisos y cancelación masiva en modo mock', () => {
+  beforeEach(() => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('devuelve solo los contactos con consentimiento de avisos', async () => {
+    const service = await loadService();
+    await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { marketingConsent: true }),
+      null
+    );
+    await service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), null);
+
+    const contacts = await service.fetchMarketingRegistrations();
+
+    expect(contacts.map((contact) => contact.email)).toEqual(['ana@example.com']);
+  });
+
+  it('cancela todas las inscripciones activas de un taller', async () => {
+    const service = await loadService();
+    await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null);
+    await service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), null);
+    await service.createRegistration('prod-2', formData('Elena', 'elena@example.com'), null);
+
+    const cancelled = await service.cancelWorkshopRegistrations('prod-1');
+
+    expect(cancelled).toBe(2);
+    const registrations = await service.fetchRegistrations();
+    expect(
+      registrations
+        .filter((item) => item.product_id === 'prod-1')
+        .every((item) => item.status === 'cancelado')
+    ).toBe(true);
+    expect(
+      registrations.find((item) => item.product_id === 'prod-2')?.status
+    ).toBe('pendiente');
+  });
+
+  it('no cuenta las inscripciones que ya estaban canceladas', async () => {
+    const service = await loadService();
+    const first = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+    await service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), null);
+    await service.updateRegistrationStatus(first.id, 'cancelado');
+
+    const cancelled = await service.cancelWorkshopRegistrations('prod-1');
+
+    expect(cancelled).toBe(1);
+  });
+});
+
+describe('registrationService · avisos y cancelación masiva contra Supabase', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+  });
+
+  it('consulta los contactos con consentimiento directamente en la base de datos', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const order = vi.fn().mockResolvedValue({
+      data: [{ ...registrationRow, marketing_consent: true }],
+      error: null,
+    });
+    const eq = vi.fn().mockReturnValue({ order });
+    const select = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ select });
+
+    const service = await loadService();
+    const contacts = await service.fetchMarketingRegistrations();
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('workshop_registrations');
+    expect(select).toHaveBeenCalledWith('*');
+    expect(eq).toHaveBeenCalledWith('marketing_consent', true);
+    expect(order).toHaveBeenCalledWith('created_at', { ascending: false });
+    expect(contacts).toHaveLength(1);
+  });
+
+  it('cancela en bloque las inscripciones activas del taller', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const select = vi.fn().mockResolvedValue({
+      data: [{ id: 'reg-1' }, { id: 'reg-2' }],
+      error: null,
+    });
+    const neq = vi.fn().mockReturnValue({ select });
+    const eq = vi.fn().mockReturnValue({ neq });
+    const update = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ update });
+
+    const service = await loadService();
+    const cancelled = await service.cancelWorkshopRegistrations('prod-1');
+
+    expect(update).toHaveBeenCalledWith({ status: 'cancelado' });
+    expect(eq).toHaveBeenCalledWith('product_id', 'prod-1');
+    expect(neq).toHaveBeenCalledWith('status', 'cancelado');
+    expect(cancelled).toBe(2);
+  });
+
+  it('propaga el error al cancelar las inscripciones del taller', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const select = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: '42501', message: 'permission denied' },
+    });
+    const neq = vi.fn().mockReturnValue({ select });
+    const eq = vi.fn().mockReturnValue({ neq });
+    const update = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ update });
+
+    const service = await loadService();
+
+    await expect(
+      service.cancelWorkshopRegistrations('prod-1')
+    ).rejects.toMatchObject({ code: 'unknown' });
+  });
+});

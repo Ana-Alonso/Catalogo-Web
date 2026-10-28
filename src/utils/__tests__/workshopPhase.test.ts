@@ -47,6 +47,15 @@ describe('getWorkshopFinishedReason', () => {
     expect(getWorkshopFinishedReason(workshop({ isVisible: false }), NOW)).toBe('archivado');
   });
 
+  it('marca como cancelado un taller cancelado antes que vendido', () => {
+    expect(
+      getWorkshopFinishedReason(
+        workshop({ workshopCancelled: true, status: 'vendido' }),
+        NOW
+      )
+    ).toBe('cancelado');
+  });
+
   it('no finaliza con nowMs de SSR o una fecha ilegible', () => {
     expect(getWorkshopFinishedReason(workshop({ eventDate: '2026-11-04T18:00:00.000Z' }), 0)).toBeNull();
     expect(getWorkshopFinishedReason(workshop({ eventDate: 'próximamente' }), NOW)).toBeNull();

@@ -24,6 +24,24 @@ BEGIN
     RAISE EXCEPTION 'FAIL: tabla workshop_registrations ausente';
   END IF;
 
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'products'
+      AND column_name = 'workshopCancelled'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: products.workshopCancelled ausente';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'products_workshop_cancelled_check'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: CHECK de taller cancelado ausente';
+  END IF;
+
   IF to_regprocedure('public.register_for_workshop(uuid,text,text,timestamptz,boolean)') IS NULL THEN
     RAISE EXCEPTION 'FAIL: función register_for_workshop ausente';
   END IF;
@@ -291,6 +309,51 @@ BEGIN
     WHEN others THEN
       IF SQLERRM <> 'workshop_full' THEN
         RAISE EXCEPTION 'FAIL: error inesperado al exceder cupo: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+INSERT INTO public.products (
+    id, title, description, image, category, status, featured, "workshopCancelled"
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000012', 'Taller cancelado', 'Descripción',
+    'img.png', 'talleres', 'disponible', false, true
+);
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.workshop_registrations (product_id, name, email)
+    VALUES ('00000000-0000-0000-0000-000000000012', 'Tarde Cancelada', 'cancelada@test.com');
+    RAISE EXCEPTION 'FAIL: se permitió inscribirse en un taller cancelado';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'registration_closed' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al inscribirse en un taller cancelado: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    UPDATE public.products
+    SET "workshopCancelled" = true
+    WHERE id = '00000000-0000-0000-0000-000000000003';
+    RAISE EXCEPTION 'FAIL: se permitió cancelar un producto que no es taller';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM NOT LIKE '%products_workshop_cancelled_check%' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al cancelar una ilustración: %', SQLERRM;
       END IF;
   END;
 END $$;
@@ -740,3 +803,4 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000002';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000003';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000004';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000011';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000012';

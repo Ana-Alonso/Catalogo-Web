@@ -1,6 +1,6 @@
 import type { CatalogItem } from '../types/catalog';
 
-export type WorkshopSignupState = 'abierto' | 'lleno' | 'cerrado' | 'terminado';
+export type WorkshopSignupState = 'abierto' | 'lleno' | 'cerrado' | 'terminado' | 'cancelado';
 
 const parseDateMs = (value: string | null | undefined): number | null => {
   if (!value) {
@@ -43,6 +43,10 @@ export const getWorkshopSignupState = (
   spotsCount: number | undefined,
   nowMs: number
 ): WorkshopSignupState => {
+  if (item.workshopCancelled) {
+    return 'cancelado';
+  }
+
   if (item.status === 'vendido') {
     return 'terminado';
   }

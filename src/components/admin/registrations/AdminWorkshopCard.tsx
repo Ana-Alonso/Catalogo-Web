@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
+  Ban,
   CalendarDays,
   ChevronDown,
   ChevronUp,
@@ -11,8 +12,8 @@ import {
   Users,
 } from 'lucide-react';
 import { Badge, Box, Button, Card, Icon, Typography } from '../../ui';
-import { AdminRegistrationsExportButton } from './AdminRegistrationsExportButton';
 import { AdminWorkshopRegistrations } from './AdminWorkshopRegistrations';
+import { useConfirm } from '../../../hooks/useConfirm';
 import { formatDateTime } from '../../../utils/dateFormat';
 import { isWorkshopRegistrationClosed } from '../../../utils/workshopSignupState';
 import {
@@ -36,6 +37,8 @@ interface AdminWorkshopCardProps {
   onSetVisibility: (id: string, isVisible: boolean) => void;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
+  onCancelWorkshop: (workshop: CatalogItem) => Promise<void>;
+  isCancellingWorkshop: boolean;
 }
 
 export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
@@ -51,8 +54,11 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
   onSetVisibility,
   onSetStatus,
   onDeleteRegistration,
+  onCancelWorkshop,
+  isCancellingWorkshop,
 }) => {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const stats = getRegistrationStats(registrations);
   const activeCount = getActiveRegistrationCount(stats);
@@ -68,6 +74,20 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
     cupo !== null
       ? t('admin.registrations.spots', { active: activeCount, cupo })
       : t('admin.workshops.noCapacity');
+
+  const handleCancelWorkshop = async (): Promise<void> => {
+    const isConfirmed = await confirm({
+      message: t('admin.workshops.cancelConfirm', { title: workshop.title }),
+      confirmLabel: t('admin.workshops.cancelConfirmAction'),
+      isDanger: true,
+    });
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    await onCancelWorkshop(workshop);
+  };
 
   return (
     <Card padding="lg">
@@ -116,6 +136,20 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                     ? 'admin.workshops.collapse'
                     : 'admin.workshops.expand'
                 )}
+              </Button>
+            )}
+            {finishedReason === null && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isCancellingWorkshop}
+                onClick={() => void handleCancelWorkshop()}
+                aria-label={t('admin.workshops.cancelWorkshopAria', {
+                  title: workshop.title,
+                })}
+              >
+                <Icon as={Ban} size="sm" tone="danger" />
+                {t('admin.workshops.cancelWorkshop')}
               </Button>
             )}
             <Button
@@ -195,12 +229,6 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
 
         {isExpanded && (
           <Box display="flex" direction="column" gap="md">
-            <Box display="flex" justify="end">
-              <AdminRegistrationsExportButton
-                registrations={registrations}
-                workshops={[workshop]}
-              />
-            </Box>
             <AdminWorkshopRegistrations
               registrations={registrations}
               onSetStatus={onSetStatus}

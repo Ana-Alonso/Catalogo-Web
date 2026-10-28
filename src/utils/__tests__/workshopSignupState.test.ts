@@ -70,6 +70,21 @@ describe('getWorkshopSignupState', () => {
     ).toBe('terminado');
   });
 
+  it('da prioridad al taller cancelado sobre cualquier otro estado', () => {
+    expect(
+      getWorkshopSignupState(
+        itemWith({
+          workshopCancelled: true,
+          status: 'vendido',
+          cupo: 1,
+          registrationDeadline: '2026-11-01T00:00:00.000Z',
+        }),
+        1,
+        now
+      )
+    ).toBe('cancelado');
+  });
+
   it('da prioridad al plazo cerrado sobre el taller lleno', () => {
     expect(
       getWorkshopSignupState(

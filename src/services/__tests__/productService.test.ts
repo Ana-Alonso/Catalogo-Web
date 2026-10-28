@@ -203,3 +203,68 @@ describe('productService · propagación de ofertas de Etsy', () => {
     ).toBe(true);
   });
 });
+
+describe('productService · cancelación de talleres', () => {
+  const workshopItem: CatalogItem = {
+    ...localItem,
+    id: 'workshop-1',
+    title: 'Taller de cerámica',
+    category: 'talleres',
+    discountPercent: null,
+    etsyOnSale: false,
+  };
+
+  beforeEach(() => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    localStorage.clear();
+    seed([workshopItem]);
+  });
+
+  it('marca y desmarca un taller como cancelado', async () => {
+    const { setWorkshopCancelled, fetchProducts } = await loadService();
+
+    const cancelled = await setWorkshopCancelled('workshop-1', true);
+    expect(cancelled.workshopCancelled).toBe(true);
+    expect((await fetchProducts())[0].workshopCancelled).toBe(true);
+
+    const restored = await setWorkshopCancelled('workshop-1', false);
+    expect(restored.workshopCancelled).toBe(false);
+    expect((await fetchProducts())[0].workshopCancelled).toBe(false);
+  });
+
+  it('lanza error al cancelar un taller inexistente', async () => {
+    const { setWorkshopCancelled } = await loadService();
+
+    await expect(setWorkshopCancelled('desconocido', true)).rejects.toThrow(
+      'Producto no encontrado.'
+    );
+  });
+
+  it('limpia la marca de cancelado cuando el producto deja de ser taller', async () => {
+    seed([{ ...workshopItem, workshopCancelled: true }]);
+    const { updateProduct } = await loadService();
+
+    const updated = await updateProduct('workshop-1', {
+      title: 'Ilustración de helechos',
+      description: 'Obra original',
+      category: 'ilustraciones',
+      status: 'disponible',
+    });
+
+    expect(updated.workshopCancelled).toBe(false);
+  });
+
+  it('mantiene la marca de cancelado al editar un taller', async () => {
+    seed([{ ...workshopItem, workshopCancelled: true }]);
+    const { updateProduct } = await loadService();
+
+    const updated = await updateProduct('workshop-1', {
+      title: 'Taller de cerámica avanzada',
+      description: 'Nivel intermedio',
+      category: 'talleres',
+      status: 'disponible',
+    });
+
+    expect(updated.workshopCancelled).toBe(true);
+  });
+});

@@ -86,7 +86,8 @@
     "status": {
       "available": "Available",
       "reserved": "Reserved",
-      "sold": "Sold / Finished"
+      "sold": "Sold / Finished",
+      "cancelled": "Cancelled"
     },
     "spotsOpen": "Registration open",
     "registrationDeadline": "Registration open until {{date}}",
@@ -108,7 +109,8 @@
     "readMore": "Read more",
     "readLess": "Read less",
     "signupModalTitle": "Workshop registration",
-    "offerBadge": "On offer"
+    "offerBadge": "On offer",
+    "workshopCancelled": "This workshop has been cancelled. If you signed up, we will contact you."
   },
   "workshop": {
     "form": {
@@ -271,8 +273,13 @@
       "finishedReasons": {
         "celebrado": "Held",
         "vendido": "Sold out",
-        "archivado": "Archived"
-      }
+        "archivado": "Archived",
+        "cancelado": "Cancelled"
+      },
+      "cancelWorkshop": "Cancel workshop",
+      "cancelWorkshopAria": "Cancel the workshop {{title}} and all its registrations",
+      "cancelConfirm": "Are you sure you want to cancel the workshop \"{{title}}\"? All its registrations will be cancelled and it will move to finished.",
+      "cancelConfirmAction": "Yes, cancel workshop"
     },
     "login": {
       "title": "Admin Access",
@@ -297,7 +304,9 @@
       "productDeleteError": "Could not delete the product.",
       "productArchived": "Product archived: it is no longer shown on the website.",
       "productRestored": "Product published on the website again.",
-      "productVisibilityError": "Could not change the product visibility."
+      "productVisibilityError": "Could not change the product visibility.",
+      "workshopCancelled": "Workshop \"{{title}}\" cancelled and moved to finished.",
+      "workshopCancelError": "Could not cancel the workshop. Please try again."
     },
     "productForm": {
       "editTitle": "Edit Product",
@@ -442,7 +451,6 @@
       "marketingBadge": "Workshop alerts",
       "export": "Alerts CSV",
       "exportAria": "Download a CSV of the people who asked to be notified about future workshops",
-      "exportDisabledHint": "Nobody has asked for workshop alerts yet",
       "exportDone": "CSV generated with {{count}} people",
       "csv": {
         "name": "Name",
@@ -463,7 +471,9 @@
         "pending": "Pending",
         "confirmed": "Confirmed",
         "cancelled": "Cancelled"
-      }
+      },
+      "exportEmpty": "There are no contacts with workshop alerts consent in the database.",
+      "exportError": "Could not generate the alerts CSV. Please try again."
     },
     "calendarPanel": {
       "published": "Workshop \"{{title}}\" published. Add the event to your calendar:"
@@ -476,7 +486,9 @@
       "deleteProductProtected": "This workshop cannot be deleted: it has contacts who asked for alerts. Archive it instead.",
       "loadRegistrations": "Unknown error while loading registrations",
       "updateRegistration": "Could not update the registration",
-      "deleteRegistration": "Could not delete the registration"
+      "deleteRegistration": "Could not delete the registration",
+      "updateWorkshop": "Could not update the workshop",
+      "cancelWorkshop": "Could not cancel the workshop registrations"
     }
   }
 }

@@ -4,6 +4,7 @@ import {
   fetchRegistrations,
   updateRegistrationStatus,
   deleteRegistration,
+  cancelWorkshopRegistrations as cancelWorkshopRegistrationsService,
 } from '../services/registrationService';
 import { logError } from '../utils/logger';
 import type { WorkshopRegistration, RegistrationStatus } from '../types/registrations';
@@ -14,6 +15,7 @@ interface UseRegistrationsResult {
   error: string | null;
   setStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
+  cancelWorkshopRegistrations: (productId: string) => Promise<boolean>;
   refreshRegistrations: () => Promise<void>;
 }
 
@@ -93,12 +95,35 @@ export const useRegistrations = (): UseRegistrationsResult => {
     }
   };
 
+  const cancelWorkshopRegistrations = async (
+    productId: string
+  ): Promise<boolean> => {
+    try {
+      await cancelWorkshopRegistrationsService(productId);
+      setRegistrations((prev) =>
+        prev.map((registration) =>
+          registration.product_id === productId &&
+          registration.status !== 'cancelado'
+            ? { ...registration, status: 'cancelado' }
+            : registration
+        )
+      );
+      return true;
+    } catch (err) {
+      logError('useRegistrations.cancelWorkshopRegistrations', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.cancelWorkshop');
+      setError(msg);
+      return false;
+    }
+  };
+
   return {
     registrations,
     isLoading,
     error,
     setStatus,
     remove,
+    cancelWorkshopRegistrations,
     refreshRegistrations: loadRegistrations,
   };
 };

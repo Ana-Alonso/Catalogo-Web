@@ -72,6 +72,32 @@ export const hasMarketingConsentRegistrations = (productId: string): boolean =>
       registration.product_id === productId && registration.marketing_consent
   );
 
+export const fetchMarketingRegistrations = async (): Promise<
+  WorkshopRegistration[]
+> => {
+  if (!useMocks) {
+    if (!isSupabaseConfigured || !supabase) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('workshop_registrations')
+      .select('*')
+      .eq('marketing_consent', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []) as WorkshopRegistration[];
+  }
+
+  return getStoredLocalRegistrations()
+    .filter((registration) => registration.marketing_consent)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+};
+
 export const fetchRegistrationCounts = async (): Promise<Record<string, number>> => {
   if (!useMocks && isSupabaseConfigured && supabase) {
     const { data, error } = await supabase.rpc('workshop_spots');
@@ -215,4 +241,41 @@ export const deleteRegistration = async (id: string): Promise<void> => {
   saveStoredLocalRegistrations(
     localRegistrations.filter((item) => item.id !== id)
   );
+};
+
+export const cancelWorkshopRegistrations = async (
+  productId: string
+): Promise<number> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('workshop_registrations')
+      .update({ status: 'cancelado' })
+      .eq('product_id', productId)
+      .neq('status', 'cancelado')
+      .select('id');
+
+    if (error) {
+      throw mapRegistrationError(error.code, error.message);
+    }
+
+    return (data || []).length;
+  }
+
+  const localRegistrations = getStoredLocalRegistrations();
+  let cancelledCount = 0;
+
+  const updated = localRegistrations.map((registration) => {
+    if (
+      registration.product_id !== productId ||
+      registration.status === 'cancelado'
+    ) {
+      return registration;
+    }
+
+    cancelledCount += 1;
+    return { ...registration, status: 'cancelado' as RegistrationStatus };
+  });
+
+  saveStoredLocalRegistrations(updated);
+  return cancelledCount;
 };

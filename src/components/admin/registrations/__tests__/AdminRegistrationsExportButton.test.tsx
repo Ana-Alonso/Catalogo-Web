@@ -1,10 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../../../../i18n';
 import AdminRegistrationsExportButton from '../AdminRegistrationsExportButton';
 import ToastProvider from '../../../toast/ToastProvider';
 import { downloadCsvFile } from '../../../../utils/registrationsCsv';
+import { fetchMarketingRegistrations } from '../../../../services/registrationService';
 import type { CatalogItem } from '../../../../types/catalog';
 import type { WorkshopRegistration } from '../../../../types/registrations';
 
@@ -15,6 +16,10 @@ vi.mock('../../../../utils/registrationsCsv', async (importOriginal) => {
 
   return { ...module, downloadCsvFile: vi.fn() };
 });
+
+vi.mock('../../../../services/registrationService', () => ({
+  fetchMarketingRegistrations: vi.fn(),
+}));
 
 const workshop: CatalogItem = {
   id: 't1',
@@ -39,52 +44,79 @@ const registration = (
   ...overrides,
 });
 
-const renderButton = (registrations: WorkshopRegistration[]) =>
+const renderButton = () =>
   render(
     <ToastProvider>
-      <AdminRegistrationsExportButton
-        registrations={registrations}
-        workshops={[workshop]}
-      />
+      <AdminRegistrationsExportButton workshops={[workshop]} />
     </ToastProvider>
   );
 
-describe('AdminRegistrationsExportButton', () => {
-  it('se deshabilita cuando nadie pidió el aviso', () => {
-    renderButton([registration({ marketing_consent: false })]);
-
-    const boton = screen.getByRole('button', {
-      name: i18n.t('admin.registrations.exportAria'),
-    });
-
-    expect(boton).toBeDisabled();
-    expect(boton).toHaveAttribute(
-      'title',
-      i18n.t('admin.registrations.exportDisabledHint')
-    );
+const exportButton = () =>
+  screen.getByRole('button', {
+    name: i18n.t('admin.registrations.exportAria'),
   });
 
-  it('descarga el CSV de las personas con consentimiento', async () => {
+describe('AdminRegistrationsExportButton', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('descarga el CSV general con los contactos que devuelve la base de datos', async () => {
     const user = userEvent.setup();
-    renderButton([
+    vi.mocked(fetchMarketingRegistrations).mockResolvedValue([
       registration(),
-      registration({ id: 'r2', marketing_consent: false }),
-      registration({ id: 'r3', name: 'Luis', status: 'cancelado' }),
+      registration({
+        id: 'r2',
+        product_id: 't2',
+        name: 'Luis',
+        status: 'cancelado',
+        created_at: '2026-10-21T10:00:00.000Z',
+      }),
+      registration({ id: 'r3', name: 'Sin avisos', marketing_consent: false }),
     ]);
+    renderButton();
 
-    await user.click(
-      screen.getByRole('button', {
-        name: i18n.t('admin.registrations.exportAria'),
-      })
-    );
+    await user.click(exportButton());
 
+    expect(fetchMarketingRegistrations).toHaveBeenCalledTimes(1);
     expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(1);
 
     const [nombre, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
 
     expect(nombre).toMatch(/^avisos-talleres-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain('Luis;ana@mail.com;;2026-10-21;Cancelado');
     expect(csv).toContain('Ana;ana@mail.com;Taller Creativo de Pintura');
-    expect(csv).toContain('Luis;ana@mail.com');
     expect(csv.trim().split('\r\n')).toHaveLength(3);
+    expect(
+      screen.getByText(i18n.t('admin.registrations.exportDone', { count: 2 }))
+    ).toBeInTheDocument();
+  });
+
+  it('avisa cuando no hay contactos con consentimiento en la base de datos', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetchMarketingRegistrations).mockResolvedValue([]);
+    renderButton();
+
+    await user.click(exportButton());
+
+    expect(vi.mocked(downloadCsvFile)).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(i18n.t('admin.registrations.exportEmpty'))
+    ).toBeInTheDocument();
+  });
+
+  it('muestra un error si falla la consulta a la base de datos', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetchMarketingRegistrations).mockRejectedValue(
+      new Error('permission denied')
+    );
+    renderButton();
+
+    await user.click(exportButton());
+
+    expect(vi.mocked(downloadCsvFile)).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(i18n.t('admin.registrations.exportError'))
+    ).toBeInTheDocument();
   });
 });

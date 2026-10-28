@@ -48,6 +48,8 @@ const buildProps = () => ({
   onSetVisibility: vi.fn(),
   onSetStatus: vi.fn().mockResolvedValue(true),
   onDeleteRegistration: vi.fn().mockResolvedValue(true),
+  onCancelWorkshop: vi.fn().mockResolvedValue(undefined),
+  isCancellingWorkshop: false,
 });
 
 const renderPanel = (props: Parameters<typeof AdminWorkshopsPanel>[0]) =>
@@ -203,6 +205,71 @@ describe('AdminWorkshopsPanel', () => {
     );
 
     expect(onSetVisibility).toHaveBeenCalledWith('w-1', false);
+  });
+
+  it('cancela un taller activo y todas sus inscripciones tras confirmar', async () => {
+    const user = userEvent.setup();
+    const onCancelWorkshop = vi.fn().mockResolvedValue(undefined);
+    renderPanel({
+      ...buildProps(),
+      workshops: [workshop()],
+      onCancelWorkshop,
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Cancelar el taller Taller de acuarela y todas sus inscripciones',
+      })
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Sí, cancelar taller' })
+    );
+
+    expect(onCancelWorkshop).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'w-1' })
+    );
+  });
+
+  it('no cancela el taller si se cierra la confirmación', async () => {
+    const user = userEvent.setup();
+    const onCancelWorkshop = vi.fn().mockResolvedValue(undefined);
+    renderPanel({
+      ...buildProps(),
+      workshops: [workshop()],
+      onCancelWorkshop,
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Cancelar el taller Taller de acuarela y todas sus inscripciones',
+      })
+    );
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+    expect(onCancelWorkshop).not.toHaveBeenCalled();
+  });
+
+  it('mueve los talleres cancelados a finalizados sin ofrecer cancelarlos otra vez', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({ id: 'w-1', title: 'Taller de acuarela' }),
+        workshop({
+          id: 'w-2',
+          title: 'Taller cancelado',
+          workshopCancelled: true,
+        }),
+      ],
+    });
+
+    expect(screen.getByText('Talleres finalizados (1)')).toBeInTheDocument();
+    expect(screen.getByText('Taller cancelado')).toBeInTheDocument();
+    expect(screen.getAllByText('Cancelado').length).toBeGreaterThan(0);
+    expect(
+      screen.queryByRole('button', {
+        name: 'Cancelar el taller Taller cancelado y todas sus inscripciones',
+      })
+    ).not.toBeInTheDocument();
   });
 
   it('muestra el estado vacío y el error de carga', () => {
