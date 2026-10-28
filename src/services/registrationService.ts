@@ -81,25 +81,31 @@ export const createRegistration = async (
   const privacyConsentAt = formData.privacyConsent ? new Date().toISOString() : null;
 
   if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('workshop_registrations')
-      .insert([
-        {
-          product_id: productId,
-          name,
-          email,
-          privacy_consent_at: privacyConsentAt,
-          marketing_consent: formData.marketingConsent,
-        },
-      ])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('workshop_registrations')
+        .insert([
+          {
+            product_id: productId,
+            name,
+            email,
+            privacy_consent_at: privacyConsentAt,
+            marketing_consent: formData.marketingConsent,
+          },
+        ])
+        .select()
+        .single();
 
-    if (error) {
-      throw mapRegistrationError(error.code, error.message);
+      if (error) {
+        throw mapRegistrationError(error.code, error.message);
+      }
+
+      return data as WorkshopRegistration;
+    } catch (err) {
+      if (err instanceof RegistrationError) {
+        throw err;
+      }
     }
-
-    return data as WorkshopRegistration;
   }
 
   const localRegistrations = getStoredLocalRegistrations();
