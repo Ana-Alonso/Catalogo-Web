@@ -10,6 +10,9 @@ export default [
   route('api/etsy-sync', 'routes/api/etsy-sync.ts', {
     id: 'routes/api/etsy-sync',
   }),
+  route('api/registrations', 'routes/api/registrations.ts', {
+    id: 'routes/api/registrations',
+  }),
   route('es', 'routes/language-layout.tsx', { id: 'routes/es' }, [
     index('routes/catalog.tsx', { id: 'routes/es/catalog' }),
     route('privacidad', 'routes/legal/privacy.tsx', { id: 'routes/es/privacy' }),
