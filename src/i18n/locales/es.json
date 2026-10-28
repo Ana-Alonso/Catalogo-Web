@@ -93,7 +93,7 @@
     "spotsLeft": "Quedan {{spots}} de {{total}} plazas",
     "signup": "Apuntarse al taller",
     "signupAria": "Apuntarse al taller {{title}}",
-    "workshopFull": "Taller completo",
+    "workshopFull": "Taller lleno",
     "buyEtsy": "Comprar en Etsy",
     "buyEtsyAria": "Comprar {{title}} en Etsy",
     "viewVinted": "Ver en Vinted",
@@ -121,7 +121,7 @@
         "invalidEmail": "Introduce un email válido.",
         "privacyRequired": "Debes aceptar la política de privacidad para continuar.",
         "alreadyRegistered": "Ya estás apuntado a este taller con este email.",
-        "workshopFull": "El taller está completo: no quedan plazas.",
+        "workshopFull": "El taller está lleno: no quedan plazas.",
         "notFound": "Inscripción no encontrada.",
         "unknown": "No se pudo completar la inscripción. Inténtalo de nuevo."
       },
@@ -264,7 +264,9 @@
       "locationPlaceholder": "Ej: Presencial (Madrid) u Online",
       "capacityLabel": "Cupo (opcional)",
       "capacityPlaceholder": "Sin límite",
-      "capacityHint": "Deja vacío para inscripciones sin límite."
+      "capacityHint": "Deja vacío para inscripciones sin límite.",
+      "registrationDeadlineLabel": "Plazo para inscribirse (opcional)",
+      "registrationDeadlineHint": "Cuando llegue esta fecha/hora, las inscripciones se cerrarán automáticamente."
     },
     "priceFields": {
       "priceLabel": "Precio estimado en € (opcional)",

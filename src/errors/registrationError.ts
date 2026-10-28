@@ -1,6 +1,7 @@
 export type RegistrationErrorCode =
   | 'alreadyRegistered'
   | 'workshopFull'
+  | 'registrationClosed'
   | 'notFound'
   | 'unknown';
 

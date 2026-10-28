@@ -6,18 +6,22 @@ interface WorkshopFieldsProps {
   eventDate: string;
   eventLocation: string;
   cupo: string;
+  registrationDeadline: string;
   onEventDateChange: (value: string) => void;
   onEventLocationChange: (value: string) => void;
   onCupoChange: (value: string) => void;
+  onRegistrationDeadlineChange: (value: string) => void;
 }
 
 export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
   eventDate,
   eventLocation,
   cupo,
+  registrationDeadline,
   onEventDateChange,
   onEventLocationChange,
   onCupoChange,
+  onRegistrationDeadlineChange,
 }) => {
   const { t } = useTranslation();
 
@@ -25,7 +29,8 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
     <Box
       display="grid"
       columns={1}
-      columnsMd={3}
+      columnsMd={2}
+      lgColumns={4}
       gap="lg"
       padding="md"
       rounded="lg"
@@ -60,6 +65,18 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
         />
         <Typography variant="body" tone="subtle" size="xs" marginTop="xs">
           {t('admin.workshopFields.capacityHint')}
+        </Typography>
+      </Box>
+      <Box>
+        <Input
+          id="prod-registration-deadline"
+          label={t('admin.workshopFields.registrationDeadlineLabel')}
+          type="datetime-local"
+          value={registrationDeadline}
+          onChange={(event) => onRegistrationDeadlineChange(event.target.value)}
+        />
+        <Typography variant="body" tone="subtle" size="xs" marginTop="xs">
+          {t('admin.workshopFields.registrationDeadlineHint')}
         </Typography>
       </Box>
     </Box>

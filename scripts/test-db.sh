@@ -59,7 +59,7 @@ run_file() {
   docker exec -i "$CONTAINER" psql -U "$PSQL_USER" -d "$db" -v ON_ERROR_STOP=1 -q < "$file"
 }
 
-echo "==> BBDD 1 (laurel): stub storage + migración legacy x2 + hardening x2 + ofertas x2 + talleres x2 + rls hardening"
+echo "==> BBDD 1 (laurel): stub storage + migración legacy x2 + hardening x2 + ofertas x2 + talleres x2 + rls hardening + plazo de inscripción"
 create_storage_stub laurel
 run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
 run_file laurel "$ROOT_DIR/supabase/migrations/legacy/000_upgrade_existing.sql"
@@ -70,11 +70,12 @@ run_file laurel "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
 run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
 run_file laurel "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
 run_file laurel "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
+run_file laurel "$ROOT_DIR/supabase/migrations/008_workshop_deadline.sql"
 
 echo "==> BBDD 1: suite de aserciones"
 run_file laurel "$ROOT_DIR/scripts/test-db.sql"
 
-echo "==> BBDD 2 (laurel_fresh): stub storage + schema + hardening + ofertas x2 + talleres x2 + rls hardening"
+echo "==> BBDD 2 (laurel_fresh): stub storage + schema + hardening + ofertas x2 + talleres x2 + rls hardening + plazo de inscripción"
 docker exec "$CONTAINER" createdb -U "$PSQL_USER" laurel_fresh
 create_storage_stub laurel_fresh
 run_file laurel_fresh "$ROOT_DIR/supabase/migrations/001_initial_schema.sql"
@@ -84,6 +85,7 @@ run_file laurel_fresh "$ROOT_DIR/supabase/migrations/003_offers_etsy.sql"
 run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
 run_file laurel_fresh "$ROOT_DIR/supabase/migrations/004_workshop_links.sql"
 run_file laurel_fresh "$ROOT_DIR/supabase/migrations/005_rls_hardening.sql"
+run_file laurel_fresh "$ROOT_DIR/supabase/migrations/008_workshop_deadline.sql"
 run_file laurel_fresh "$ROOT_DIR/scripts/test-db.sql"
 
 echo "==> TODO OK: 2 bases de datos y aserciones superadas"

@@ -26,3 +26,19 @@ export const formatWorkshopDateForLanguage = (
     minute: '2-digit',
   }).format(date);
 };
+
+export const formatRegistrationDeadlineForLanguage = (
+  value: string,
+  language: string
+): string => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(getIntlLocale(language), {
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+};

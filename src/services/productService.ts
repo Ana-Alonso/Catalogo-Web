@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from '../utils/supabase';
 import { validateImageFile } from '../utils/imageValidation';
 import { parsePriceToCents } from '../utils/price';
 import { resolvePurchaseLinks } from '../utils/productLinks';
+import { toUtcDeadline } from '../utils/deadlineTime';
 import { mockCatalogItems } from '../mocks/catalogMocks';
 import type {
   CatalogItem,
@@ -20,6 +21,20 @@ const parseCupo = (value?: string): number | null => {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 };
+
+interface WorkshopFields {
+  eventDate?: string;
+  eventLocation?: string;
+  cupo: number | null;
+  registrationDeadline: string | null;
+}
+
+const resolveWorkshopFields = (formData: ProductFormData): WorkshopFields => ({
+  eventDate: formData.eventDate?.trim() || undefined,
+  eventLocation: formData.eventLocation?.trim() || undefined,
+  cupo: parseCupo(formData.cupo),
+  registrationDeadline: toUtcDeadline(formData.registrationDeadline) ?? null,
+});
 
 interface LocalPriceFields {
   priceCents: number | null;
@@ -155,9 +170,7 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
     source: 'local',
     isVisible: true,
     status: formData.status,
-    eventDate: formData.eventDate?.trim() || undefined,
-    eventLocation: formData.eventLocation?.trim() || undefined,
-    cupo: parseCupo(formData.cupo),
+    ...resolveWorkshopFields(formData),
     created_at: new Date().toISOString()
   };
 
@@ -180,7 +193,8 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
           status: newProduct.status,
           eventDate: newProduct.eventDate || null,
           eventLocation: newProduct.eventLocation || null,
-          cupo: newProduct.cupo ?? null
+          cupo: newProduct.cupo ?? null,
+          registrationDeadline: newProduct.registrationDeadline ?? null
         }
       ])
       .select()
@@ -224,9 +238,7 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      eventDate: formData.eventDate?.trim() || undefined,
-      eventLocation: formData.eventLocation?.trim() || undefined,
-      cupo: parseCupo(formData.cupo)
+      ...resolveWorkshopFields(formData)
     };
 
     if (imageUrl) {
@@ -264,9 +276,7 @@ export const updateProduct = async (
         vintedLink: purchaseLinks.vintedLink ?? null,
         ...priceFields,
         status: formData.status,
-        eventDate: formData.eventDate?.trim() || undefined,
-        eventLocation: formData.eventLocation?.trim() || undefined,
-        cupo: parseCupo(formData.cupo)
+        ...resolveWorkshopFields(formData)
       };
     }
     return item;
@@ -285,9 +295,7 @@ export const updateProduct = async (
       vintedLink: purchaseLinks.vintedLink ?? null,
       ...priceFields,
       status: formData.status,
-      eventDate: formData.eventDate?.trim() || undefined,
-      eventLocation: formData.eventLocation?.trim() || undefined,
-      cupo: parseCupo(formData.cupo)
+      ...resolveWorkshopFields(formData)
     };
   }
   return found;

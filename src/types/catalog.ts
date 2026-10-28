@@ -25,6 +25,7 @@ export interface CatalogItem {
   eventDate?: string;
   eventLocation?: string;
   cupo?: number | null;
+  registrationDeadline?: string | null;
   created_at?: string;
 }
 
@@ -48,6 +49,7 @@ export interface ProductFormData {
   eventDate?: string;
   eventLocation?: string;
   cupo?: string;
+  registrationDeadline?: string;
 }
 
 export interface EtsyProductMetadata {

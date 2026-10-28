@@ -8,6 +8,9 @@ Orden de ejecución:
 3. `003_offers_etsy.sql`
 4. `004_workshop_links.sql`
 5. `005_rls_hardening.sql`
+6. `006_consent_fields.sql`
+7. `007_etsy_offers.sql`
+8. `008_workshop_deadline.sql`
 
 **Base de datos existente / legacy:**
 1. `legacy/000_upgrade_existing.sql`
@@ -15,5 +18,8 @@ Orden de ejecución:
 3. `003_offers_etsy.sql`
 4. `004_workshop_links.sql`
 5. `005_rls_hardening.sql`
+6. `006_consent_fields.sql`
+7. `007_etsy_offers.sql`
+8. `008_workshop_deadline.sql`
 
 Las migraciones están pensadas para ser re-ejecutables cuando sea posible. `scripts/test-db.sql` contiene las aserciones usadas por `npm run test:db`.

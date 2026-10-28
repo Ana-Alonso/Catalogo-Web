@@ -10,6 +10,16 @@ BEGIN
     RAISE EXCEPTION 'FAIL: products.cupo ausente';
   END IF;
 
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'products'
+      AND column_name = 'registrationDeadline'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: products.registrationDeadline ausente';
+  END IF;
+
   IF to_regclass('public.workshop_registrations') IS NULL THEN
     RAISE EXCEPTION 'FAIL: tabla workshop_registrations ausente';
   END IF;
@@ -195,6 +205,14 @@ INSERT INTO public.products (id, title, description, image, category, status, fe
 VALUES ('00000000-0000-0000-0000-000000000002', 'Taller sin cupo', 'Descripción', 'img.png', 'talleres', 'disponible', false, NULL);
 
 INSERT INTO public.products (
+    id, title, description, image, category, status, featured, cupo, "registrationDeadline"
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000011', 'Taller con plazo cerrado', 'Descripción',
+    'img.png', 'talleres', 'disponible', false, NULL, timezone('utc'::text, now()) - interval '1 day'
+);
+
+INSERT INTO public.products (
     id, title, description, image, category, status, featured,
     "priceCents", currency, "discountPercent", source, "isVisible"
 )
@@ -235,6 +253,24 @@ END $$;
 
 INSERT INTO public.workshop_registrations (product_id, name, email)
 VALUES ('00000000-0000-0000-0000-000000000002', 'Lucía Prevía', 'lucia@test.com');
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.workshop_registrations (product_id, name, email)
+    VALUES ('00000000-0000-0000-0000-000000000011', 'Nerea Tardía', 'nerea@test.com');
+    RAISE EXCEPTION 'FAIL: no se bloqueó la inscripción fuera de plazo';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'registration_closed' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al inscribirse fuera de plazo: %', SQLERRM;
+      END IF;
+  END;
+END $$;
 
 DO $$
 BEGIN
@@ -519,3 +555,4 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000001';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000002';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000003';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000004';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000011';

@@ -264,7 +264,9 @@
       "locationPlaceholder": "E.g. In person (Madrid) or Online",
       "capacityLabel": "Capacity (optional)",
       "capacityPlaceholder": "No limit",
-      "capacityHint": "Leave empty for unlimited registrations."
+      "capacityHint": "Leave empty for unlimited registrations.",
+      "registrationDeadlineLabel": "Registration deadline (optional)",
+      "registrationDeadlineHint": "When this date/time is reached, registrations will close automatically."
     },
     "priceFields": {
       "priceLabel": "Estimated price in € (optional)",

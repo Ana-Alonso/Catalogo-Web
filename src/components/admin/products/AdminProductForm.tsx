@@ -17,6 +17,7 @@ import { ProductDetailsFields } from './form/ProductDetailsFields';
 import { WorkshopFields } from './form/WorkshopFields';
 import { ProductFormHeader } from './ProductFormHeader';
 import { ProductFormActions } from './ProductFormActions';
+import { toDatetimeLocalValue } from '../../../utils/deadlineTime';
 import type {
   AvailabilityStatus,
   CatalogItem,
@@ -85,6 +86,9 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
   const [cupo, setCupo] = useState<string>(
     editingProduct?.cupo != null ? String(editingProduct.cupo) : ''
   );
+  const [registrationDeadline, setRegistrationDeadline] = useState<string>(
+    toDatetimeLocalValue(editingProduct?.registrationDeadline)
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(editingProduct?.image || '');
   const [externalImageUrl, setExternalImageUrl] = useState<string>('');
@@ -135,6 +139,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     setEventDate('');
     setEventLocation('');
     setCupo('');
+    setRegistrationDeadline('');
     setImageFile(null);
     setPreviewUrl('');
     setExternalImageUrl('');
@@ -173,6 +178,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       eventDate: category === 'talleres' ? eventDate : undefined,
       eventLocation: category === 'talleres' ? eventLocation : undefined,
       cupo: category === 'talleres' ? cupo : '',
+      registrationDeadline: category === 'talleres' ? registrationDeadline : undefined,
       imageFile,
       imageUrl: externalImageUrl.trim() || (editingProduct ? editingProduct.image : undefined),
     });
@@ -238,9 +244,11 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
             eventDate={eventDate}
             eventLocation={eventLocation}
             cupo={cupo}
+            registrationDeadline={registrationDeadline}
             onEventDateChange={setEventDate}
             onEventLocationChange={setEventLocation}
             onCupoChange={setCupo}
+            onRegistrationDeadlineChange={setRegistrationDeadline}
           />
         )}
 
