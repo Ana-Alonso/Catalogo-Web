@@ -169,7 +169,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
         <ProductDescription id={descriptionId} text={item.description} />
         
         <Box display="flex" direction="column" gap="sm" marginTop="auto">
-          {isWorkshop && !isFinished && (
+          {isWorkshop && !isFinished && (signupState === 'abierto' || signupState === 'lleno') && (
             <Box display="flex" align="center" gap="sm">
               <Icon as={Users} size="sm" tone="warning" shrink={false} />
               <Box display="flex" direction="column" gap="xs">
@@ -206,7 +206,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               </Typography>
             </Box>
           )}
-          {isWorkshop && !isFinished && signupState === 'terminado' && !isFull && (
+          {isWorkshop && !isFinished && signupState === 'terminado' && (
             <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
               <Typography variant="caption" tone="muted">{t('product.workshopPassed')}</Typography>
             </Box>

@@ -129,12 +129,21 @@ describe('ProductCard · plazo de inscripción de talleres', () => {
 
   it('oculta el botón y avisa cuando el plazo ya venció', () => {
     const deadline = inDays(-2);
-    renderCard(workshop({ registrationDeadline: deadline }));
+    renderCard(workshop({ registrationDeadline: deadline, cupo: 8 }));
 
     expect(
       screen.queryByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
     ).toBeNull();
     expect(screen.getByText(/registration closed|plazo de inscripción finalizó/i)).toBeInTheDocument();
+  });
+
+  it('no muestra las plazas cuando el plazo de inscripción ya venció', () => {
+    renderCard(workshop({ registrationDeadline: inDays(-2), cupo: 8 }));
+
+    expect(
+      screen.queryByText(i18n.t('product.spotsLeft', { spots: 8, total: 8 }))
+    ).toBeNull();
+    expect(screen.queryByText(i18n.t('product.spotsOpen'))).toBeNull();
   });
 
   it('oculta el botón y avisa cuando el taller ya se celebró', () => {
@@ -146,6 +155,14 @@ describe('ProductCard · plazo de inscripción de talleres', () => {
     expect(
       screen.getByText(i18n.t('product.workshopPassed'))
     ).toBeInTheDocument();
+  });
+
+  it('no muestra las plazas cuando el taller ya se celebró', () => {
+    renderCard(workshop({ eventDate: inDays(-1), cupo: 8 }));
+
+    expect(
+      screen.queryByText(i18n.t('product.spotsLeft', { spots: 8, total: 8 }))
+    ).toBeNull();
   });
 
   it('oculta el botón cuando no quedan plazas', () => {
