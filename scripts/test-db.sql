@@ -155,6 +155,21 @@ BEGIN
     RAISE EXCEPTION 'FAIL: la política de inserción pública sigue activa';
   END IF;
 
+  IF has_table_privilege('authenticated', 'public.workshop_registrations', 'INSERT') THEN
+    RAISE EXCEPTION 'FAIL: authenticated puede insertar directamente en workshop_registrations';
+  END IF;
+
+  IF NOT has_table_privilege('authenticated', 'public.workshop_registrations', 'SELECT')
+     OR NOT has_table_privilege('authenticated', 'public.workshop_registrations', 'UPDATE')
+     OR NOT has_table_privilege('authenticated', 'public.workshop_registrations', 'DELETE') THEN
+    RAISE EXCEPTION 'FAIL: authenticated perdio SELECT/UPDATE/DELETE en workshop_registrations';
+  END IF;
+
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+     NOT LIKE '%now()%' THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no usa hora del servidor para el consentimiento';
+  END IF;
+
   IF EXISTS (
     SELECT 1
     FROM pg_policies
