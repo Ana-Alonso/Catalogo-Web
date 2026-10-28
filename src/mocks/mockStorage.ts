@@ -4,4 +4,4 @@ export const MOCK_STORAGE_KEYS = {
   seedVersion: 'laurel_mock_seed_version',
 } as const;
 
-export const MOCK_SEED_VERSION = 'workshop-states-2026-10';
+export const MOCK_SEED_VERSION = 'ofertas-2026-10';
