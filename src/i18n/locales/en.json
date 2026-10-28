@@ -186,7 +186,7 @@
     "save": "Save preferences",
     "saved": "Cookie preferences saved.",
     "accepted": "You have accepted the cookies.",
-    "rejected": "You have rejected non-essential cookies."
+    "rejected": "Only the necessary cookies will be used."
   },
   "legal": {
     "updatedAt": "Last updated: {{date}}"
