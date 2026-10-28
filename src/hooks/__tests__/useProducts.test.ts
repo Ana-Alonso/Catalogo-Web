@@ -89,4 +89,118 @@ describe('useProducts', () => {
     expect(added).toBe(true);
     expect(result.current.error).toBe('sin conexion');
   });
+
+  it('descarta un refresco en vuelo cuando hay una mutación más reciente', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let resolveStale: ((value: CatalogItem[]) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockResolvedValueOnce([producto])
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveStale = resolve;
+          })
+      )
+      .mockResolvedValueOnce([otro, producto]);
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      void result.current.refreshProducts();
+    });
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+
+    await act(async () => {
+      resolveStale?.([]);
+      await Promise.resolve();
+    });
+
+    expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+
+    await waitFor(() => expect(fetchProducts).toHaveBeenCalledTimes(3));
+    await waitFor(() => {
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+      expect(result.current.error).toBeNull();
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  it('no restaura el error de un refresco obsoleto tras una mutación correcta', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let rejectStale: ((reason: unknown) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockResolvedValueOnce([producto])
+      .mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            rejectStale = reject;
+          })
+      )
+      .mockResolvedValueOnce([otro, producto]);
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      void result.current.refreshProducts();
+    });
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.error).toBeNull();
+
+    await act(async () => {
+      rejectStale?.(new Error('sin conexion'));
+      await Promise.resolve();
+    });
+
+    expect(result.current.error).toBeNull();
+
+    await waitFor(() => expect(fetchProducts).toHaveBeenCalledTimes(3));
+    await waitFor(() => {
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+      expect(result.current.error).toBeNull();
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  it('libera la carga cuando la respuesta inicial llega tarde tras una mutación', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let resolveInitial: ((value: CatalogItem[]) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveInitial = resolve;
+          })
+      )
+      .mockResolvedValueOnce([otro, producto]);
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    expect(result.current.isLoading).toBe(true);
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+
+    await act(async () => {
+      resolveInitial?.([producto]);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+    });
+  });
 });
