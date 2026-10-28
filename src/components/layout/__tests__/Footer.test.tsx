@@ -17,7 +17,7 @@ describe('Footer', () => {
 
     const credit = await screen.findByRole('link', { name: 'Ana Alonso' });
     expect(credit).toHaveAttribute('href', 'https://github.com/Ana-Alonso');
-    expect(credit.closest('p')).toHaveTextContent('Diseño y desarrollo por');
+    expect(credit.parentElement).toHaveTextContent('Diseño y desarrollo por');
     expect(credit).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
 
@@ -26,7 +26,7 @@ describe('Footer', () => {
     renderFooter();
 
     const credit = await screen.findByRole('link', { name: 'Ana Alonso' });
-    expect(credit.closest('p')).toHaveTextContent('Design & development by');
+    expect(credit.parentElement).toHaveTextContent('Design & development by');
 
     await i18n.changeLanguage('es');
   });
