@@ -71,11 +71,11 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <FooterShell aria-labelledby="footer-heading" padding="lg">
+    <FooterShell aria-labelledby="footer-heading" padding="lg" container={false}>
       <Box as="h2" id="footer-heading" srOnly>
         {t('footer.heading')}
       </Box>
-      <Container>
+      <Container size="full">
         <Box display="flex" align="center" justify="between" gap="lg" stackBelow="md">
           <Box display="flex" align="center" gap="sm">
             <Image
@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
             <Typography variant="h4" transform="uppercase" tracking="wider">
               <Trans
                 i18nKey="brand.name"
-                components={{ highlight: <Typography as="span" tone="accent" /> }}
+                components={{ highlight: <Typography as="span" variant="plain" tone="accent" /> }}
               />
             </Typography>
           </Box>
