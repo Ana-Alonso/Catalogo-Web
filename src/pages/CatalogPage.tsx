@@ -31,6 +31,12 @@ export const CatalogPage: React.FC = () => {
   const [newOnly, setNewOnly] = useState(false);
   const [nowMs, setNowMs] = useState(0);
 
+  const selectCategory = (category: CategoryType) => {
+    setNewOnly(false);
+    setOffersOnly(false);
+    setActiveCategory(category);
+  };
+
   useEffect(() => {
     const id = requestAnimationFrame(() => setNowMs(Date.now()));
     return () => cancelAnimationFrame(id);
@@ -64,7 +70,7 @@ export const CatalogPage: React.FC = () => {
 
       <Navbar 
         activeCategory={activeCategory} 
-        onSelectCategory={setActiveCategory}
+        onSelectCategory={selectCategory}
       />
       
       <Box as="main" id="main-content">
@@ -88,10 +94,7 @@ export const CatalogPage: React.FC = () => {
         <GallerySection 
           items={products} 
           activeCategory={activeCategory} 
-          onSelectCategory={(cat) => {
-            setNewOnly(false);
-            setActiveCategory(cat);
-          }} 
+          onSelectCategory={selectCategory} 
           offersOnly={offersOnly}
           onToggleOffers={() => setOffersOnly((prev) => !prev)}
           newOnly={newOnly}
