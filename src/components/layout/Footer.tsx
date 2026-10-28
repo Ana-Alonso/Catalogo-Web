@@ -10,6 +10,7 @@ import {
   Icon,
   Image,
   Instagram,
+  TextLink,
   Tiktok,
   Typography,
   type IconGlyphProps,
@@ -132,9 +133,28 @@ const Footer: React.FC = () => {
           paddingTop="xl"
           divider="top"
         >
-          <Typography variant="body" size="sm" tone="subtle" align="center">
-            {t('footer.copyright', { year: currentYear })}
-          </Typography>
+          <Box display="flex" direction="column" align="center" gap="xs">
+            <Typography variant="body" size="sm" tone="subtle" align="center">
+              {t('footer.copyright', { year: currentYear })}
+            </Typography>
+            <Box as="p" align="center">
+              <Trans
+                i18nKey="footer.credit"
+                components={{
+                  author: (
+                    <TextLink
+                      href="https://github.com/Ana-Alonso"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      size="xs"
+                      tone="accent"
+                      underline
+                    />
+                  ),
+                }}
+              />
+            </Box>
+          </Box>
           <Box display="flex" align="center" gap="md" wrap>
             <Typography as="span" size="xs" tone="subtle">
               {t('footer.accessibility')}
