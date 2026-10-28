@@ -101,7 +101,8 @@ describe('useProducts', () => {
           new Promise((resolve) => {
             resolveStale = resolve;
           })
-      );
+      )
+      .mockResolvedValueOnce([otro, producto]);
     vi.mocked(createProduct).mockResolvedValueOnce(otro);
 
     const { result } = renderHook(() => useProducts());
@@ -121,5 +122,51 @@ describe('useProducts', () => {
     });
 
     expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+
+    await waitFor(() => expect(fetchProducts).toHaveBeenCalledTimes(3));
+    await waitFor(() => {
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+      expect(result.current.error).toBeNull();
+    });
+  });
+
+  it('no restaura el error de un refresco obsoleto tras una mutación correcta', async () => {
+    const otro: CatalogItem = { ...producto, id: '2', title: 'Otra obra' };
+    let rejectStale: ((reason: unknown) => void) | null = null;
+
+    vi.mocked(fetchProducts)
+      .mockResolvedValueOnce([producto])
+      .mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            rejectStale = reject;
+          })
+      )
+      .mockResolvedValueOnce([otro, producto]);
+    vi.mocked(createProduct).mockResolvedValueOnce(otro);
+
+    const { result } = renderHook(() => useProducts());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      void result.current.refreshProducts();
+    });
+
+    const added = await act(async () => result.current.addProduct(formData));
+    expect(added).toBe(true);
+    expect(result.current.error).toBeNull();
+
+    await act(async () => {
+      rejectStale?.(new Error('sin conexion'));
+      await Promise.resolve();
+    });
+
+    expect(result.current.error).toBeNull();
+
+    await waitFor(() => expect(fetchProducts).toHaveBeenCalledTimes(3));
+    await waitFor(() => {
+      expect(result.current.products.map((item) => item.id)).toEqual(['2', '1']);
+      expect(result.current.error).toBeNull();
+    });
   });
 });

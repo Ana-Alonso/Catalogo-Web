@@ -42,27 +42,28 @@ export const useProducts = (): UseProductsResult => {
   const hasLoadedRef = useRef(false);
 
   const loadProducts = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    const mutationsAtStart = mutationCountRef.current;
-    try {
-      const data = await fetchProducts();
-      if (requestId === requestIdRef.current) {
-        if (mutationCountRef.current === mutationsAtStart) {
-          setProducts(data);
-          setError(null);
-        }
+    for (;;) {
+      const requestId = ++requestIdRef.current;
+      const mutationsAtStart = mutationCountRef.current;
+      try {
+        const data = await fetchProducts();
+        if (requestId !== requestIdRef.current) return;
         setIsLoading(false);
+        if (mutationCountRef.current !== mutationsAtStart) continue;
+        setProducts(data);
+        setError(null);
         hasLoadedRef.current = true;
-      }
-    } catch (err) {
-      if (requestId === requestIdRef.current) {
-        if (mutationCountRef.current === mutationsAtStart) {
-          logError('useProducts.loadProducts', err);
-          const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
-          setError(msg);
-        }
+        return;
+      } catch (err) {
+        if (requestId !== requestIdRef.current) return;
         setIsLoading(false);
+        if (mutationCountRef.current !== mutationsAtStart) continue;
+        logError('useProducts.loadProducts', err);
+        const msg =
+          err instanceof Error ? err.message : t('admin.errors.loadProducts');
+        setError(msg);
         hasLoadedRef.current = false;
+        return;
       }
     }
   }, [t]);
