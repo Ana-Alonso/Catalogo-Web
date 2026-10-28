@@ -367,6 +367,17 @@
       "attendees": "{{count}} registered",
       "empty": "No registrations yet.",
       "marketingBadge": "Workshop alerts",
+      "export": "Alerts CSV",
+      "exportAria": "Download a CSV of the people who asked to be notified about future workshops",
+      "exportDisabledHint": "Nobody has asked for workshop alerts yet",
+      "exportDone": "CSV generated with {{count}} people",
+      "csv": {
+        "name": "Name",
+        "email": "Email",
+        "workshop": "Workshop",
+        "date": "Date",
+        "status": "Status"
+      },
       "confirmAria": "Confirm registration for {{name}}",
       "cancelAria": "Cancel registration for {{name}}",
       "deleteAria": "Delete registration for {{name}}",

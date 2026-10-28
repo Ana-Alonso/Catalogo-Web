@@ -367,6 +367,17 @@
       "attendees": "{{count}} inscritos",
       "empty": "Sin inscripciones todavía.",
       "marketingBadge": "Avisa de talleres",
+      "export": "CSV de avisos",
+      "exportAria": "Extraer CSV de las personas que quieren que se les avise de futuros talleres",
+      "exportDisabledHint": "Nadie ha marcado todavía el aviso de talleres",
+      "exportDone": "CSV generado con {{count}} personas",
+      "csv": {
+        "name": "Nombre",
+        "email": "Email",
+        "workshop": "Taller",
+        "date": "Fecha",
+        "status": "Estado"
+      },
       "confirmAria": "Confirmar inscripción de {{name}}",
       "cancelAria": "Cancelar inscripción de {{name}}",
       "deleteAria": "Eliminar inscripción de {{name}}",

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users, ClipboardList } from 'lucide-react';
 import { Badge, Box, Card, ErrorState, Icon, Typography } from '../../ui';
+import { AdminRegistrationsExportButton } from './AdminRegistrationsExportButton';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { RegistrationRowActions } from './RegistrationRowActions';
 import { getIntlLocale } from '../../../i18n/languages';
@@ -61,16 +62,30 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
 
   return (
     <Card>
-      <Box padding="lg" divider="bottom" display="flex" align="center" gap="tight">
-        <Icon as={ClipboardList} size="lg" tone="accent" />
-        <Box>
-          <Typography variant="h3">
-            {t('admin.registrations.title', { count: registrations.length })}
-          </Typography>
-          <Typography variant="body">
-            {t('admin.registrations.subtitle')}
-          </Typography>
+      <Box
+        padding="lg"
+        divider="bottom"
+        display="flex"
+        align="center"
+        justify="between"
+        wrap
+        gap="tight"
+      >
+        <Box display="flex" align="center" gap="tight">
+          <Icon as={ClipboardList} size="lg" tone="accent" />
+          <Box>
+            <Typography variant="h3">
+              {t('admin.registrations.title', { count: registrations.length })}
+            </Typography>
+            <Typography variant="body">
+              {t('admin.registrations.subtitle')}
+            </Typography>
+          </Box>
         </Box>
+        <AdminRegistrationsExportButton
+          registrations={registrations}
+          workshops={workshops}
+        />
       </Box>
 
       <Box padding="lg" display="flex" direction="column" gap="xl">
