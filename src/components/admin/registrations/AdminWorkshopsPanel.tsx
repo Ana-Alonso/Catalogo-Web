@@ -28,6 +28,7 @@ interface AdminWorkshopsPanelProps {
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (workshop: CatalogItem) => Promise<void>;
   isCancellingWorkshop: boolean;
@@ -43,6 +44,7 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
   onEdit,
   onSetVisibility,
   onSetStatus,
+  onWithdrawMarketingConsent,
   onDeleteRegistration,
   onCancelWorkshop,
   isCancellingWorkshop,
@@ -91,6 +93,7 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
         onEdit={onEdit}
         onSetVisibility={onSetVisibility}
         onSetStatus={onSetStatus}
+        onWithdrawMarketingConsent={onWithdrawMarketingConsent}
         onDeleteRegistration={onDeleteRegistration}
         onCancelWorkshop={onCancelWorkshop}
         isCancellingWorkshop={isCancellingWorkshop}

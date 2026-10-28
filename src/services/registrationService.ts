@@ -243,6 +243,43 @@ export const deleteRegistration = async (id: string): Promise<void> => {
   );
 };
 
+export const withdrawMarketingConsent = async (
+  id: string
+): Promise<WorkshopRegistration> => {
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('workshop_registrations')
+      .update({ marketing_consent: false })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw mapRegistrationError(error.code, error.message);
+    }
+
+    return data as WorkshopRegistration;
+  }
+
+  const localRegistrations = getStoredLocalRegistrations();
+  const registration = localRegistrations.find((item) => item.id === id);
+
+  if (!registration) {
+    throw new RegistrationError('notFound');
+  }
+
+  const updated: WorkshopRegistration = {
+    ...registration,
+    marketing_consent: false,
+  };
+
+  saveStoredLocalRegistrations(
+    localRegistrations.map((item) => (item.id === id ? updated : item))
+  );
+
+  return updated;
+};
+
 export const cancelWorkshopRegistrations = async (
   productId: string
 ): Promise<number> => {

@@ -25,6 +25,7 @@ interface AdminArchivedPanelProps {
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
 }
 
@@ -41,6 +42,7 @@ export const AdminArchivedPanel: React.FC<AdminArchivedPanelProps> = ({
   onEdit,
   onSetVisibility,
   onSetStatus,
+  onWithdrawMarketingConsent,
   onDeleteRegistration,
 }) => {
   const { t, i18n } = useTranslation();
@@ -162,6 +164,7 @@ export const AdminArchivedPanel: React.FC<AdminArchivedPanelProps> = ({
                     <AdminWorkshopRegistrations
                       registrations={workshopRegistrations}
                       onSetStatus={onSetStatus}
+                      onWithdrawMarketingConsent={onWithdrawMarketingConsent}
                       onDelete={onDeleteRegistration}
                     />
                   )}

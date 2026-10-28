@@ -430,3 +430,79 @@ describe('registrationService · avisos y cancelación masiva contra Supabase', 
     ).rejects.toMatchObject({ code: 'unknown' });
   });
 });
+
+describe('registrationService · retirada del consentimiento de marketing', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('retira el consentimiento en local y permite borrar después', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { marketingConsent: true }),
+      null
+    );
+
+    const updated = await service.withdrawMarketingConsent(created.id);
+
+    expect(updated.marketing_consent).toBe(false);
+    const [stored] = await service.fetchRegistrations();
+    expect(stored.marketing_consent).toBe(false);
+    await expect(service.deleteRegistration(created.id)).resolves.toBeUndefined();
+    await expect(service.fetchRegistrations()).resolves.toHaveLength(0);
+  });
+
+  it('lanza notFound al retirar el consentimiento de una inscripción local inexistente', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+
+    await expect(
+      service.withdrawMarketingConsent('desconocida')
+    ).rejects.toMatchObject({ code: 'notFound' });
+  });
+
+  it('actualiza el consentimiento en Supabase sin borrar la inscripción', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const single = vi.fn().mockResolvedValue({
+      data: { ...registrationRow, marketing_consent: false },
+      error: null,
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ update });
+
+    const service = await loadService();
+    const updated = await service.withdrawMarketingConsent('reg-1');
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('workshop_registrations');
+    expect(update).toHaveBeenCalledWith({ marketing_consent: false });
+    expect(eq).toHaveBeenCalledWith('id', 'reg-1');
+    expect(updated.marketing_consent).toBe(false);
+  });
+
+  it('propaga el error al retirar el consentimiento en Supabase', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: '42501', message: 'permission denied' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ update });
+
+    const service = await loadService();
+
+    await expect(
+      service.withdrawMarketingConsent('reg-1')
+    ).rejects.toMatchObject({ code: 'unknown' });
+  });
+});

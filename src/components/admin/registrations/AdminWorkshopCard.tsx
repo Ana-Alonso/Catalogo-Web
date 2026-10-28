@@ -36,6 +36,7 @@ interface AdminWorkshopCardProps {
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (workshop: CatalogItem) => Promise<void>;
   isCancellingWorkshop: boolean;
@@ -53,6 +54,7 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
   onEdit,
   onSetVisibility,
   onSetStatus,
+  onWithdrawMarketingConsent,
   onDeleteRegistration,
   onCancelWorkshop,
   isCancellingWorkshop,
@@ -232,6 +234,7 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
             <AdminWorkshopRegistrations
               registrations={registrations}
               onSetStatus={onSetStatus}
+              onWithdrawMarketingConsent={onWithdrawMarketingConsent}
               onDelete={onDeleteRegistration}
             />
           </Box>

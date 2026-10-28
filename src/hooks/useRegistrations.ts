@@ -4,6 +4,7 @@ import {
   fetchRegistrations,
   updateRegistrationStatus,
   deleteRegistration,
+  withdrawMarketingConsent as withdrawMarketingConsentService,
   cancelWorkshopRegistrations as cancelWorkshopRegistrationsService,
 } from '../services/registrationService';
 import { logError } from '../utils/logger';
@@ -15,6 +16,7 @@ interface UseRegistrationsResult {
   error: string | null;
   setStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
+  withdrawMarketingConsent: (id: string) => Promise<boolean>;
   cancelWorkshopRegistrations: (productId: string) => Promise<boolean>;
   refreshRegistrations: () => Promise<void>;
 }
@@ -95,6 +97,23 @@ export const useRegistrations = (): UseRegistrationsResult => {
     }
   };
 
+  const withdrawMarketingConsent = async (id: string): Promise<boolean> => {
+    try {
+      const updated = await withdrawMarketingConsentService(id);
+      setRegistrations((prev) =>
+        prev.map((registration) =>
+          registration.id === id ? updated : registration
+        )
+      );
+      return true;
+    } catch (err) {
+      logError('useRegistrations.withdrawMarketingConsent', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateRegistration');
+      setError(msg);
+      return false;
+    }
+  };
+
   const cancelWorkshopRegistrations = async (
     productId: string
   ): Promise<boolean> => {
@@ -123,6 +142,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
     error,
     setStatus,
     remove,
+    withdrawMarketingConsent,
     cancelWorkshopRegistrations,
     refreshRegistrations: loadRegistrations,
   };

@@ -43,6 +43,7 @@ interface AdminDashboardProps {
   onRefreshProducts: () => Promise<void>;
   onRefreshRegistrations: () => Promise<void>;
   onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDeleteRegistration: (id: string) => Promise<boolean>;
   onCancelWorkshop: (id: string) => Promise<boolean>;
   onClose: () => void;
@@ -64,6 +65,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onRefreshProducts,
   onRefreshRegistrations,
   onSetRegistrationStatus,
+  onWithdrawMarketingConsent,
   onDeleteRegistration,
   onCancelWorkshop,
   onClose
@@ -352,6 +354,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onEdit={handleEditProduct}
             onSetVisibility={handleSetVisibility}
             onSetStatus={onSetRegistrationStatus}
+            onWithdrawMarketingConsent={onWithdrawMarketingConsent}
             onDeleteRegistration={onDeleteRegistration}
             onCancelWorkshop={handleCancelWorkshop}
             isCancellingWorkshop={isCancellingWorkshop}
@@ -372,6 +375,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onEdit={handleEditProduct}
             onSetVisibility={handleSetVisibility}
             onSetStatus={onSetRegistrationStatus}
+            onWithdrawMarketingConsent={onWithdrawMarketingConsent}
             onDeleteRegistration={onDeleteRegistration}
           />
         )}

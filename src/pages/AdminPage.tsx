@@ -31,6 +31,7 @@ export const AdminPage: React.FC = () => {
     error: registrationsError,
     setStatus,
     remove,
+    withdrawMarketingConsent,
     cancelWorkshopRegistrations,
     refreshRegistrations,
   } = useRegistrations();
@@ -70,6 +71,7 @@ export const AdminPage: React.FC = () => {
       onRefreshProducts={refreshProducts}
       onRefreshRegistrations={refreshRegistrations}
       onSetRegistrationStatus={setStatus}
+      onWithdrawMarketingConsent={withdrawMarketingConsent}
       onDeleteRegistration={remove}
       onCancelWorkshop={handleCancelWorkshop}
       onClose={() => navigate('/')}

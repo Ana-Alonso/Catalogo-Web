@@ -9,6 +9,7 @@ import type { RegistrationStatus, WorkshopRegistration } from '../../../types/re
 interface AdminWorkshopRegistrationsProps {
   registrations: WorkshopRegistration[];
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
 }
 
@@ -23,7 +24,7 @@ const statusBadgeVariant: Record<
 
 export const AdminWorkshopRegistrations: React.FC<
   AdminWorkshopRegistrationsProps
-> = ({ registrations, onSetStatus, onDelete }) => {
+> = ({ registrations, onSetStatus, onWithdrawMarketingConsent, onDelete }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
 
@@ -82,6 +83,7 @@ export const AdminWorkshopRegistrations: React.FC<
             <RegistrationRowActions
               registration={registration}
               onSetStatus={onSetStatus}
+              onWithdrawMarketingConsent={onWithdrawMarketingConsent}
               onDelete={onDelete}
             />
           </Box>

@@ -58,6 +58,7 @@ const buildProps = () => ({
   onEdit: vi.fn(),
   onSetVisibility: vi.fn(),
   onSetStatus: vi.fn().mockResolvedValue(true),
+  onWithdrawMarketingConsent: vi.fn().mockResolvedValue(true),
   onDeleteRegistration: vi.fn().mockResolvedValue(true),
 });
 

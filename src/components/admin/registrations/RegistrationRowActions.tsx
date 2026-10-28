@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Trash2, X } from 'lucide-react';
+import { BellOff, Check, Trash2, X } from 'lucide-react';
 import { Button, Icon } from '../../ui';
 import { useConfirm } from '../../../hooks/useConfirm';
 import { useToast } from '../../../hooks/useToast';
@@ -9,12 +9,14 @@ import type { RegistrationStatus, WorkshopRegistration } from '../../../types/re
 interface RegistrationRowActionsProps {
   registration: WorkshopRegistration;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
 }
 
 export const RegistrationRowActions: React.FC<RegistrationRowActionsProps> = ({
   registration,
   onSetStatus,
+  onWithdrawMarketingConsent,
   onDelete,
 }) => {
   const { t } = useTranslation();
@@ -58,8 +60,43 @@ export const RegistrationRowActions: React.FC<RegistrationRowActionsProps> = ({
     notifyError(t('admin.errors.deleteRegistration'));
   };
 
+  const handleWithdrawMarketingConsent = async (): Promise<void> => {
+    const isConfirmed = await confirm({
+      message: t('admin.registrations.withdrawConfirm', {
+        name: registration.name,
+      }),
+      confirmLabel: t('admin.registrations.withdrawAction'),
+      isDanger: true,
+    });
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const isDone = await onWithdrawMarketingConsent(registration.id);
+
+    if (isDone) {
+      success(t('admin.registrations.withdrawn', { name: registration.name }));
+      return;
+    }
+
+    notifyError(t('admin.errors.updateRegistration'));
+  };
+
   return (
     <>
+      {registration.marketing_consent && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void handleWithdrawMarketingConsent()}
+          aria-label={t('admin.registrations.withdrawAria', {
+            name: registration.name,
+          })}
+        >
+          <Icon as={BellOff} tone="warning" />
+        </Button>
+      )}
       {registration.status !== 'confirmado' && (
         <Button
           variant="ghost"
