@@ -46,12 +46,11 @@ export const useProducts = (): UseProductsResult => {
     const mutationsAtStart = mutationCountRef.current;
     try {
       const data = await fetchProducts();
-      if (
-        requestId === requestIdRef.current &&
-        mutationCountRef.current === mutationsAtStart
-      ) {
-        setProducts(data);
-        setError(null);
+      if (requestId === requestIdRef.current) {
+        if (mutationCountRef.current === mutationsAtStart) {
+          setProducts(data);
+          setError(null);
+        }
         setIsLoading(false);
         hasLoadedRef.current = true;
       }
