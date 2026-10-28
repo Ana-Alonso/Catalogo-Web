@@ -56,9 +56,11 @@ export const useProducts = (): UseProductsResult => {
       }
     } catch (err) {
       if (requestId === requestIdRef.current) {
-        logError('useProducts.loadProducts', err);
-        const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
-        setError(msg);
+        if (mutationCountRef.current === mutationsAtStart) {
+          logError('useProducts.loadProducts', err);
+          const msg = err instanceof Error ? err.message : t('admin.errors.loadProducts');
+          setError(msg);
+        }
         setIsLoading(false);
         hasLoadedRef.current = false;
       }
