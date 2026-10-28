@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import i18n from '../../i18n';
@@ -184,5 +184,30 @@ describe('ProductCard · plazo de inscripción de talleres', () => {
     expect(
       screen.getByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
     ).toBeInTheDocument();
+  });
+
+  it('cierra la inscripción sin recargar cuando vence el plazo', () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-11-05T12:00:00.000Z'));
+      renderCard(workshop({ registrationDeadline: '2026-11-05T12:00:30.000Z' }));
+
+      expect(
+        screen.getByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+      ).toBeInTheDocument();
+      expect(screen.queryByText(i18n.t('product.spotsOpen'))).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(30_000);
+      });
+
+      expect(
+        screen.queryByRole('button', { name: i18n.t('product.signupAria', { title: 'Taller de acuarela' }) })
+      ).toBeNull();
+      expect(screen.queryByText(i18n.t('product.spotsOpen'))).toBeNull();
+      expect(screen.getByText(/plazo de inscripción finalizó/i)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

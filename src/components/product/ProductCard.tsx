@@ -18,7 +18,7 @@ import {
 import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
 import { getDaysUntilRegistrationDeadline } from '../../utils/registrationDeadline';
 import { getWorkshopSignupState } from '../../utils/workshopSignupState';
-import { useMountedNow } from '../../hooks/useMountedNow';
+import { useNow } from '../../hooks/useNow';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
 
@@ -52,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = item.category === 'talleres';
-  const nowMs = useMountedNow();
+  const nowMs = useNow();
   const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
   const finalCents = getDiscountedCents(priceCents, getOfferPercent(item));
