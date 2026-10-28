@@ -163,7 +163,7 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                disabled={isRestoringWorkshop}
+                disabled={isRestoringWorkshop || isCancellingWorkshop}
                 onClick={() => void onRestoreWorkshop(workshop)}
                 aria-label={t('admin.workshops.restoreWorkshopAria', {
                   title: workshop.title,
