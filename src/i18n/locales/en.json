@@ -297,6 +297,7 @@
       "submitting": "Signing in…",
       "invalidCredentials": "Incorrect email or password.",
       "notAdmin": "You don't have permission to access the panel.",
+      "authNotConfigured": "Authentication is not configured for this deployment.",
       "unknownError": "Could not sign in."
     },
     "feedback": {
