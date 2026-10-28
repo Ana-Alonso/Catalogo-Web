@@ -122,6 +122,7 @@
         "privacyRequired": "Debes aceptar la política de privacidad para continuar.",
         "alreadyRegistered": "Ya estás apuntado a este taller con este email.",
         "workshopFull": "El taller está lleno: no quedan plazas.",
+        "registrationClosed": "Las inscripciones para este taller ya están cerradas.",
         "notFound": "Inscripción no encontrada.",
         "unknown": "No se pudo completar la inscripción. Inténtalo de nuevo."
       },

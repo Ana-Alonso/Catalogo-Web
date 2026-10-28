@@ -30,7 +30,6 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
       display="grid"
       columns={1}
       columnsMd={2}
-      lgColumns={4}
       gap="lg"
       padding="md"
       rounded="lg"

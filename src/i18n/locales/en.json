@@ -122,6 +122,7 @@
         "privacyRequired": "You must accept the privacy policy to continue.",
         "alreadyRegistered": "You are already registered for this workshop with this email.",
         "workshopFull": "The workshop is full: no spots left.",
+        "registrationClosed": "Registration for this workshop is closed.",
         "notFound": "Registration not found.",
         "unknown": "Could not complete registration. Please try again."
       },
