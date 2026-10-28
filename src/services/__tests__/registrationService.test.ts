@@ -109,87 +109,92 @@ describe('registrationService en modo mock (localStorage)', () => {
   });
 });
 
-describe('registrationService contra Supabase (mock del cliente)', () => {
+describe('registrationService contra el backend', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.clearAllMocks();
+    vi.unstubAllGlobals();
   });
 
-  const mockRpcError = (code: string, message: string) => {
-    supabaseMock.rpc.mockResolvedValue({ data: null, error: { code, message } });
+  interface RecordedRequest {
+    url: string;
+    init: RequestInit;
+  }
+
+  const mockApiResponse = (status: number, body: unknown) => {
+    const requests: RecordedRequest[] = [];
+    const fetchMock = vi.fn(
+      async (url: string, init: RequestInit): Promise<Response> => {
+        requests.push({ url, init });
+        return {
+          ok: status >= 200 && status < 300,
+          status,
+          json: async () => body,
+        } as Response;
+      }
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    return { fetchMock, requests };
   };
 
-  it('mapea el error 23505 de duplicado al código alreadyRegistered', async () => {
+  it('publica el error de la API como código de inscripción', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    mockRpcError('23505', 'duplicate key value violates unique constraint');
+    mockApiResponse(409, { error: 'alreadyRegistered' });
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'alreadyRegistered' });
   });
 
-  it('mapea workshop_full al código workshopFull', async () => {
+  it('devuelve unknown cuando la API falla sin cuerpo', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    mockRpcError('P0001', 'workshop_full');
-    const service = await loadService();
-    await expect(
-      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
-    ).rejects.toMatchObject({ code: 'workshopFull' });
-  });
-
-  it('mapea registration_closed al código registrationClosed', async () => {
-    vi.stubEnv('VITE_USE_MOCKS', 'false');
-    mockRpcError('P0001', 'registration_closed');
-    const service = await loadService();
-    await expect(
-      service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
-    ).rejects.toMatchObject({ code: 'registrationClosed' });
-  });
-
-  it('devuelve el código unknown ante un error desconocido', async () => {
-    vi.stubEnv('VITE_USE_MOCKS', 'false');
-    mockRpcError('XX000', 'algo raro');
+    mockApiResponse(500, 'boom');
     const service = await loadService();
     await expect(
       service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), null)
     ).rejects.toMatchObject({ code: 'unknown' });
   });
 
-  it('registra la inscripción a través de la RPC con los datos del formulario', async () => {
+  it('registra la inscripción contra /api/registrations con los datos del formulario', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    const rpcSpy = supabaseMock.rpc.mockResolvedValue({ data: registrationRow, error: null });
+    const { fetchMock } = mockApiResponse(201, registrationRow);
     const service = await loadService();
     const created = await service.createRegistration(
       'prod-1',
       formData('  Ana  ', '  ana@example.com  '),
       5
     );
-    expect(rpcSpy).toHaveBeenCalledWith('register_for_workshop', {
-      p_product_id: 'prod-1',
-      p_name: 'Ana',
-      p_email: 'ana@example.com',
-      p_privacy_consent_at: expect.any(String),
-      p_marketing_consent: false,
-    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/registrations',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          productId: 'prod-1',
+          name: 'Ana',
+          email: 'ana@example.com',
+          privacyConsent: true,
+          marketingConsent: false,
+        }),
+      })
+    );
     expect(created.id).toBe('reg-1');
   });
 
-  it('no fabrica la marca de consentimiento cuando no se dio', async () => {
+  it('no fabrica la marca de consentimiento en el cliente', async () => {
     vi.stubEnv('VITE_USE_MOCKS', 'false');
-    const rpcSpy = supabaseMock.rpc.mockResolvedValue({ data: registrationRow, error: null });
+    const { requests } = mockApiResponse(201, registrationRow);
     const service = await loadService();
     await service.createRegistration(
       'prod-1',
       formData('Ana', 'ana@example.com', { privacyConsent: false, marketingConsent: true }),
       null
     );
-    expect(rpcSpy).toHaveBeenCalledWith('register_for_workshop', {
-      p_product_id: 'prod-1',
-      p_name: 'Ana',
-      p_email: 'ana@example.com',
-      p_privacy_consent_at: null,
-      p_marketing_consent: true,
-    });
+
+    const body = JSON.parse(String(requests[0]?.init.body)) as Record<string, unknown>;
+    expect(body).not.toHaveProperty('privacy_consent_at');
+    expect(body.privacyConsent).toBe(false);
+    expect(body.marketingConsent).toBe(true);
   });
 
   it('calcula las plazas ocupadas con la RPC sin leer inscripciones', async () => {

@@ -127,6 +127,8 @@
       "errors": {
         "required": "Please enter your name and email.",
         "invalidEmail": "Enter a valid email.",
+        "invalidData": "The data sent is not valid. Check your name and email.",
+        "rateLimited": "You tried to register too many times. Please try again later.",
         "privacyRequired": "You must accept the privacy policy to continue.",
         "alreadyRegistered": "You are already registered for this workshop with this email.",
         "workshopFull": "The workshop is full: no spots left.",

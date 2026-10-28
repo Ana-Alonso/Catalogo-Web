@@ -127,6 +127,8 @@
       "errors": {
         "required": "Por favor indica tu nombre y tu email.",
         "invalidEmail": "Introduce un email válido.",
+        "invalidData": "Los datos enviados no son válidos. Revisa nombre y email.",
+        "rateLimited": "Has intentado inscribirte demasiado rápido. Inténtalo de nuevo más tarde.",
         "privacyRequired": "Debes aceptar la política de privacidad para continuar.",
         "alreadyRegistered": "Ya estás apuntado a este taller con este email.",
         "workshopFull": "El taller está lleno: no quedan plazas.",

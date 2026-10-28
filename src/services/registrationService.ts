@@ -1,5 +1,9 @@
 import { supabase, isSupabaseConfigured } from '../utils/supabase';
-import { RegistrationError } from '../errors/registrationError';
+import { RegistrationError, mapRegistrationDatabaseError } from '../errors/registrationError';
+import {
+  readApiErrorCode,
+  readRegistrationRow,
+} from '../utils/registrationResponse';
 import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
 import type {
   WorkshopRegistration,
@@ -30,21 +34,7 @@ const saveStoredLocalRegistrations = (items: WorkshopRegistration[]): void => {
 const mapRegistrationError = (
   code: string | undefined,
   message: string
-): RegistrationError => {
-  if (code === '23505') {
-    return new RegistrationError('alreadyRegistered');
-  }
-  if (message.includes('registration_closed')) {
-    return new RegistrationError('registrationClosed');
-  }
-  if (message.includes('workshop_full')) {
-    return new RegistrationError('workshopFull');
-  }
-  if (message.includes('marketing_consent_protected')) {
-    return new RegistrationError('marketingConsentProtected');
-  }
-  return new RegistrationError('unknown');
-};
+): RegistrationError => new RegistrationError(mapRegistrationDatabaseError(code, message));
 
 export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
   if (!useMocks) {
@@ -134,20 +124,26 @@ export const createRegistration = async (
   const email = formData.email.trim();
   const privacyConsentAt = formData.privacyConsent ? new Date().toISOString() : null;
 
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase.rpc('register_for_workshop', {
-      p_product_id: productId,
-      p_name: name,
-      p_email: email,
-      p_privacy_consent_at: privacyConsentAt,
-      p_marketing_consent: formData.marketingConsent,
+  if (!useMocks) {
+    const response = await fetch('/api/registrations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId,
+        name,
+        email,
+        privacyConsent: formData.privacyConsent,
+        marketingConsent: formData.marketingConsent,
+      }),
     });
 
-    if (error) {
-      throw mapRegistrationError(error.code, error.message);
+    const payload: unknown = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new RegistrationError(readApiErrorCode(payload));
     }
 
-    return data as WorkshopRegistration;
+    return readRegistrationRow(payload);
   }
 
   const localRegistrations = getStoredLocalRegistrations();

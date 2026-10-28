@@ -68,8 +68,8 @@ BEGIN
     RAISE EXCEPTION 'FAIL: anon no puede ejecutar workshop_spots';
   END IF;
 
-  IF NOT has_function_privilege('anon', 'public.register_for_workshop(uuid,text,text,timestamptz,boolean)', 'EXECUTE') THEN
-    RAISE EXCEPTION 'FAIL: anon no puede ejecutar register_for_workshop';
+  IF has_function_privilege('anon', 'public.register_for_workshop(uuid,text,text,timestamptz,boolean)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon todavía puede ejecutar register_for_workshop';
   END IF;
 
   IF NOT EXISTS (
@@ -125,15 +125,14 @@ BEGIN
     RAISE EXCEPTION 'FAIL: política abierta antigua en products todavía existe';
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'workshop_registrations'
       AND policyname = 'Registro publico de inscripciones'
-      AND cmd = 'INSERT'
   ) THEN
-    RAISE EXCEPTION 'FAIL: política INSERT pública en workshop_registrations ausente';
+    RAISE EXCEPTION 'FAIL: la política de inserción pública sigue activa';
   END IF;
 
   IF EXISTS (
@@ -735,6 +734,29 @@ BEGIN
     RAISE EXCEPTION 'FAIL: workshop_spots devuelve % plazas en vez de 1', ocupadas;
   END IF;
 END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000002',
+      'Elena Rpc',
+      'elena@test.com',
+      now(),
+      false
+    );
+    RAISE EXCEPTION 'FAIL: anon puede ejecutar register_for_workshop';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN insufficient_privilege THEN
+      NULL;
+  END;
+END $$;
+
+RESET ROLE;
 
 DO $$
 DECLARE
