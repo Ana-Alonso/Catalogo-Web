@@ -72,6 +72,20 @@ BEGIN
     RAISE EXCEPTION 'FAIL: trigger trg_workshop_capacity ausente';
   END IF;
 
+  IF to_regprocedure('public.prevent_marketing_consent_delete()') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: función prevent_marketing_consent_delete ausente';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'trg_protect_marketing_consent'
+      AND tgrelid = 'public.workshop_registrations'::regclass
+      AND NOT tgisinternal
+  ) THEN
+    RAISE EXCEPTION 'FAIL: trigger trg_protect_marketing_consent ausente';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM pg_policies
@@ -373,6 +387,78 @@ BEGIN
   END IF;
 END $$;
 
+INSERT INTO public.workshop_registrations (product_id, name, email, marketing_consent)
+VALUES ('00000000-0000-0000-0000-000000000002', 'Contacto Protegido', 'protegido@test.com', true);
+
+DO $$
+BEGIN
+  BEGIN
+    DELETE FROM public.workshop_registrations WHERE email = 'protegido@test.com';
+    RAISE EXCEPTION 'FAIL: se borró una inscripción con consentimiento de marketing';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'marketing_consent_protected' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al borrar una inscripción protegida: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000002';
+    RAISE EXCEPTION 'FAIL: se borró un taller con contactos protegidos';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'marketing_consent_protected' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al borrar el taller protegido: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+DO $$
+DECLARE
+  protegidas INTEGER;
+BEGIN
+  SELECT count(*) INTO protegidas
+  FROM public.workshop_registrations
+  WHERE email = 'protegido@test.com';
+
+  IF protegidas <> 1 THEN
+    RAISE EXCEPTION 'FAIL: la inscripción protegida desapareció tras los intentos de borrado';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.products WHERE id = '00000000-0000-0000-0000-000000000002') THEN
+    RAISE EXCEPTION 'FAIL: el taller protegido desapareció tras el intento de borrado';
+  END IF;
+END $$;
+
+INSERT INTO public.workshop_registrations (product_id, name, email)
+VALUES ('00000000-0000-0000-0000-000000000002', 'Contacto Borrable', 'borrable@test.com');
+
+DO $$
+DECLARE
+  borradas INTEGER;
+BEGIN
+  DELETE FROM public.workshop_registrations WHERE email = 'borrable@test.com';
+
+  SELECT count(*) INTO borradas
+  FROM public.workshop_registrations
+  WHERE email = 'borrable@test.com';
+
+  IF borradas <> 0 THEN
+    RAISE EXCEPTION 'FAIL: no se borró una inscripción sin consentimiento de marketing';
+  END IF;
+END $$;
+
 DO $$
 BEGIN
   BEGIN
@@ -645,6 +731,8 @@ BEGIN
 END $$;
 
 RESET ROLE;
+
+UPDATE public.workshop_registrations SET marketing_consent = false WHERE marketing_consent;
 
 DELETE FROM public.workshop_registrations WHERE email = 'ana@test.com';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000001';

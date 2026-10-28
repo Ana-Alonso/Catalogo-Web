@@ -14,6 +14,7 @@ const renderTable = (props: Parameters<typeof AdminProductTable>[0]) =>
 
 const buildProps = () => ({
   products: [],
+  blockedDeletionIds: new Set<string>(),
   onDelete: vi.fn(),
   onEdit: vi.fn(),
   onSetVisibility: vi.fn(),
@@ -147,5 +148,22 @@ describe('AdminProductTable', () => {
 
     expect(etsy).toHaveLength(2);
     etsy.forEach((button) => expect(button).toBeDisabled());
+  });
+
+  it('deshabilita el borrado cuando hay contactos protegidos', () => {
+    const local = { ...producto, source: 'local' as const };
+
+    renderTable({
+      ...buildProps(),
+      products: [local],
+      blockedDeletionIds: new Set(['1']),
+    });
+
+    const eliminar = screen.getAllByRole('button', {
+      name: 'Ilustración en acuarela no se puede eliminar porque tiene contactos con consentimiento de avisos',
+    });
+
+    expect(eliminar).toHaveLength(2);
+    eliminar.forEach((button) => expect(button).toBeDisabled());
   });
 });

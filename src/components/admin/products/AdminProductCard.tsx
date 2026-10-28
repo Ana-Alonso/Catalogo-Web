@@ -15,6 +15,7 @@ interface AdminProductCardProps {
   item: CatalogItem;
   isDeleting: boolean;
   isUpdatingVisibility: boolean;
+  isDeleteBlocked: boolean;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
@@ -24,6 +25,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
   item,
   isDeleting,
   isUpdatingVisibility,
+  isDeleteBlocked,
   onDelete,
   onEdit,
   onSetVisibility,
@@ -59,6 +61,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
         item={item}
         isDeleting={isDeleting}
         isUpdatingVisibility={isUpdatingVisibility}
+        isDeleteBlocked={isDeleteBlocked}
         onDelete={onDelete}
         onEdit={onEdit}
         onSetVisibility={onSetVisibility}

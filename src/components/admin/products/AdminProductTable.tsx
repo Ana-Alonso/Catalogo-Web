@@ -8,6 +8,7 @@ import type { CatalogItem } from '../../../types/catalog';
 
 interface AdminProductTableProps {
   products: CatalogItem[];
+  blockedDeletionIds: Set<string>;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
@@ -20,6 +21,7 @@ interface AdminProductTableProps {
 
 export const AdminProductTable: React.FC<AdminProductTableProps> = ({
   products,
+  blockedDeletionIds,
   onDelete,
   onEdit,
   onSetVisibility,
@@ -94,6 +96,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
                 item={item}
                 isDeleting={isDeleting}
                 isUpdatingVisibility={isUpdatingVisibility}
+                isDeleteBlocked={blockedDeletionIds.has(String(item.id))}
                 onDelete={onDelete}
                 onEdit={onEdit}
                 onSetVisibility={onSetVisibility}
@@ -116,6 +119,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
             item={item}
             isDeleting={isDeleting}
             isUpdatingVisibility={isUpdatingVisibility}
+            isDeleteBlocked={blockedDeletionIds.has(String(item.id))}
             onDelete={onDelete}
             onEdit={onEdit}
             onSetVisibility={onSetVisibility}

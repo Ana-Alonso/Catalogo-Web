@@ -14,6 +14,7 @@ interface AdminProductTableRowProps {
   item: CatalogItem;
   isDeleting: boolean;
   isUpdatingVisibility: boolean;
+  isDeleteBlocked: boolean;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
@@ -23,6 +24,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
   item,
   isDeleting,
   isUpdatingVisibility,
+  isDeleteBlocked,
   onDelete,
   onEdit,
   onSetVisibility,
@@ -48,6 +50,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
         item={item}
         isDeleting={isDeleting}
         isUpdatingVisibility={isUpdatingVisibility}
+        isDeleteBlocked={isDeleteBlocked}
         onDelete={onDelete}
         onEdit={onEdit}
         onSetVisibility={onSetVisibility}

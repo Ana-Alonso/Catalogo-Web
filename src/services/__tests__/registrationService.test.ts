@@ -226,3 +226,82 @@ describe('registrationService contra Supabase (mock del cliente)', () => {
     await expect(service.fetchRegistrations()).rejects.toBeTruthy();
   });
 });
+
+describe('registrationService · protección del consentimiento de marketing', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('bloquea el borrado local de una inscripción con consentimiento', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { marketingConsent: true }),
+      null
+    );
+
+    await expect(service.deleteRegistration(created.id)).rejects.toMatchObject({
+      code: 'marketingConsentProtected',
+    });
+    await expect(service.fetchRegistrations()).resolves.toHaveLength(1);
+  });
+
+  it('borra en local una inscripción sin consentimiento', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+
+    await service.deleteRegistration(created.id);
+
+    await expect(service.fetchRegistrations()).resolves.toHaveLength(0);
+  });
+
+  it('lanza notFound al borrar una inscripción local inexistente', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+
+    await expect(service.deleteRegistration('desconocida')).rejects.toMatchObject({
+      code: 'notFound',
+    });
+  });
+
+  it('mapea el error marketing_consent_protected de Supabase', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    supabaseMock.from.mockReturnValue({
+      delete: () => ({
+        eq: async () => ({
+          error: { code: 'P0001', message: 'marketing_consent_protected' },
+        }),
+      }),
+    });
+    const service = await loadService();
+
+    await expect(service.deleteRegistration('reg-1')).rejects.toMatchObject({
+      code: 'marketingConsentProtected',
+    });
+  });
+
+  it('mapea cualquier otro error de borrado a unknown', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    supabaseMock.from.mockReturnValue({
+      delete: () => ({
+        eq: async () => ({ error: { code: '42501', message: 'permission denied' } }),
+      }),
+    });
+    const service = await loadService();
+
+    await expect(service.deleteRegistration('reg-1')).rejects.toMatchObject({
+      code: 'unknown',
+    });
+  });
+});

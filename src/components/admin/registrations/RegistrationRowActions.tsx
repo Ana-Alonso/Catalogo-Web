@@ -20,6 +20,7 @@ export const RegistrationRowActions: React.FC<RegistrationRowActionsProps> = ({
   const { t } = useTranslation();
   const confirm = useConfirm();
   const { success, error: notifyError } = useToast();
+  const isDeletionBlocked = registration.marketing_consent;
 
   const handleSetStatus = async (status: RegistrationStatus): Promise<void> => {
     const isDone = await onSetStatus(registration.id, status);
@@ -33,6 +34,10 @@ export const RegistrationRowActions: React.FC<RegistrationRowActionsProps> = ({
   };
 
   const handleDelete = async (): Promise<void> => {
+    if (isDeletionBlocked) {
+      return;
+    }
+
     const isConfirmed = await confirm({
       message: t('admin.registrations.deleteConfirm', { name: registration.name }),
       confirmLabel: t('common.delete'),
@@ -78,8 +83,20 @@ export const RegistrationRowActions: React.FC<RegistrationRowActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
+        disabled={isDeletionBlocked}
+        title={
+          isDeletionBlocked
+            ? t('admin.registrations.marketingProtectedHint')
+            : undefined
+        }
         onClick={() => void handleDelete()}
-        aria-label={t('admin.registrations.deleteAria', { name: registration.name })}
+        aria-label={
+          isDeletionBlocked
+            ? t('admin.registrations.marketingProtectedAria', {
+                name: registration.name,
+              })
+            : t('admin.registrations.deleteAria', { name: registration.name })
+        }
       >
         <Icon as={Trash2} tone="danger" />
       </Button>

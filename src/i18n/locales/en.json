@@ -129,6 +129,7 @@
         "alreadyRegistered": "You are already registered for this workshop with this email.",
         "workshopFull": "The workshop is full: no spots left.",
         "registrationClosed": "Registration for this workshop is closed.",
+        "marketingConsentProtected": "The data of someone who asked for workshop alerts cannot be deleted.",
         "notFound": "Registration not found.",
         "unknown": "Could not complete registration. Please try again."
       },
@@ -220,6 +221,59 @@
     "loadingSession": "Loading session…",
     "backToSite": "Back to site",
     "logout": "Log out",
+    "tabs": {
+      "label": "Panel sections",
+      "products": "Products",
+      "workshops": "Workshops",
+      "archived": "Archived"
+    },
+    "archived": {
+      "title": "Archived ({{count}})",
+      "subtitle": "Products hidden from the website. Restore them or delete them permanently.",
+      "errorTitle": "Could not load archived products",
+      "empty": "There are no archived products.",
+      "createdAt": "Created on {{date}}",
+      "unknownDate": "unknown date",
+      "viewRegistrations": "View registrations",
+      "hideRegistrations": "Hide registrations",
+      "viewRegistrationsAria": "View the registrations for {{title}}",
+      "hideRegistrationsAria": "Hide the registrations for {{title}}",
+      "deleteHint": "Permanent deletion cannot be undone. Workshops with contacts who asked for alerts cannot be deleted: archive them instead."
+    },
+    "workshops": {
+      "title": "Workshops ({{count}})",
+      "subtitle": "Spots, deadlines and registrations for every workshop. Finished ones are kept for reference.",
+      "activeTitle": "Active workshops ({{count}})",
+      "finishedTitle": "Finished workshops ({{count}})",
+      "finishedHint": "Review, export or change the status of their registrations.",
+      "activeEmpty": "There are no active workshops.",
+      "finishedEmpty": "There are no finished workshops yet.",
+      "registrationCount_one": "{{count}} registration",
+      "registrationCount_other": "{{count}} registrations",
+      "noDate": "No date",
+      "noLocation": "No location",
+      "deadlineUntil": "Sign-ups until {{date}}",
+      "noDeadline": "No sign-up deadline",
+      "deadlineClosed": "Deadline closed",
+      "noCapacity": "No capacity",
+      "pending_one": "{{count}} pending",
+      "pending_other": "{{count}} pending",
+      "confirmed_one": "{{count}} confirmed",
+      "confirmed_other": "{{count}} confirmed",
+      "cancelled_one": "{{count}} cancelled",
+      "cancelled_other": "{{count}} cancelled",
+      "marketing": "{{count}} with alerts",
+      "expand": "Registrations",
+      "collapse": "Hide",
+      "expandAria": "View the registrations for {{title}}",
+      "collapseAria": "Hide the registrations for {{title}}",
+      "editAria": "Edit the workshop {{title}}",
+      "finishedReasons": {
+        "celebrado": "Held",
+        "vendido": "Sold out",
+        "archivado": "Archived"
+      }
+    },
     "login": {
       "title": "Admin Access",
       "subtitle": "Sign in to manage the catalog.",
@@ -370,6 +424,8 @@
       "restoreAria": "Publish {{title}} again",
       "etsyVisibilityHint": "Etsy products are hidden from Etsy",
       "etsyVisibilityAria": "{{title}} is hidden from Etsy",
+      "protectedDeleteHint": "It has contacts who agreed to alerts: archive the workshop instead of deleting it",
+      "protectedDeleteAria": "{{title}} cannot be deleted because it has contacts who agreed to alerts",
       "offerFromEtsy": "Etsy offer",
       "offerManual": "manual offer"
     },
@@ -399,6 +455,8 @@
       "cancelAria": "Cancel registration for {{name}}",
       "deleteAria": "Delete registration for {{name}}",
       "deleteConfirm": "Are you sure you want to delete the registration for \"{{name}}\"?",
+      "marketingProtectedHint": "They agreed to workshop alerts: their data cannot be deleted. Cancel their registration if you no longer want to count that spot.",
+      "marketingProtectedAria": "{{name}}'s data is protected by marketing consent",
       "statusUpdated": "Registration for {{name}} updated.",
       "deleted": "Registration for {{name}} deleted.",
       "status": {
@@ -415,6 +473,7 @@
       "saveProduct": "Could not save the product",
       "updateProduct": "Could not update the product",
       "deleteProduct": "Could not delete the product",
+      "deleteProductProtected": "This workshop cannot be deleted: it has contacts who asked for alerts. Archive it instead.",
       "loadRegistrations": "Unknown error while loading registrations",
       "updateRegistration": "Could not update the registration",
       "deleteRegistration": "Could not delete the registration"

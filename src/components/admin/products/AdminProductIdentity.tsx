@@ -28,7 +28,13 @@ export const AdminProductIdentity: React.FC<AdminProductIdentityProps> = ({
       />
       <Box minWidth="zero">
         <Box display="flex" wrap align="center" gap="xs">
-          <Typography size="sm" tone="main" weight="semibold">
+          <Typography
+            size="sm"
+            tone="main"
+            weight="semibold"
+            clamp={1}
+            title={item.title}
+          >
             {item.title}
           </Typography>
           {item.source === 'etsy' && (

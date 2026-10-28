@@ -4,6 +4,7 @@ import { parsePriceToCents } from '../utils/price';
 import { resolvePurchaseLinks } from '../utils/productLinks';
 import { toUtcDeadline } from '../utils/deadlineTime';
 import { mockCatalogItems } from '../mocks/catalogMocks';
+import { hasMarketingConsentRegistrations } from './registrationService';
 import type {
   CatalogItem,
   EtsyProductMetadata,
@@ -377,6 +378,11 @@ export const deleteProduct = async (id: string): Promise<void> => {
   }
 
   const currentLocals = getStoredLocalProducts();
+
+  if (hasMarketingConsentRegistrations(id)) {
+    throw new Error('marketing_consent_protected');
+  }
+
   const updated = currentLocals.filter((item) => item.id !== id);
   saveStoredLocalProducts(updated);
 };

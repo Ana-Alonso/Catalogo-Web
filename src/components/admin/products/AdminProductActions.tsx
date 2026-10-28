@@ -9,6 +9,7 @@ interface AdminProductActionsProps {
   item: CatalogItem;
   isDeleting: boolean;
   isUpdatingVisibility: boolean;
+  isDeleteBlocked?: boolean;
   onDelete: (id: string) => void;
   onEdit: (product: CatalogItem) => void;
   onSetVisibility: (id: string, isVisible: boolean) => void;
@@ -18,6 +19,7 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
   item,
   isDeleting,
   isUpdatingVisibility,
+  isDeleteBlocked = false,
   onDelete,
   onEdit,
   onSetVisibility,
@@ -38,6 +40,18 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
       onDelete(String(item.id));
     }
   };
+
+  const deleteHint = isFromEtsy
+    ? t('admin.productTable.etsyDeleteHint')
+    : isDeleteBlocked
+      ? t('admin.productTable.protectedDeleteHint')
+      : undefined;
+
+  const deleteAria = isFromEtsy
+    ? t('admin.productTable.etsyDeleteAria', { title: item.title })
+    : isDeleteBlocked
+      ? t('admin.productTable.protectedDeleteAria', { title: item.title })
+      : t('admin.productTable.deleteAria', { title: item.title });
 
   const archiveAria = isFromEtsy
     ? t('admin.productTable.etsyVisibilityAria', { title: item.title })
@@ -73,14 +87,10 @@ export const AdminProductActions: React.FC<AdminProductActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        disabled={isDeleting || isFromEtsy}
-        title={isFromEtsy ? t('admin.productTable.etsyDeleteHint') : undefined}
+        disabled={isDeleting || isFromEtsy || isDeleteBlocked}
+        title={deleteHint}
         onClick={handleDelete}
-        aria-label={
-          isFromEtsy
-            ? t('admin.productTable.etsyDeleteAria', { title: item.title })
-            : t('admin.productTable.deleteAria', { title: item.title })
-        }
+        aria-label={deleteAria}
       >
         <Icon as={Trash2} tone="danger" />
       </Button>

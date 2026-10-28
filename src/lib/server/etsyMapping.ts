@@ -1,4 +1,5 @@
 import type { EtsyListing, EtsyListingImage } from './etsyClient';
+import { truncateTitle } from './etsyTitle';
 
 type EtsyProductStatus = 'disponible' | 'reservado' | 'vendido';
 
@@ -70,7 +71,7 @@ export const pickListingImage = (images?: EtsyListingImage[]): string => {
 };
 
 export const mapEtsyListing = (listing: EtsyListing): EtsyProductFields => {
-  const cleanTitle = stripHtml(listing.title ?? '').slice(0, TITLE_LIMIT);
+  const cleanTitle = truncateTitle(stripHtml(listing.title ?? ''), TITLE_LIMIT);
   const cleanDescription = stripHtml(listing.description ?? '').slice(
     0,
     DESCRIPTION_LIMIT

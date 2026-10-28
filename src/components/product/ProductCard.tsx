@@ -135,7 +135,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               {t(availabilityTranslationKeys[currentStatus])}
             </Badge>
           </Box>
-          <Typography variant="h4" marginTop="xs">{item.title}</Typography>
+          <Typography variant="h4" marginTop="xs" clamp={2} title={item.title}>
+            {item.title}
+          </Typography>
         </Box>
 
         {item.category === 'talleres' && (item.eventDate || item.eventLocation) && (

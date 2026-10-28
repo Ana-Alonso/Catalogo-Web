@@ -94,6 +94,72 @@ describe('productService · metadatos de productos Etsy', () => {
   });
 });
 
+describe('productService · borrado protegido por consentimiento de marketing', () => {
+  const registration = {
+    id: 'reg-1',
+    product_id: 'local-1',
+    name: 'Ana',
+    email: 'ana@example.com',
+    status: 'pendiente',
+    privacy_consent_at: '2026-10-01T10:00:00.000Z',
+    marketing_consent: false,
+    created_at: '2026-10-01T10:00:00.000Z',
+  };
+
+  beforeEach(() => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    localStorage.clear();
+    seed([localItem]);
+  });
+
+  it('bloquea el borrado de un producto con contactos protegidos', async () => {
+    localStorage.setItem(
+      'laurel_workshop_registrations',
+      JSON.stringify([{ ...registration, marketing_consent: true }])
+    );
+    const { deleteProduct, fetchProducts } = await loadService();
+
+    await expect(deleteProduct('local-1')).rejects.toThrow(
+      'marketing_consent_protected'
+    );
+    const products = await fetchProducts();
+    expect(products.some((item) => item.id === 'local-1')).toBe(true);
+  });
+
+  it('borra el producto cuando ningún contacto pidió avisos', async () => {
+    localStorage.setItem(
+      'laurel_workshop_registrations',
+      JSON.stringify([registration])
+    );
+    const { deleteProduct, fetchProducts } = await loadService();
+
+    await deleteProduct('local-1');
+
+    const products = await fetchProducts();
+    expect(products.some((item) => item.id === 'local-1')).toBe(false);
+  });
+
+  it('ignora las inscripciones protegidas de otros talleres', async () => {
+    localStorage.setItem(
+      'laurel_workshop_registrations',
+      JSON.stringify([
+        {
+          ...registration,
+          id: 'reg-2',
+          product_id: 'otro-taller',
+          marketing_consent: true,
+        },
+      ])
+    );
+    const { deleteProduct, fetchProducts } = await loadService();
+
+    await deleteProduct('local-1');
+
+    const products = await fetchProducts();
+    expect(products.some((item) => item.id === 'local-1')).toBe(false);
+  });
+});
+
 describe('productService · propagación de ofertas de Etsy', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_USE_MOCKS', 'true');

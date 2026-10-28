@@ -39,6 +39,9 @@ const mapRegistrationError = (
   if (message.includes('workshop_full')) {
     return new RegistrationError('workshopFull');
   }
+  if (message.includes('marketing_consent_protected')) {
+    return new RegistrationError('marketingConsentProtected');
+  }
   return new RegistrationError('unknown');
 };
 
@@ -62,6 +65,12 @@ export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
 
   return getStoredLocalRegistrations();
 };
+
+export const hasMarketingConsentRegistrations = (productId: string): boolean =>
+  getStoredLocalRegistrations().some(
+    (registration) =>
+      registration.product_id === productId && registration.marketing_consent
+  );
 
 export const fetchRegistrationCounts = async (): Promise<Record<string, number>> => {
   if (!useMocks && isSupabaseConfigured && supabase) {
@@ -192,7 +201,18 @@ export const deleteRegistration = async (id: string): Promise<void> => {
     return;
   }
 
+  const localRegistrations = getStoredLocalRegistrations();
+  const registration = localRegistrations.find((item) => item.id === id);
+
+  if (!registration) {
+    throw new RegistrationError('notFound');
+  }
+
+  if (registration.marketing_consent) {
+    throw new RegistrationError('marketingConsentProtected');
+  }
+
   saveStoredLocalRegistrations(
-    getStoredLocalRegistrations().filter((registration) => registration.id !== id)
+    localRegistrations.filter((item) => item.id !== id)
   );
 };

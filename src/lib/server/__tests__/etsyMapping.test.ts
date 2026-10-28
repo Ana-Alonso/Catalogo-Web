@@ -34,6 +34,18 @@ describe('mapEtsyListing', () => {
   it('truncates titles to the database limit', () => {
     const mapped = mapEtsyListing({ ...baseListing, title: 'a'.repeat(200) });
     expect(mapped.title).toHaveLength(120);
+    expect(mapped.title.endsWith('…')).toBe(true);
+  });
+
+  it('cuts long titles on a word boundary', () => {
+    const mapped = mapEtsyListing({
+      ...baseListing,
+      title: `${'Ilustración artesanal '.repeat(10)}final`,
+    });
+
+    expect(mapped.title.length).toBeLessThanOrEqual(120);
+    expect(mapped.title.endsWith('…')).toBe(true);
+    expect(mapped.title).not.toMatch(/\s…$/);
   });
 
   it('strips HTML from titles and descriptions', () => {

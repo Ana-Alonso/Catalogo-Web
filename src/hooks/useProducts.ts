@@ -139,7 +139,14 @@ export const useProducts = (): UseProductsResult => {
       return true;
     } catch (err) {
       logError('useProducts.removeProduct', err);
-      const msg = err instanceof Error ? err.message : t('admin.errors.deleteProduct');
+      const isProtected =
+        err instanceof Error &&
+        err.message.includes('marketing_consent_protected');
+      const msg = isProtected
+        ? t('admin.errors.deleteProductProtected')
+        : err instanceof Error
+          ? err.message
+          : t('admin.errors.deleteProduct');
       setError(msg);
       return false;
     }
