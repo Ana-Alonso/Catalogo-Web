@@ -39,15 +39,18 @@ const formData = (overrides: Partial<ProductFormData> = {}): ProductFormData => 
 });
 
 const mockUpdate = () => {
-  const updateSpy = vi.fn(() => ({
-    eq: () => ({
+  const updateSpy = vi.fn((payload: Record<string, unknown>) => {
+    void payload;
+    return {
       eq: () => ({
-        select: () => ({
-          single: async () => ({ data: row, error: null }),
+        eq: () => ({
+          select: () => ({
+            single: async () => ({ data: row, error: null }),
+          }),
         }),
       }),
-    }),
-  }));
+    };
+  });
   supabaseMock.from.mockReturnValue({ update: updateSpy });
   return updateSpy;
 };
@@ -63,7 +66,7 @@ describe('productService · payload de talleres', () => {
 
     await updateProduct('prod-1', formData());
 
-    const payload = updateSpy.mock.calls[0][0] as Record<string, unknown>;
+    const payload = updateSpy.mock.calls[0][0];
     expect(payload).not.toHaveProperty('registrationDeadline');
     expect(payload).not.toHaveProperty('cupo');
   });
@@ -83,7 +86,7 @@ describe('productService · payload de talleres', () => {
       })
     );
 
-    const payload = updateSpy.mock.calls[0][0] as Record<string, unknown>;
+    const payload = updateSpy.mock.calls[0][0];
     expect(payload.cupo).toBe(8);
     expect(payload.eventLocation).toBe('Estudio');
     expect(payload.registrationDeadline).toBe(new Date('2026-11-10T18:00').toISOString());
@@ -95,7 +98,7 @@ describe('productService · payload de talleres', () => {
 
     await updateProduct('prod-1', formData({ category: 'talleres' }));
 
-    const payload = updateSpy.mock.calls[0][0] as Record<string, unknown>;
+    const payload = updateSpy.mock.calls[0][0];
     expect(payload.registrationDeadline).toBeNull();
     expect(payload.cupo).toBeNull();
   });
