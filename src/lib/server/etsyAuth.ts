@@ -1,5 +1,11 @@
 import { getServerEnv } from './env';
 import { createSupabaseAdmin } from './supabaseAdmin';
+import {
+  decodeStoredToken,
+  encodeStoredToken,
+  encryptToken,
+  isEncryptedToken,
+} from './tokenCipher';
 
 const TOKEN_URL = 'https://api.etsy.com/v3/public/oauth/token';
 const EXPIRY_MARGIN_MS = 60_000;
@@ -36,6 +42,34 @@ const isFresh = (expiresAt: string | null): boolean => {
   return Number.isFinite(expiresAtMs) && expiresAtMs - Date.now() > EXPIRY_MARGIN_MS;
 };
 
+const storeCredentials = async (
+  credentials: StoredCredentials,
+  encodedKey: string
+): Promise<void> => {
+  const supabase = createSupabaseAdmin();
+  const { error } = await supabase.from('etsy_credentials').upsert(
+    {
+      id: 1,
+      access_token: encodeStoredToken(credentials.access_token, encodedKey),
+      refresh_token: encryptToken(credentials.refresh_token, encodedKey),
+      access_token_expires_at: credentials.access_token_expires_at,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'id' }
+  );
+
+  if (error) {
+    throw new Error(
+      `No se pudieron guardar las credenciales de Etsy (${error.message}).`
+    );
+  }
+};
+
+const needsEncryption = (credentials: StoredCredentials): boolean =>
+  [credentials.access_token, credentials.refresh_token].some(
+    (token) => token !== null && !isEncryptedToken(token)
+  );
+
 const readCredentials = async (): Promise<StoredCredentials> => {
   const env = getServerEnv();
   const supabase = createSupabaseAdmin();
@@ -51,20 +85,36 @@ const readCredentials = async (): Promise<StoredCredentials> => {
     );
   }
 
-  if (data) {
-    return data as StoredCredentials;
+  if (!data) {
+    if (!env.etsyRefreshToken) {
+      throw new Error(
+        'No hay credenciales de Etsy. Ejecuta scripts/etsy-oauth.mjs o define ETSY_REFRESH_TOKEN.'
+      );
+    }
+
+    return {
+      access_token: null,
+      refresh_token: env.etsyRefreshToken,
+      access_token_expires_at: null,
+    };
   }
 
-  if (!env.etsyRefreshToken) {
-    throw new Error(
-      'No hay credenciales de Etsy. Ejecuta scripts/etsy-oauth.mjs o define ETSY_REFRESH_TOKEN.'
-    );
+  const stored = data as StoredCredentials;
+
+  if (needsEncryption(stored)) {
+    await storeCredentials(stored, env.etsyTokenEncryptionKey);
   }
 
   return {
-    access_token: null,
-    refresh_token: env.etsyRefreshToken,
-    access_token_expires_at: null,
+    access_token: decodeStoredToken(
+      stored.access_token,
+      env.etsyTokenEncryptionKey
+    ),
+    refresh_token: decodeStoredToken(
+      stored.refresh_token,
+      env.etsyTokenEncryptionKey
+    ) ?? '',
+    access_token_expires_at: stored.access_token_expires_at,
   };
 };
 
@@ -97,21 +147,14 @@ const refreshAccessToken = async (
 
   const expiresAt = new Date(Date.now() + payload.expires_in * 1000);
 
-  const supabase = createSupabaseAdmin();
-  const { error } = await supabase.from('etsy_credentials').upsert(
+  await storeCredentials(
     {
-      id: 1,
       access_token: payload.access_token,
       refresh_token: payload.refresh_token,
       access_token_expires_at: expiresAt.toISOString(),
-      updated_at: new Date().toISOString(),
     },
-    { onConflict: 'id' }
+    env.etsyTokenEncryptionKey
   );
-
-  if (error) {
-    throw new Error(`No se pudieron guardar las credenciales de Etsy (${error.message}).`);
-  }
 
   return payload.access_token;
 };

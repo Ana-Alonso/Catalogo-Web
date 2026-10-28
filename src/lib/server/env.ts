@@ -4,6 +4,7 @@ export interface ServerEnv {
   etsyShopId: string;
   etsyRefreshToken: string | null;
   etsyWebhookSecret: string;
+  etsyTokenEncryptionKey: string;
   supabaseUrl: string;
   supabaseServiceRoleKey: string;
   supabaseAnonKey: string;
@@ -26,6 +27,7 @@ export const getServerEnv = (): ServerEnv => ({
   etsyShopId: required('ETSY_SHOP_ID'),
   etsyRefreshToken: optional('ETSY_REFRESH_TOKEN'),
   etsyWebhookSecret: required('ETSY_WEBHOOK_SECRET'),
+  etsyTokenEncryptionKey: required('ETSY_TOKEN_ENCRYPTION_KEY'),
   supabaseUrl: required('SUPABASE_URL'),
   supabaseServiceRoleKey: required('SUPABASE_SERVICE_ROLE_KEY'),
   supabaseAnonKey: required('SUPABASE_ANON_KEY'),
