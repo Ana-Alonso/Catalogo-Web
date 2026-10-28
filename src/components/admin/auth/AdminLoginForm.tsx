@@ -109,7 +109,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
               {errorMessage}
             </Typography>
           )}
-          <Box display="grid" columns={2} gap="tight" paddingTop="sm">
+          <Box display="grid" columns={1} columnsMd={2} gap="tight" paddingTop="sm">
             <Button variant="secondary" fullWidth onClick={onClose}>
               {t('admin.backToSite')}
             </Button>

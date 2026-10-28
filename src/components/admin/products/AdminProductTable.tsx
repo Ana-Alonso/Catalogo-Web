@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Box, ErrorState, Typography, Table, TableHead, TableBody, TableRow, TableHeader } from '../../ui';
+import { AdminProductCard } from './AdminProductCard';
 import { AdminProductTableRow } from './AdminProductTableRow';
 import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
 import type { CatalogItem } from '../../../types/catalog';
@@ -66,7 +67,7 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
         </Typography>
       </Box>
 
-      <Box overflow="xAuto">
+      <Box overflow="xAuto" hideBelow="md" display="block">
         <Table fullWidth>
           <TableHead>
             <TableRow head>
@@ -94,6 +95,24 @@ export const AdminProductTable: React.FC<AdminProductTableProps> = ({
             ))}
           </TableBody>
         </Table>
+      </Box>
+
+      <Box
+        showBelow="md"
+        display="flex"
+        direction="column"
+        gap="md"
+        padding="md"
+      >
+        {products.map((item) => (
+          <AdminProductCard
+            key={item.id}
+            item={item}
+            isDeleting={isDeleting}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
+        ))}
       </Box>
     </Card>
   );

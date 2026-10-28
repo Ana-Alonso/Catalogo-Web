@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AdminProductForm } from './products/AdminProductForm';
 import { AdminEtsyProductForm } from './etsy/AdminEtsyProductForm';
@@ -66,6 +66,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
+
+  useEffect(() => {
+    if (!editingProduct) return;
+    document
+      .getElementById('admin-product-form')
+      ?.scrollIntoView({ block: 'start' });
+  }, [editingProduct]);
 
   const isAuthDegraded = !isSupabaseConfigured;
   const isAuthenticated = isAuthDegraded || (user !== null && isAdmin);
@@ -207,31 +214,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onApply={onApplyEtsyOffers}
         />
 
-        {editingProduct?.source === 'etsy' ? (
-          <AdminEtsyProductForm
-            key={editingProduct.id}
-            product={editingProduct}
-            onSubmit={handleEtsySubmit}
-            isSubmitting={isSubmitting}
-            onCancelEdit={() => setEditingProduct(null)}
-          />
-        ) : (
-          <AdminProductForm
-            key={editingProduct ? editingProduct.id : 'new-product-form'}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-            editingProduct={editingProduct}
-            onCancelEdit={() => setEditingProduct(null)}
-          />
-        )}
+        <Box id="admin-product-form" className="scroll-mt-24">
+          {editingProduct?.source === 'etsy' ? (
+            <AdminEtsyProductForm
+              key={editingProduct.id}
+              product={editingProduct}
+              onSubmit={handleEtsySubmit}
+              isSubmitting={isSubmitting}
+              onCancelEdit={() => setEditingProduct(null)}
+            />
+          ) : (
+            <AdminProductForm
+              key={editingProduct ? editingProduct.id : 'new-product-form'}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              editingProduct={editingProduct}
+              onCancelEdit={() => setEditingProduct(null)}
+            />
+          )}
+        </Box>
 
         <AdminProductTable
           products={products}
           onDelete={handleDelete}
-          onEdit={(prod) => {
-            setEditingProduct(prod);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onEdit={setEditingProduct}
           isDeleting={isDeleting}
           isLoading={isLoadingProducts}
           error={productsError}

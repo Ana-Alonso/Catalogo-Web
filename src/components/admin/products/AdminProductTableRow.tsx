@@ -1,19 +1,14 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
-import { Badge, Box, Button, Icon, Image, TableCell, TableRow, TextLink, Typography } from '../../ui';
-import { useConfirm } from '../../../hooks/useConfirm';
-import { formatPriceForLanguage } from '../../../i18n/formatters';
+import { TableCell, TableRow } from '../../ui';
+import { AdminProductActions } from './AdminProductActions';
 import {
-  availabilityTranslationKeys,
-  categoryTranslationKeys,
-} from '../../../i18n/labels';
-import {
-  getDiscountedCents,
-  getOfferPercent,
-  isEtsyOffer,
-} from '../../../utils/price';
-import type { CatalogItem, AvailabilityStatus } from '../../../types/catalog';
+  AdminProductCategoryBadge,
+  AdminProductStatusBadge,
+} from './AdminProductBadges';
+import { AdminProductIdentity } from './AdminProductIdentity';
+import { AdminProductLinks } from './AdminProductLinks';
+import { AdminProductPriceBlock } from './AdminProductPriceBlock';
+import type { CatalogItem } from '../../../types/catalog';
 
 interface AdminProductTableRowProps {
   item: CatalogItem;
@@ -22,184 +17,37 @@ interface AdminProductTableRowProps {
   onEdit: (product: CatalogItem) => void;
 }
 
-const statusBadgeVariant: Record<AvailabilityStatus, 'primary' | 'neutral' | 'outline'> = {
-  disponible: 'primary',
-  reservado: 'neutral',
-  vendido: 'outline',
-};
-
 export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
   item,
   isDeleting,
   onDelete,
   onEdit,
-}) => {
-  const { t, i18n } = useTranslation();
-  const confirm = useConfirm();
-  const language = i18n.resolvedLanguage ?? i18n.language;
-  const currentStatus = item.status || 'disponible';
-  const currency = item.currency || 'EUR';
-  const offerPercent = getOfferPercent(item);
-  const isOnSale = isEtsyOffer(item);
-  const displayCents =
-    offerPercent != null && item.priceCents != null
-      ? getDiscountedCents(item.priceCents, offerPercent)
-      : item.priceCents;
-
-  return (
-    <TableRow hoverable>
-      <TableCell>
-        <Box display="flex" align="center" gap="tight">
-          <Image
-            src={item.image}
-            alt=""
-            width={12}
-            height={12}
-            rounded="md"
-            background="strong"
-            shrink={false}
-          />
-          <Box>
-            <Box display="flex" wrap align="center" gap="xs">
-              <Typography size="sm" tone="main" weight="semibold">
-                {item.title}
-              </Typography>
-              {item.source === 'etsy' && (
-                <Badge variant="neutral">{t('admin.productTable.etsy')}</Badge>
-              )}
-              {item.isVisible === false && (
-                <Badge variant="outline">{t('admin.productTable.hidden')}</Badge>
-              )}
-            </Box>
-            <Typography variant="body" size="xs" clamp={1} maxWidth="xs">
-              {item.description}
-            </Typography>
-          </Box>
-        </Box>
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline">
-          {t(categoryTranslationKeys[item.category])}
-        </Badge>
-        {item.category === 'talleres' && (
-          <Typography size="xs" tone="subtle" marginTop="tight">
-            {item.cupo != null
-              ? t('admin.productTable.capacity', { count: item.cupo })
-              : t('admin.productTable.noCapacity')}
-          </Typography>
-        )}
-      </TableCell>
-      <TableCell>
-        <Badge variant={statusBadgeVariant[currentStatus]}>
-          {t(availabilityTranslationKeys[currentStatus])}
-        </Badge>
-      </TableCell>
-      <TableCell weight="medium" tone="muted">
-        {displayCents != null ? (
-          <Box display="flex" direction="column" gap="xs">
-            <Typography>{formatPriceForLanguage(displayCents, currency, language)}</Typography>
-            {offerPercent != null && item.priceCents != null && (
-              <Typography as="span" size="xs" tone="subtle">
-                <Typography as="span" size="xs" tone="subtle" strike>
-                  {formatPriceForLanguage(
-                    item.priceCents,
-                    currency,
-                    language
-                  )}
-                </Typography>
-                <Typography as="span" size="xs" tone="warning" marginLeft="sm">
-                  -{offerPercent}%
-                </Typography>
-                <Typography as="span" size="xs" tone="subtle" marginLeft="sm">
-                  {t('admin.productTable.offerManual')}
-                </Typography>
-              </Typography>
-            )}
-            {isOnSale && (
-              <Typography as="span" size="xs" tone="warning">
-                {t('admin.productTable.offerFromEtsy')}
-              </Typography>
-            )}
-          </Box>
-        ) : (
-          t('admin.productTable.consult')
-        )}
-      </TableCell>
-      <TableCell>
-        <Box display="flex" align="center" gap="tight">
-          {item.category !== 'talleres' && item.etsyLink && (
-            <TextLink
-              href={item.etsyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="xs"
-              hover="underline"
-            >
-              Etsy <Icon as={ExternalLink} size="xs" />
-            </TextLink>
-          )}
-          {item.category !== 'talleres' && item.vintedLink && (
-            <TextLink
-              href={item.vintedLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              tone="muted"
-              size="xs"
-              hover="bright"
-            >
-              Vinted <Icon as={ExternalLink} size="xs" />
-            </TextLink>
-          )}
-        </Box>
-      </TableCell>
-      <TableCell align="right">
-        <Box display="flex" align="center" justify="end" gap="xs">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(item)}
-            aria-label={t('admin.productTable.editAria', {
-              title: item.title,
-            })}
-          >
-            <Icon as={Edit3} tone="accent" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={isDeleting || item.source === 'etsy'}
-            title={
-              item.source === 'etsy'
-                ? t('admin.productTable.etsyDeleteHint')
-                : undefined
-            }
-            onClick={async () => {
-              const isConfirmed = await confirm({
-                message: t('admin.productTable.deleteConfirm', { title: item.title }),
-                confirmLabel: t('common.delete'),
-                isDanger: true,
-              });
-
-              if (isConfirmed) {
-                onDelete(String(item.id));
-              }
-            }}
-            aria-label={
-              item.source === 'etsy'
-                ? t('admin.productTable.etsyDeleteAria', {
-                    title: item.title,
-                  })
-                : t('admin.productTable.deleteAria', {
-                    title: item.title,
-                  })
-            }
-          >
-            <Icon as={Trash2} tone="danger" />
-          </Button>
-        </Box>
-      </TableCell>
-    </TableRow>
-  );
-};
+}) => (
+  <TableRow hoverable>
+    <TableCell>
+      <AdminProductIdentity item={item} />
+    </TableCell>
+    <TableCell>
+      <AdminProductCategoryBadge item={item} />
+    </TableCell>
+    <TableCell>
+      <AdminProductStatusBadge status={item.status || 'disponible'} />
+    </TableCell>
+    <TableCell weight="medium" tone="muted">
+      <AdminProductPriceBlock item={item} />
+    </TableCell>
+    <TableCell>
+      <AdminProductLinks item={item} />
+    </TableCell>
+    <TableCell align="right">
+      <AdminProductActions
+        item={item}
+        isDeleting={isDeleting}
+        onDelete={onDelete}
+        onEdit={onEdit}
+      />
+    </TableCell>
+  </TableRow>
+);
 
 export default AdminProductTableRow;

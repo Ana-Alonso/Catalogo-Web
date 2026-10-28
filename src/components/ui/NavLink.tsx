@@ -19,7 +19,7 @@ const NAV_LINK_TONE = {
     idle: '',
   },
   pill: {
-    base: 'inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950',
+    base: 'inline-flex min-h-11 min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-semibold tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 md:min-h-0',
     active: 'bg-orange-600 text-white',
     idle: 'text-neutral-400 hover:text-white',
   },

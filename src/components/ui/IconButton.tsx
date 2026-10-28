@@ -14,9 +14,9 @@ const iconButtonVariants = cva(
           'bg-neutral-950/90 hover:bg-neutral-950 text-white shadow-lg opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
       },
       size: {
-        sm: 'p-1.5',
-        md: 'p-2',
-        lg: 'p-2.5',
+        sm: 'min-h-11 min-w-11 p-1.5 md:min-h-0 md:min-w-0',
+        md: 'min-h-11 min-w-11 p-2 md:min-h-0 md:min-w-0',
+        lg: 'min-h-11 min-w-11 p-2.5 md:min-h-0 md:min-w-0',
       },
     },
     defaultVariants: {

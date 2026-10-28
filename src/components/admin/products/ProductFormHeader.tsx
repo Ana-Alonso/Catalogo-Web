@@ -21,6 +21,8 @@ export const ProductFormHeader: React.FC<ProductFormHeaderProps> = ({
       display="flex"
       align="center"
       justify="between"
+      wrap
+      gap="tight"
       divider="bottom"
       paddingBottom="md"
     >

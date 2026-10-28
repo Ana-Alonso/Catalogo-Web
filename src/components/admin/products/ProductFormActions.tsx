@@ -20,6 +20,7 @@ export const ProductFormActions: React.FC<ProductFormActionsProps> = ({
     <Box
       display="flex"
       justify="end"
+      wrap
       gap="tight"
       paddingTop="md"
       divider="top"

@@ -12,8 +12,8 @@ const variantStyles = {
 } as const;
 
 const sizeStyles = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-5 py-2.5 text-xs',
+  sm: 'min-h-11 px-3 py-1.5 text-xs md:min-h-0',
+  md: 'min-h-11 px-5 py-2.5 text-xs md:min-h-0',
   card: 'px-4 py-3 text-sm',
   cta: 'px-6 py-3 text-xs font-bold tracking-widest',
   lg: 'px-8 py-4 text-sm font-bold tracking-widest',
