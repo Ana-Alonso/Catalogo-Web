@@ -11,6 +11,7 @@ import { AdminLoginForm } from './auth/AdminLoginForm';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
 import { Box, Container, Icon, Typography } from '../ui';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { useToast } from '../../hooks/useToast';
 import { isSupabaseConfigured } from '../../utils/supabase';
 import type {
   CatalogItem,
@@ -18,7 +19,7 @@ import type {
   ProductFormData,
 } from '../../types/catalog';
 import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
-import { AlertCircle, CheckCircle, LoaderCircle } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 
 interface AdminDashboardProps {
   products: CatalogItem[];
@@ -59,11 +60,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const { t } = useTranslation();
   const { user, isAdmin, isLoading, signIn, signOut } = useAdminAuth();
+  const { success: notifySuccess, error: notifyError } = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingProduct, setEditingProduct] = useState<CatalogItem | null>(null);
-  const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [createdWorkshop, setCreatedWorkshop] = useState<ProductFormData | null>(null);
 
   const isAuthDegraded = !isSupabaseConfigured;
@@ -84,7 +85,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleFormSubmit = async (data: ProductFormData): Promise<boolean> => {
     setIsSubmitting(true);
-    setFeedbackMsg(null);
     setCreatedWorkshop(null);
 
     const isEdit = Boolean(editingProduct);
@@ -95,25 +95,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setIsSubmitting(false);
 
     if (success) {
-      setFeedbackMsg({
-        text: t(
+      notifySuccess(
+        t(
           isEdit
             ? 'admin.feedback.productUpdated'
             : 'admin.feedback.productCreated'
-        ),
-        type: 'success'
-      });
+        )
+      );
       setEditingProduct(null);
 
       if (!isEdit && data.category === 'talleres' && data.eventDate) {
         setCreatedWorkshop(data);
       }
 
-      setTimeout(() => setFeedbackMsg(null), 3500);
       return true;
     }
 
-    setFeedbackMsg({ text: t('admin.feedback.productOperationError'), type: 'error' });
+    notifyError(t('admin.feedback.productOperationError'));
     return false;
   };
 
@@ -123,39 +121,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
 
     setIsSubmitting(true);
-    setFeedbackMsg(null);
 
-    const success = await onEditEtsyMetadata(String(editingProduct.id), metadata);
+    const isSaved = await onEditEtsyMetadata(String(editingProduct.id), metadata);
     setIsSubmitting(false);
 
-    if (success) {
-      setFeedbackMsg({
-        text: t('admin.feedback.etsyUpdated'),
-        type: 'success',
-      });
+    if (isSaved) {
+      notifySuccess(t('admin.feedback.etsyUpdated'));
       setEditingProduct(null);
-      setTimeout(() => setFeedbackMsg(null), 3500);
       return true;
     }
 
-    setFeedbackMsg({ text: t('admin.feedback.etsyUpdateError'), type: 'error' });
     return false;
   };
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true);
-    setFeedbackMsg(null);
-    const success = await onDeleteProduct(id);
+    const isDeleted = await onDeleteProduct(id);
     setIsDeleting(false);
 
-    if (success) {
+    if (isDeleted) {
       if (editingProduct?.id === id) {
         setEditingProduct(null);
       }
-      setFeedbackMsg({ text: t('admin.feedback.productDeleted'), type: 'success' });
-      setTimeout(() => setFeedbackMsg(null), 3000);
+      notifySuccess(t('admin.feedback.productDeleted'));
     } else {
-      setFeedbackMsg({ text: t('admin.feedback.productDeleteError'), type: 'error' });
+      notifyError(t('admin.feedback.productDeleteError'));
     }
   };
 
@@ -206,32 +196,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         direction="column"
         gap="xl"
       >
-        {feedbackMsg && (
-          <Box
-            padding="md"
-            rounded="xl"
-            border
-            display="flex"
-            align="center"
-            gap="tight"
-            background={feedbackMsg.type === 'success' ? 'successSoft' : 'dangerSoft'}
-            borderTone={feedbackMsg.type === 'success' ? 'success' : 'danger'}
-          >
-            {feedbackMsg.type === 'success' ? (
-              <Icon as={CheckCircle} size="lg" tone="success" />
-            ) : (
-              <Icon as={AlertCircle} size="lg" tone="danger" />
-            )}
-            <Typography
-              variant="body"
-              size="sm"
-              tone={feedbackMsg.type === 'success' ? 'successSoft' : 'dangerSoft'}
-            >
-              {feedbackMsg.text}
-            </Typography>
-          </Box>
-        )}
-
         {createdWorkshop && (
           <AdminWorkshopCalendarPanel workshopData={createdWorkshop} />
         )}

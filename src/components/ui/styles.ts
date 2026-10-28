@@ -133,6 +133,8 @@ export const Z_INDEX = {
   30: 'z-30',
   40: 'z-40',
   50: 'z-50',
+  60: 'z-[60]',
+  70: 'z-[70]',
 } as const;
 
 export const OPACITY = {

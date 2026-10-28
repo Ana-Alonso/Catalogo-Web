@@ -22,6 +22,8 @@ import { CookieBanner } from './components/consent/CookieBanner';
 import { CookieConsentProvider } from './components/consent/CookieConsentProvider';
 import { CookieSettingsModal } from './components/consent/CookieSettingsModal';
 import { ConsentAnalytics } from './components/consent/ConsentAnalytics';
+import { ToastProvider } from './components/toast/ToastProvider';
+import { ConfirmProvider } from './components/confirm/ConfirmProvider';
 import { ErrorFallback } from './components/errors/ErrorBoundary';
 import NotFoundPage from './pages/NotFoundPage';
 import { getDefaultMeta } from './seo/meta';
@@ -78,12 +80,16 @@ export function Layout({ children }: LayoutProps) {
       </head>
       <body>
         <I18nextProvider i18n={i18n}>
-          <CookieConsentProvider>
-            {children}
-            <CookieBanner />
-            <CookieSettingsModal />
-            <ConsentAnalytics />
-          </CookieConsentProvider>
+          <ToastProvider>
+            <ConfirmProvider>
+              <CookieConsentProvider>
+                {children}
+                <CookieBanner />
+                <CookieSettingsModal />
+                <ConsentAnalytics />
+              </CookieConsentProvider>
+            </ConfirmProvider>
+          </ToastProvider>
         </I18nextProvider>
         <ScrollRestoration />
         <Scripts />

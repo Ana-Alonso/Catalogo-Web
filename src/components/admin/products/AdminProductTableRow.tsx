@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Trash2, Edit3 } from 'lucide-react';
 import { Badge, Box, Button, Icon, Image, TableCell, TableRow, TextLink, Typography } from '../../ui';
+import { useConfirm } from '../../../hooks/useConfirm';
 import { formatPriceForLanguage } from '../../../i18n/formatters';
 import {
   availabilityTranslationKeys,
@@ -34,6 +35,7 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
   onEdit,
 }) => {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const currentStatus = item.status || 'disponible';
   const currency = item.currency || 'EUR';
@@ -171,14 +173,14 @@ export const AdminProductTableRow: React.FC<AdminProductTableRowProps> = ({
                 ? t('admin.productTable.etsyDeleteHint')
                 : undefined
             }
-            onClick={() => {
-              if (
-                window.confirm(
-                  t('admin.productTable.deleteConfirm', {
-                    title: item.title,
-                  })
-                )
-              ) {
+            onClick={async () => {
+              const isConfirmed = await confirm({
+                message: t('admin.productTable.deleteConfirm', { title: item.title }),
+                confirmLabel: t('common.delete'),
+                isDanger: true,
+              });
+
+              if (isConfirmed) {
                 onDelete(String(item.id));
               }
             }}

@@ -1,6 +1,7 @@
 import React, { useState, type FormEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCookieConsent } from '../../hooks/useCookieConsent';
+import { useToast } from '../../hooks/useToast';
 import { LegalLink } from '../legal/LegalLink';
 import { Badge, Box, Button, Checkbox, Typography } from '../ui';
 import { Modal } from '../ui/Modal';
@@ -62,10 +63,17 @@ const CookiePreferences: React.FC<CookiePreferencesProps> = ({ initialAnalytics,
 export const CookieSettingsModal: React.FC = () => {
   const { t } = useTranslation();
   const { isSettingsOpen, closeSettings, analyticsEnabled, savePreferences } = useCookieConsent();
+  const { success } = useToast();
+
+  const handleSave = (analytics: boolean): void => {
+    savePreferences(analytics);
+    closeSettings();
+    success(t('cookie.saved'));
+  };
 
   return (
     <Modal isOpen={isSettingsOpen} onClose={closeSettings} title={t('cookie.settingsTitle')}>
-      <CookiePreferences initialAnalytics={analyticsEnabled} onSave={savePreferences} />
+      <CookiePreferences initialAnalytics={analyticsEnabled} onSave={handleSave} />
     </Modal>
   );
 };

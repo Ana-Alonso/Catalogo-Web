@@ -13,7 +13,8 @@
     "delete": "Delete",
     "loading": "Loading...",
     "retry": "Retry",
-    "reload": "Reload page"
+    "reload": "Reload page",
+    "confirmTitle": "Confirm action"
   },
   "language": {
     "label": "Language",
@@ -173,7 +174,10 @@
     "requiredDescription": "They are needed for the website to work: they store your language and the personalised products. They do not require consent.",
     "analyticsLabel": "Google Analytics",
     "analyticsDescription": "Third-party cookies managed by Google Ireland Limited that measure visitor numbers in aggregate form. They are only installed if you accept them and you can turn them off at any time.",
-    "save": "Save preferences"
+    "save": "Save preferences",
+    "saved": "Cookie preferences saved.",
+    "accepted": "You have accepted the cookies.",
+    "rejected": "You have rejected non-essential cookies."
   },
   "legal": {
     "updatedAt": "Last updated: {{date}}"
@@ -181,6 +185,9 @@
   "a11y": {
     "skipToContent": "Skip to main content",
     "closeDialog": "Close dialog"
+  },
+  "notifications": {
+    "title": "Notifications"
   },
   "validation": {
     "titleDescription": "Please complete the title and description of the piece.",
@@ -364,6 +371,8 @@
       "cancelAria": "Cancel registration for {{name}}",
       "deleteAria": "Delete registration for {{name}}",
       "deleteConfirm": "Are you sure you want to delete the registration for \"{{name}}\"?",
+      "statusUpdated": "Registration for {{name}} updated.",
+      "deleted": "Registration for {{name}} deleted.",
       "status": {
         "pending": "Pending",
         "confirmed": "Confirmed",

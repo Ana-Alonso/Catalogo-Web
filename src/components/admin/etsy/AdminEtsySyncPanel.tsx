@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Box, Button, Card, Icon, Typography } from '../../ui';
+import { useToast } from '../../../hooks/useToast';
 import {
   EtsySyncError,
   triggerEtsySync,
@@ -10,11 +11,6 @@ import {
 
 interface AdminEtsySyncPanelProps {
   onSynced: () => Promise<void>;
-}
-
-interface SyncFeedback {
-  type: 'success' | 'error';
-  text: string;
 }
 
 const syncErrorKeys = {
@@ -26,33 +22,31 @@ const syncErrorKeys = {
 
 export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced }) => {
   const { t } = useTranslation();
+  const { success, error: notifyError } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [feedback, setFeedback] = useState<SyncFeedback | null>(null);
 
   const handleSync = async () => {
     setIsSyncing(true);
-    setFeedback(null);
 
     try {
       const result = await triggerEtsySync();
       await onSynced();
-      setFeedback({
-        type: 'success',
-        text: t('admin.etsySync.success', {
+      success(
+        t('admin.etsySync.success', {
           total: result.total,
           created: result.created,
           updated: result.updated,
           hidden: result.hidden,
-        }),
-      });
+        })
+      );
     } catch (error) {
-      const text =
+      notifyError(
         error instanceof EtsySyncError
           ? t(syncErrorKeys[error.code])
           : error instanceof Error
             ? error.message
-            : t('admin.etsySync.error');
-      setFeedback({ type: 'error', text });
+            : t('admin.etsySync.error')
+      );
     } finally {
       setIsSyncing(false);
     }
@@ -83,33 +77,6 @@ export const AdminEtsySyncPanel: React.FC<AdminEtsySyncPanelProps> = ({ onSynced
             : t('admin.etsySync.syncNow')}
         </Button>
       </Box>
-
-      {feedback && (
-        <Box
-          marginTop="md"
-          padding="tight"
-          rounded="lg"
-          border
-          display="flex"
-          align="center"
-          gap="sm"
-          background={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
-          borderTone={feedback.type === 'success' ? 'success' : 'danger'}
-        >
-          {feedback.type === 'success' ? (
-            <Icon as={CheckCircle} tone="success" shrink={false} />
-          ) : (
-            <Icon as={AlertCircle} tone="danger" shrink={false} />
-          )}
-          <Typography
-            variant="body"
-            size="sm"
-            tone={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
-          >
-            {feedback.text}
-          </Typography>
-        </Box>
-      )}
     </Card>
   );
 };

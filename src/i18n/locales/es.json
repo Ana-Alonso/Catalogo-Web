@@ -13,7 +13,8 @@
     "delete": "Eliminar",
     "loading": "Cargando...",
     "retry": "Reintentar",
-    "reload": "Recargar página"
+    "reload": "Recargar página",
+    "confirmTitle": "Confirmar acción"
   },
   "language": {
     "label": "Idioma",
@@ -173,7 +174,10 @@
     "requiredDescription": "Son necesarias para el funcionamiento de la web: guardan el idioma escolhido y los productos personalizados. No requieren consentimiento.",
     "analyticsLabel": "Google Analytics",
     "analyticsDescription": "Cookies de terceros gestionadas por Google Ireland Limited que miden de forma agregada el número de visitantes. Se instalan solo si las aceptas y puedes desactivarlas cuando quieras.",
-    "save": "Guardar preferencias"
+    "save": "Guardar preferencias",
+    "saved": "Preferencias de cookies guardadas.",
+    "accepted": "Has aceptado las cookies.",
+    "rejected": "Has rechazado las cookies no esenciales."
   },
   "legal": {
     "updatedAt": "Última actualización: {{date}}"
@@ -181,6 +185,9 @@
   "a11y": {
     "skipToContent": "Saltar al contenido principal",
     "closeDialog": "Cerrar diálogo"
+  },
+  "notifications": {
+    "title": "Notificaciones"
   },
   "validation": {
     "titleDescription": "Por favor completa el título y la descripción de la obra.",
@@ -364,6 +371,8 @@
       "cancelAria": "Cancelar inscripción de {{name}}",
       "deleteAria": "Eliminar inscripción de {{name}}",
       "deleteConfirm": "¿Seguro que deseas eliminar la inscripción de \"{{name}}\"?",
+      "statusUpdated": "Inscripción de {{name}} actualizada.",
+      "deleted": "Inscripción de {{name}} eliminada.",
       "status": {
         "pending": "Pendiente",
         "confirmed": "Confirmado",

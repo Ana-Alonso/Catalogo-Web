@@ -1,13 +1,25 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCookieConsent } from '../../hooks/useCookieConsent';
+import { useToast } from '../../hooks/useToast';
 import { LegalLink } from '../legal/LegalLink';
 import { Animated, Box, Button, Presence, Typography } from '../ui';
 
 export const CookieBanner: React.FC = () => {
   const { t } = useTranslation();
   const { status, acceptAll, rejectAll, openSettings } = useCookieConsent();
+  const { success, info } = useToast();
   const isVisible = status === 'pending';
+
+  const handleAccept = (): void => {
+    acceptAll();
+    success(t('cookie.accepted'));
+  };
+
+  const handleReject = (): void => {
+    rejectAll();
+    info(t('cookie.rejected'));
+  };
 
   return (
     <Presence>
@@ -47,10 +59,10 @@ export const CookieBanner: React.FC = () => {
               <LegalLink kind="privacy">{t('cookie.privacyLink')}</LegalLink>
             </Box>
             <Box display="flex" align="center" gap="sm" wrap marginTop="xs">
-              <Button size="sm" variant="primary" onClick={acceptAll}>
+              <Button size="sm" variant="primary" onClick={handleAccept}>
                 {t('cookie.accept')}
               </Button>
-              <Button size="sm" variant="accent" onClick={rejectAll}>
+              <Button size="sm" variant="accent" onClick={handleReject}>
                 {t('cookie.reject')}
               </Button>
               <Button size="sm" variant="ghost" onClick={openSettings}>

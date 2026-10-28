@@ -6,6 +6,7 @@ import i18n from '../../../i18n';
 import { CookieBanner } from '../CookieBanner';
 import { CookieSettingsModal } from '../CookieSettingsModal';
 import { CookieConsentProvider } from '../CookieConsentProvider';
+import { ToastProvider } from '../../toast/ToastProvider';
 import {
   OPEN_COOKIE_SETTINGS_EVENT,
   readCookieConsent,
@@ -20,10 +21,12 @@ const findScript = (): HTMLScriptElement | null =>
 const renderConsent = () =>
   render(
     <MemoryRouter initialEntries={['/es']}>
-      <CookieConsentProvider>
-        <CookieBanner />
-        <CookieSettingsModal />
-      </CookieConsentProvider>
+      <ToastProvider>
+        <CookieConsentProvider>
+          <CookieBanner />
+          <CookieSettingsModal />
+        </CookieConsentProvider>
+      </ToastProvider>
     </MemoryRouter>
   );
 
@@ -113,5 +116,16 @@ describe('CookieBanner', () => {
     await waitFor(() => expect(findScript()).toBeNull());
     expect(readCookieConsent()?.analytics).toBe(false);
     expect(window.gtag).toBeUndefined();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(await screen.findByText(i18n.t('cookie.saved'))).toBeInTheDocument();
+  });
+
+  it('confirma con un aviso cada decisión de la barra', async () => {
+    const user = userEvent.setup();
+    renderConsent();
+
+    await user.click(screen.getByRole('button', { name: i18n.t('cookie.accept') }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(i18n.t('cookie.accepted'));
   });
 });

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import i18n from '../../../../i18n';
 import AdminEtsyOffersPanel from '../AdminEtsyOffersPanel';
+import ToastProvider from '../../../toast/ToastProvider';
 import type { CatalogItem } from '../../../../types/catalog';
 
 const etsyProduct = (overrides: Partial<CatalogItem>): CatalogItem => ({
@@ -31,7 +32,9 @@ const renderPanel = (
 ) => {
   render(
     <MemoryRouter>
-      <AdminEtsyOffersPanel products={products} onApply={onApply} />
+      <ToastProvider>
+        <AdminEtsyOffersPanel products={products} onApply={onApply} />
+      </ToastProvider>
     </MemoryRouter>
   );
   return onApply;
@@ -62,13 +65,13 @@ describe('AdminEtsyOffersPanel', () => {
 
     expect(onApply).toHaveBeenCalledWith(true);
     expect(
-      await screen.findByText(
-        i18n.t('admin.etsyOffers.applied', {
-          affected: 2,
-          state: i18n.t('admin.etsyOffers.stateOn'),
-        })
-      )
-    ).toBeInTheDocument();
+      await screen.findByRole('status')
+    ).toHaveTextContent(
+      i18n.t('admin.etsyOffers.applied', {
+        affected: 2,
+        state: i18n.t('admin.etsyOffers.stateOn'),
+      })
+    );
   });
 
   it('permite quitar la oferta a todas', async () => {
@@ -91,8 +94,8 @@ describe('AdminEtsyOffersPanel', () => {
     );
 
     expect(
-      await screen.findByText(i18n.t('admin.etsyOffers.error'))
-    ).toBeInTheDocument();
+      await screen.findByRole('alert')
+    ).toHaveTextContent(i18n.t('admin.etsyOffers.error'));
   });
 
   it('bloquea las acciones si el catálogo aún no tiene productos de Etsy', () => {

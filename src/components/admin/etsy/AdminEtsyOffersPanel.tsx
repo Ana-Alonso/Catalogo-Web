@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, CheckCircle, Tag, X } from 'lucide-react';
+import { Tag, X } from 'lucide-react';
 import { Box, Button, Card, Icon, Typography } from '../../ui';
+import { useToast } from '../../../hooks/useToast';
 import { isEtsyOffer } from '../../../utils/price';
 import type { CatalogItem } from '../../../types/catalog';
 
@@ -10,43 +11,37 @@ interface AdminEtsyOffersPanelProps {
   onApply: (onSale: boolean) => Promise<number | null>;
 }
 
-interface OfferFeedback {
-  type: 'success' | 'error';
-  text: string;
-}
-
 export const AdminEtsyOffersPanel: React.FC<AdminEtsyOffersPanelProps> = ({
   products,
   onApply,
 }) => {
   const { t } = useTranslation();
+  const { success, error: notifyError } = useToast();
   const [isApplying, setIsApplying] = useState(false);
-  const [feedback, setFeedback] = useState<OfferFeedback | null>(null);
 
   const etsyProducts = products.filter((item) => item.source === 'etsy');
   const onSaleCount = etsyProducts.filter(isEtsyOffer).length;
 
   const handleApply = async (onSale: boolean) => {
     setIsApplying(true);
-    setFeedback(null);
 
     const affected = await onApply(onSale);
     setIsApplying(false);
 
-    setFeedback(
-      affected === null
-        ? { type: 'error', text: t('admin.etsyOffers.error') }
-        : {
-            type: 'success',
-            text: t('admin.etsyOffers.applied', {
-              affected,
-              state: t(
-                onSale
-                  ? 'admin.etsyOffers.stateOn'
-                  : 'admin.etsyOffers.stateOff'
-              ),
-            }),
-          }
+    if (affected === null) {
+      notifyError(t('admin.etsyOffers.error'));
+      return;
+    }
+
+    success(
+      t('admin.etsyOffers.applied', {
+        affected,
+        state: t(
+          onSale
+            ? 'admin.etsyOffers.stateOn'
+            : 'admin.etsyOffers.stateOff'
+        ),
+      })
     );
   };
 
@@ -91,32 +86,6 @@ export const AdminEtsyOffersPanel: React.FC<AdminEtsyOffersPanelProps> = ({
             {t('admin.etsyOffers.clearAll')}
           </Button>
         </Box>
-
-        {feedback && (
-          <Box
-            padding="tight"
-            rounded="lg"
-            border
-            display="flex"
-            align="center"
-            gap="sm"
-            background={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
-            borderTone={feedback.type === 'success' ? 'success' : 'danger'}
-          >
-            {feedback.type === 'success' ? (
-              <Icon as={CheckCircle} tone="success" shrink={false} />
-            ) : (
-              <Icon as={AlertCircle} tone="danger" shrink={false} />
-            )}
-            <Typography
-              variant="body"
-              size="sm"
-              tone={feedback.type === 'success' ? 'successSoft' : 'dangerSoft'}
-            >
-              {feedback.text}
-            </Typography>
-          </Box>
-        )}
       </Box>
     </Card>
   );

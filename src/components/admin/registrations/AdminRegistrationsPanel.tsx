@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, X, Trash2, Users, ClipboardList } from 'lucide-react';
-import { Badge, Box, Button, Card, ErrorState, Icon, Typography } from '../../ui';
+import { Users, ClipboardList } from 'lucide-react';
+import { Badge, Box, Card, ErrorState, Icon, Typography } from '../../ui';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
+import { RegistrationRowActions } from './RegistrationRowActions';
 import { getIntlLocale } from '../../../i18n/languages';
 import { registrationStatusTranslationKeys } from '../../../i18n/labels';
 import type { CatalogItem } from '../../../types/catalog';
@@ -168,50 +169,11 @@ export const AdminRegistrationsPanel: React.FC<AdminRegistrationsPanelProps> = (
                             {t('admin.registrations.marketingBadge')}
                           </Badge>
                         )}
-                        {registration.status !== 'confirmado' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => void onSetStatus(registration.id, 'confirmado')}
-                            aria-label={t('admin.registrations.confirmAria', {
-                              name: registration.name,
-                            })}
-                          >
-                            <Icon as={Check} tone="success" />
-                          </Button>
-                        )}
-                        {registration.status !== 'cancelado' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => void onSetStatus(registration.id, 'cancelado')}
-                            aria-label={t('admin.registrations.cancelAria', {
-                              name: registration.name,
-                            })}
-                          >
-                            <Icon as={X} tone="warning" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                t('admin.registrations.deleteConfirm', {
-                                  name: registration.name,
-                                })
-                              )
-                            ) {
-                              void onDelete(registration.id);
-                            }
-                          }}
-                          aria-label={t('admin.registrations.deleteAria', {
-                            name: registration.name,
-                          })}
-                        >
-                          <Icon as={Trash2} tone="danger" />
-                        </Button>
+                        <RegistrationRowActions
+                          registration={registration}
+                          onSetStatus={onSetStatus}
+                          onDelete={onDelete}
+                        />
                       </Box>
                     </Box>
                   ))}
