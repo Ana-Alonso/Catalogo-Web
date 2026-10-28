@@ -72,6 +72,7 @@ describe('CookieBanner', () => {
     await user.click(screen.getByRole('button', { name: i18n.t('cookie.reject') }));
 
     await waitFor(() => expect(banner()).toBeNull());
+    expect(screen.queryByRole('status')).toBeNull();
     expect(readCookieConsent()?.analytics).toBe(false);
     expect(findScript()).toBeNull();
     expect(window.gtag).toBeUndefined();
@@ -120,7 +121,7 @@ describe('CookieBanner', () => {
     expect(await screen.findByText(i18n.t('cookie.saved'))).toBeInTheDocument();
   });
 
-  it('confirma con un aviso cada decisión de la barra', async () => {
+  it('confirma con un aviso solo al aceptar las cookies', async () => {
     const user = userEvent.setup();
     renderConsent();
 

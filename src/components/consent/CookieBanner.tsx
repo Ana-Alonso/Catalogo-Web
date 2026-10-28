@@ -8,7 +8,7 @@ import { Animated, Box, Button, Presence, Typography } from '../ui';
 export const CookieBanner: React.FC = () => {
   const { t } = useTranslation();
   const { status, acceptAll, rejectAll, openSettings } = useCookieConsent();
-  const { success, info } = useToast();
+  const { success } = useToast();
   const isVisible = status === 'pending';
 
   const handleAccept = (): void => {
@@ -18,7 +18,6 @@ export const CookieBanner: React.FC = () => {
 
   const handleReject = (): void => {
     rejectAll();
-    info(t('cookie.rejected'));
   };
 
   return (
