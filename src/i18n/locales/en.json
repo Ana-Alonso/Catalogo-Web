@@ -296,6 +296,7 @@
       "invalidCredentials": "Incorrect email or password.",
       "notAdmin": "You don't have permission to access the panel.",
       "authNotConfigured": "Authentication is not configured for this deployment.",
+      "rateLimited": "Too many attempts. Try again later.",
       "unknownError": "Could not sign in."
     },
     "feedback": {

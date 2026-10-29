@@ -8,7 +8,13 @@ interface SignInResult {
   errorKey?:
     | 'admin.login.invalidCredentials'
     | 'admin.login.notAdmin'
-    | 'admin.login.authNotConfigured';
+    | 'admin.login.authNotConfigured'
+    | 'admin.login.rateLimited';
+}
+
+interface SessionPayload {
+  access_token?: string;
+  refresh_token?: string;
 }
 
 interface UseAdminAuthReturn {
@@ -59,18 +65,47 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         return { success: false, errorKey: 'admin.login.authNotConfigured' };
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const normalizedEmail = email.trim().toLowerCase();
 
-      if (error) {
+      const response = await fetch('/api/admin-session', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password }),
+      }).catch(() => null);
+
+      if (!response) {
+        return { success: false };
+      }
+
+      if (response.status === 429) {
+        return { success: false, errorKey: 'admin.login.rateLimited' };
+      }
+
+      if (response.status === 403) {
+        return { success: false, errorKey: 'admin.login.notAdmin' };
+      }
+
+      if (response.status === 400 || response.status === 401) {
         return { success: false, errorKey: 'admin.login.invalidCredentials' };
       }
 
-      if (!isAdminUser(data.user)) {
-        await supabase.auth.signOut();
-        return { success: false, errorKey: 'admin.login.notAdmin' };
+      if (!response.ok) {
+        return { success: false };
+      }
+
+      const session = (await response.json().catch(() => null)) as SessionPayload | null;
+
+      if (!session?.access_token || !session.refresh_token) {
+        return { success: false };
+      }
+
+      const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+
+      if (error) {
+        return { success: false };
       }
 
       return { success: true };

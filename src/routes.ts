@@ -13,6 +13,9 @@ export default [
   route('api/registrations', 'routes/api/registrations.ts', {
     id: 'routes/api/registrations',
   }),
+  route('api/admin-session', 'routes/api/admin-session.ts', {
+    id: 'routes/api/admin-session',
+  }),
   route('es', 'routes/language-layout.tsx', { id: 'routes/es' }, [
     index('routes/catalog.tsx', { id: 'routes/es/catalog' }),
     route('privacidad', 'routes/legal/privacy.tsx', { id: 'routes/es/privacy' }),

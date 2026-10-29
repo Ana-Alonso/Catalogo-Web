@@ -296,6 +296,7 @@
       "invalidCredentials": "Email o contraseña incorrectos.",
       "notAdmin": "No tienes permisos para acceder al panel.",
       "authNotConfigured": "La autenticación no está configurada en este despliegue.",
+      "rateLimited": "Demasiados intentos. Vuelve a probar más tarde.",
       "unknownError": "Error al iniciar sesión."
     },
     "feedback": {
