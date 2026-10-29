@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAdminAuth } from './useAdminAuth';
-import { isMockMode } from '../utils/supabase';
+import { isMockAuthEnabled } from '../utils/supabase';
 
 export const useAdminSession = () => {
   const { t } = useTranslation();
   const { user, isAdmin, isLoading, signIn, signOut } = useAdminAuth();
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const isAuthenticated = isMockMode || (user !== null && isAdmin);
+  const isAuthenticated = isMockAuthEnabled || (user !== null && isAdmin);
 
   const handleLogin = async (email: string, password: string) => {
     const result = await signIn(email, password);

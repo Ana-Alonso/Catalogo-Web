@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { User } from '@supabase/supabase-js';
-import { isAdminUser } from '../adminAccess';
+import { canUseDemoAccess, isAdminUser } from '../adminAccess';
 
 const buildUser = (overrides: Partial<User> = {}): User => ({
   id: 'user-1',
@@ -44,5 +44,20 @@ describe('isAdminUser', () => {
     expect(
       isAdminUser(buildUser({ app_metadata: null as unknown as User['app_metadata'] }))
     ).toBe(false);
+  });
+});
+
+describe('canUseDemoAccess', () => {
+  it('permite la demo solo con mocks en desarrollo', () => {
+    expect(canUseDemoAccess(true, true)).toBe(true);
+  });
+
+  it('bloquea la demo en una build de producción', () => {
+    expect(canUseDemoAccess(true, false)).toBe(false);
+  });
+
+  it('bloquea la demo sin mocks', () => {
+    expect(canUseDemoAccess(false, true)).toBe(false);
+    expect(canUseDemoAccess(false, false)).toBe(false);
   });
 });
