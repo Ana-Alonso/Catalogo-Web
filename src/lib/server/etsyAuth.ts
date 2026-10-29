@@ -181,8 +181,12 @@ export const getEtsyAccessToken = async (
 
 export const markEtsySync = async (): Promise<void> => {
   const supabase = createSupabaseAdmin();
-  await supabase
+  const { error } = await supabase
     .from('etsy_credentials')
     .update({ last_synced_at: new Date().toISOString() })
     .eq('id', 1);
+
+  if (error) {
+    console.error('[etsy-auth]', error.message);
+  }
 };
