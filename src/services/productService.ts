@@ -1,111 +1,43 @@
-import { supabase, isSupabaseConfigured } from '../utils/supabase';
+import { isSupabaseConfigured, supabase } from '../utils/supabase';
 import { validateImageFile } from '../utils/imageValidation';
-import { parsePriceToCents } from '../utils/price';
 import { resolvePurchaseLinks } from '../utils/productLinks';
-import { toUtcDeadline } from '../utils/deadlineTime';
-import { mockCatalogItems } from '../mocks/catalogMocks';
-import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
-import { hasMarketingConsentRegistrations } from './registrationService';
+import {
+  resolveCancelledReset,
+  resolvePriceFields,
+  resolveWorkshopFields,
+  resolveWorkshopPayload,
+} from '../utils/productFormPayload';
+import {
+  createLocalProduct,
+  deleteLocalProduct,
+  fetchLocalProducts,
+  setAllLocalEtsyOffers,
+  setLocalVisibility,
+  setLocalWorkshopCancelled,
+  updateLocalEtsyMetadata,
+  updateLocalProduct,
+} from './localProductStore';
+import {
+  createRemoteProduct,
+  deleteRemoteProduct,
+  fetchRemoteProducts,
+  setAllRemoteEtsyOffers,
+  setRemoteVisibility,
+  setRemoteWorkshopCancelled,
+  uploadRemoteImage,
+  updateRemoteEtsyMetadata,
+  updateRemoteProduct,
+} from './productSupabaseStore';
 import type {
   CatalogItem,
   EtsyProductMetadata,
   ProductFormData,
 } from '../types/catalog';
 
-const STORAGE_BUCKET = 'products';
-const LOCAL_STORAGE_KEY = MOCK_STORAGE_KEYS.products;
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
 
-const parseCupo = (value?: string): number | null => {
-  if (!value || !value.trim()) {
-    return null;
-  }
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
-
-interface WorkshopFields {
-  eventDate?: string;
-  eventLocation?: string;
-  cupo: number | null;
-  registrationDeadline: string | null;
-}
-
-const resolveWorkshopFields = (formData: ProductFormData): WorkshopFields => ({
-  eventDate: formData.eventDate?.trim() || undefined,
-  eventLocation: formData.eventLocation?.trim() || undefined,
-  cupo: parseCupo(formData.cupo),
-  registrationDeadline: toUtcDeadline(formData.registrationDeadline) ?? null,
-});
-
-const resolveWorkshopPayload = (formData: ProductFormData): Record<string, unknown> => {
-  if (formData.category !== 'talleres') {
-    return {};
-  }
-
-  const fields = resolveWorkshopFields(formData);
-
-  return {
-    eventDate: fields.eventDate ?? null,
-    eventLocation: fields.eventLocation ?? null,
-    cupo: fields.cupo,
-    registrationDeadline: fields.registrationDeadline,
-  };
-};
-
-const resolveCancelledReset = (formData: ProductFormData): Record<string, unknown> =>
-  formData.category === 'talleres' ? {} : { workshopCancelled: false };
-
-interface LocalPriceFields {
-  priceCents: number | null;
-  currency: string;
-  discountPercent: number | null;
-}
-
-const resolvePriceFields = (formData: ProductFormData): LocalPriceFields => {
-  const priceCents = parsePriceToCents(formData.price);
-
-  if (formData.price?.trim() && priceCents == null) {
-    throw new Error('El precio introducido no es válido.');
-  }
-
-  if (!formData.discountPercent?.trim()) {
-    return { priceCents, currency: 'EUR', discountPercent: null };
-  }
-
-  const discountPercent = Number(formData.discountPercent.replace(',', '.'));
-
-  if (
-    !Number.isInteger(discountPercent) ||
-    discountPercent < 1 ||
-    discountPercent > 90
-  ) {
-    throw new Error('El descuento debe ser un número entero entre 1 y 90.');
-  }
-
-  if (priceCents == null) {
-    throw new Error('Para aplicar un descuento primero debes indicar un precio.');
-  }
-
-  return { priceCents, currency: 'EUR', discountPercent };
-};
-
-const getStoredLocalProducts = (): CatalogItem[] => {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveStoredLocalProducts = (items: CatalogItem[]): void => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    return;
-  }
-};
+const isRemote = (): boolean =>
+  !useMocks && isSupabaseConfigured && supabase !== null;
 
 export const fetchProducts = async (): Promise<CatalogItem[]> => {
   if (!useMocks) {
@@ -113,23 +45,10 @@ export const fetchProducts = async (): Promise<CatalogItem[]> => {
       return [];
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      throw error;
-    }
-
-    return (data || []) as CatalogItem[];
+    return fetchRemoteProducts();
   }
 
-  const localItems = getStoredLocalProducts();
-  if (localItems.length > 0) {
-    return localItems;
-  }
-  return mockCatalogItems;
+  return fetchLocalProducts();
 };
 
 export const uploadProductImage = async (file: File): Promise<string> => {
@@ -139,23 +58,7 @@ export const uploadProductImage = async (file: File): Promise<string> => {
   }
 
   if (isSupabaseConfigured && supabase) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `items/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(filePath, file);
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from(STORAGE_BUCKET)
-      .getPublicUrl(filePath);
-
-    return publicUrlData.publicUrl;
+    return uploadRemoteImage(file);
   }
 
   return new Promise((resolve, reject) => {
@@ -166,7 +69,9 @@ export const uploadProductImage = async (file: File): Promise<string> => {
   });
 };
 
-export const createProduct = async (formData: ProductFormData): Promise<CatalogItem> => {
+export const createProduct = async (
+  formData: ProductFormData
+): Promise<CatalogItem> => {
   let imageUrl = formData.imageUrl || '';
   const priceFields = resolvePriceFields(formData);
   const purchaseLinks = resolvePurchaseLinks(
@@ -194,45 +99,11 @@ export const createProduct = async (formData: ProductFormData): Promise<CatalogI
     created_at: new Date().toISOString()
   };
 
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .insert([
-        {
-          title: newProduct.title,
-          description: newProduct.description,
-          category: newProduct.category,
-          image: newProduct.image,
-          etsyLink: newProduct.etsyLink || null,
-          vintedLink: newProduct.vintedLink || null,
-          priceCents: newProduct.priceCents ?? null,
-          currency: newProduct.currency,
-          discountPercent: newProduct.discountPercent ?? null,
-          source: 'local',
-          isVisible: true,
-          status: newProduct.status,
-          eventDate: newProduct.eventDate || null,
-          eventLocation: newProduct.eventLocation || null,
-          cupo: newProduct.cupo ?? null,
-          ...(newProduct.category === 'talleres'
-            ? { registrationDeadline: newProduct.registrationDeadline ?? null }
-            : {})
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return data as CatalogItem;
+  if (isRemote()) {
+    return createRemoteProduct(newProduct);
   }
 
-  const currentLocals = getStoredLocalProducts();
-  const updated = [newProduct, ...currentLocals];
-  saveStoredLocalProducts(updated);
-  return newProduct;
+  return createLocalProduct(newProduct);
 };
 
 export const updateProduct = async (
@@ -251,185 +122,68 @@ export const updateProduct = async (
     imageUrl = await uploadProductImage(formData.imageFile);
   }
 
-  if (!useMocks && isSupabaseConfigured && supabase) {
+  const updates = {
+    title: formData.title.trim(),
+    description: formData.description.trim(),
+    category: formData.category,
+    etsyLink: purchaseLinks.etsyLink ?? null,
+    vintedLink: purchaseLinks.vintedLink ?? null,
+    ...priceFields,
+    status: formData.status,
+  };
+
+  if (isRemote()) {
     const payload: Record<string, unknown> = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      category: formData.category,
-      etsyLink: purchaseLinks.etsyLink ?? null,
-      vintedLink: purchaseLinks.vintedLink ?? null,
-      ...priceFields,
-      status: formData.status,
+      ...updates,
       ...resolveWorkshopPayload(formData),
-      ...resolveCancelledReset(formData)
+      ...resolveCancelledReset(formData),
     };
 
     if (imageUrl) {
       payload.image = imageUrl;
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .update(payload)
-      .eq('id', id)
-      .eq('source', 'local')
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        throw new Error('Los productos de Etsy se editan desde Etsy.');
-      }
-      throw error;
-    }
-
-    return data as CatalogItem;
+    return updateRemoteProduct(id, payload);
   }
 
-  const currentLocals = getStoredLocalProducts();
-  const updatedLocals = currentLocals.map((item) => {
-    if (item.id === id) {
-      return {
-        ...item,
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        category: formData.category,
-        image: imageUrl || item.image,
-        etsyLink: purchaseLinks.etsyLink ?? null,
-        vintedLink: purchaseLinks.vintedLink ?? null,
-        ...priceFields,
-        status: formData.status,
-        ...resolveWorkshopFields(formData),
-        ...resolveCancelledReset(formData)
-      };
-    }
-    return item;
-  });
+  const workshopFields = resolveWorkshopFields(formData);
 
-  saveStoredLocalProducts(updatedLocals);
-  const found = updatedLocals.find((item) => item.id === id);
-  if (!found) {
-    return {
-      id,
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      category: formData.category,
-      image: imageUrl,
-      etsyLink: purchaseLinks.etsyLink ?? null,
-      vintedLink: purchaseLinks.vintedLink ?? null,
-      ...priceFields,
-      status: formData.status,
-      ...resolveWorkshopFields(formData)
-    };
-  }
-  return found;
+  return updateLocalProduct(
+    id,
+    imageUrl,
+    { ...updates, ...workshopFields },
+    { ...updates, ...workshopFields, ...resolveCancelledReset(formData) }
+  );
 };
 
 export const setProductVisibility = async (
   id: string,
   isVisible: boolean
 ): Promise<CatalogItem> => {
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ isVisible })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return data as CatalogItem;
+  if (isRemote()) {
+    return setRemoteVisibility(id, isVisible);
   }
 
-  const currentProducts = getStoredLocalProducts();
-  let updatedProduct: CatalogItem | null = null;
-
-  const updatedProducts = currentProducts.map((item) => {
-    if (item.id !== id) {
-      return item;
-    }
-    updatedProduct = { ...item, isVisible };
-    return updatedProduct;
-  });
-
-  saveStoredLocalProducts(updatedProducts);
-
-  if (!updatedProduct) {
-    throw new Error('Producto no encontrado.');
-  }
-
-  return updatedProduct;
+  return setLocalVisibility(id, isVisible);
 };
 
 export const setWorkshopCancelled = async (
   id: string,
   isCancelled: boolean
 ): Promise<CatalogItem> => {
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ workshopCancelled: isCancelled })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return data as CatalogItem;
+  if (isRemote()) {
+    return setRemoteWorkshopCancelled(id, isCancelled);
   }
 
-  const currentProducts = getStoredLocalProducts();
-  let updatedProduct: CatalogItem | null = null;
-
-  const updatedProducts = currentProducts.map((item) => {
-    if (item.id !== id) {
-      return item;
-    }
-    updatedProduct = { ...item, workshopCancelled: isCancelled };
-    return updatedProduct;
-  });
-
-  saveStoredLocalProducts(updatedProducts);
-
-  if (!updatedProduct) {
-    throw new Error('Producto no encontrado.');
-  }
-
-  return updatedProduct;
+  return setLocalWorkshopCancelled(id, isCancelled);
 };
 
 export const deleteProduct = async (id: string): Promise<void> => {
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id)
-      .eq('source', 'local')
-      .select('id');
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data || data.length === 0) {
-      throw new Error('Los productos de Etsy se gestionan desde Etsy.');
-    }
-    return;
+  if (isRemote()) {
+    return deleteRemoteProduct(id);
   }
 
-  const currentLocals = getStoredLocalProducts();
-
-  if (hasMarketingConsentRegistrations(id)) {
-    throw new Error('marketing_consent_protected');
-  }
-
-  const updated = currentLocals.filter((item) => item.id !== id);
-  saveStoredLocalProducts(updated);
+  return deleteLocalProduct(id);
 };
 
 export const updateEtsyProductMetadata = async (
@@ -440,72 +194,17 @@ export const updateEtsyProductMetadata = async (
     throw new Error('Los talleres no pueden sincronizarse desde Etsy.');
   }
 
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({
-        category: metadata.category,
-        etsyOnSale: metadata.etsyOnSale,
-      })
-      .eq('id', id)
-      .eq('source', 'etsy')
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return data as CatalogItem;
+  if (isRemote()) {
+    return updateRemoteEtsyMetadata(id, metadata);
   }
 
-  const currentLocals = getStoredLocalProducts();
-  let updatedProduct: CatalogItem | null = null;
-
-  const updatedLocals = currentLocals.map((item) => {
-    if (item.id !== id) {
-      return item;
-    }
-    updatedProduct = {
-      ...item,
-      category: metadata.category,
-      etsyOnSale: metadata.etsyOnSale,
-    };
-    return updatedProduct;
-  });
-
-  saveStoredLocalProducts(updatedLocals);
-
-  if (!updatedProduct) {
-    throw new Error('Producto no encontrado.');
-  }
-
-  return updatedProduct;
+  return updateLocalEtsyMetadata(id, metadata);
 };
 
 export const setAllEtsyOffers = async (onSale: boolean): Promise<number> => {
-  if (!useMocks && isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ etsyOnSale: onSale })
-      .eq('source', 'etsy')
-      .select('id');
-
-    if (error) {
-      throw error;
-    }
-
-    return (data ?? []).length;
+  if (isRemote()) {
+    return setAllRemoteEtsyOffers(onSale);
   }
 
-  const currentProducts = getStoredLocalProducts();
-  const updatedProducts = currentProducts.map((item) =>
-    item.source === 'etsy' ? { ...item, etsyOnSale: onSale } : item
-  );
-
-  saveStoredLocalProducts(updatedProducts);
-
-  return updatedProducts.filter(
-    (item) => item.source === 'etsy' && item.etsyOnSale === onSale
-  ).length;
+  return setAllLocalEtsyOffers(onSale);
 };
