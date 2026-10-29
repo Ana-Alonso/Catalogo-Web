@@ -64,7 +64,7 @@ const loadConfiguredHook = async () => {
   vi.resetModules();
   vi.doMock('../../utils/supabase', () => ({
     isSupabaseConfigured: true,
-    isMockMode: false,
+    isMockAuthEnabled: false,
     supabase: clientMock,
   }));
   vi.stubGlobal('fetch', fetchMock);
