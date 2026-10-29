@@ -13,61 +13,44 @@ import { Box, Container } from '../ui';
 import { useAdminTab } from '../../hooks/useAdminTab';
 import { useAdminCollections } from '../../hooks/useAdminCollections';
 import { useAdminMutations } from '../../hooks/useAdminMutations';
+import { useProducts } from '../../hooks/useProducts';
+import { useRegistrations } from '../../hooks/useRegistrations';
 import { isSupabaseConfigured } from '../../utils/supabase';
-import type {
-  CatalogItem,
-  EtsyProductMetadata,
-  ProductFormData,
-} from '../../types/catalog';
-import type { WorkshopRegistration, RegistrationStatus } from '../../types/registrations';
+import type { CatalogItem } from '../../types/catalog';
 
 export interface AdminDashboardProps {
-  products: CatalogItem[];
-  registrations: WorkshopRegistration[];
-  isLoadingProducts: boolean;
-  productsError: string | null;
-  isLoadingRegistrations: boolean;
-  registrationsError: string | null;
-  onAddProduct: (data: ProductFormData) => Promise<boolean>;
-  onEditProduct: (id: string, data: ProductFormData) => Promise<boolean>;
-  onEditEtsyMetadata: (id: string, metadata: EtsyProductMetadata) => Promise<boolean>;
-  onApplyEtsyOffers: (onSale: boolean) => Promise<number | null>;
-  onDeleteProduct: (id: string) => Promise<boolean>;
-  onSetProductVisibility: (id: string, isVisible: boolean) => Promise<boolean>;
-  onRefreshProducts: () => Promise<void>;
-  onRefreshRegistrations: () => Promise<void>;
-  onSetRegistrationStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
-  onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
-  onDeleteRegistration: (id: string) => Promise<boolean>;
-  onCancelWorkshop: (id: string) => Promise<boolean>;
-  onRestoreWorkshop: (id: string) => Promise<boolean>;
   onClose: () => void;
   onLogout: () => void;
 }
 
 export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
-  products,
-  registrations,
-  isLoadingProducts,
-  productsError,
-  isLoadingRegistrations,
-  registrationsError,
-  onAddProduct,
-  onEditProduct,
-  onEditEtsyMetadata,
-  onApplyEtsyOffers,
-  onDeleteProduct,
-  onSetProductVisibility,
-  onRefreshProducts,
-  onRefreshRegistrations,
-  onSetRegistrationStatus,
-  onWithdrawMarketingConsent,
-  onDeleteRegistration,
-  onCancelWorkshop,
-  onRestoreWorkshop,
   onClose,
   onLogout
 }) => {
+  const {
+    products,
+    isLoading: isLoadingProducts,
+    error: productsError,
+    addProduct,
+    editProduct,
+    editEtsyMetadata,
+    applyEtsyOffers,
+    removeProduct,
+    setVisibility,
+    cancelWorkshop,
+    restoreWorkshop,
+    refreshProducts,
+  } = useProducts();
+  const {
+    registrations,
+    isLoading: isLoadingRegistrations,
+    error: registrationsError,
+    setStatus,
+    remove,
+    withdrawMarketingConsent,
+    cancelWorkshopRegistrations,
+    refreshRegistrations,
+  } = useRegistrations();
   const { activeTab, setTab } = useAdminTab();
   const {
     visibleProducts,
@@ -92,13 +75,15 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
     handleCancelWorkshop,
     handleRestoreWorkshop,
   } = useAdminMutations({
-    onAddProduct,
-    onEditProduct,
-    onEditEtsyMetadata,
-    onDeleteProduct,
-    onSetProductVisibility,
-    onCancelWorkshop,
-    onRestoreWorkshop,
+    onAddProduct: addProduct,
+    onEditProduct: editProduct,
+    onEditEtsyMetadata: editEtsyMetadata,
+    onDeleteProduct: removeProduct,
+    onSetProductVisibility: setVisibility,
+    onCancelWorkshop: cancelWorkshop,
+    onRestoreWorkshop: restoreWorkshop,
+    onCancelWorkshopRegistrations: cancelWorkshopRegistrations,
+    onRefreshRegistrations: refreshRegistrations,
   });
 
   const handleEditProduct = (product: CatalogItem) => {
@@ -132,12 +117,12 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
             )}
 
             {isSupabaseConfigured && (
-              <AdminEtsySyncPanel onSynced={onRefreshProducts} />
+              <AdminEtsySyncPanel onSynced={refreshProducts} />
             )}
 
             <AdminEtsyOffersPanel
               products={products}
-              onApply={onApplyEtsyOffers}
+              onApply={applyEtsyOffers}
             />
 
             <Box id="admin-product-form" className="scroll-mt-24">
@@ -173,7 +158,7 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
             isUpdatingVisibility={isUpdatingVisibility}
             isLoading={isLoadingProducts}
             error={productsError}
-            onRetry={onRefreshProducts}
+            onRetry={refreshProducts}
           />
         )}
 
@@ -184,12 +169,12 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
             isLoading={isLoadingRegistrations}
             error={registrationsError}
             isUpdatingVisibility={isUpdatingVisibility}
-            onRetry={onRefreshRegistrations}
+            onRetry={refreshRegistrations}
             onEdit={handleEditProduct}
             onSetVisibility={handleSetVisibility}
-            onSetStatus={onSetRegistrationStatus}
-            onWithdrawMarketingConsent={onWithdrawMarketingConsent}
-            onDeleteRegistration={onDeleteRegistration}
+            onSetStatus={setStatus}
+            onWithdrawMarketingConsent={withdrawMarketingConsent}
+            onDeleteRegistration={remove}
             onCancelWorkshop={handleCancelWorkshop}
             isCancellingWorkshop={isCancellingWorkshop}
             onRestoreWorkshop={handleRestoreWorkshop}
@@ -206,13 +191,13 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
             isDeleting={isDeleting}
             isUpdatingVisibility={isUpdatingVisibility}
             protectedProductIds={protectedProductIds}
-            onRetry={onRefreshProducts}
+            onRetry={refreshProducts}
             onDelete={handleDelete}
             onEdit={handleEditProduct}
             onSetVisibility={handleSetVisibility}
-            onSetStatus={onSetRegistrationStatus}
-            onWithdrawMarketingConsent={onWithdrawMarketingConsent}
-            onDeleteRegistration={onDeleteRegistration}
+            onSetStatus={setStatus}
+            onWithdrawMarketingConsent={withdrawMarketingConsent}
+            onDeleteRegistration={remove}
           />
         )}
       </Container>

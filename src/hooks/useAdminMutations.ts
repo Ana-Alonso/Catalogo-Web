@@ -15,6 +15,8 @@ interface AdminMutations {
   onSetProductVisibility: (id: string, isVisible: boolean) => Promise<boolean>;
   onCancelWorkshop: (id: string) => Promise<boolean>;
   onRestoreWorkshop: (id: string) => Promise<boolean>;
+  onCancelWorkshopRegistrations: (id: string) => Promise<boolean>;
+  onRefreshRegistrations: () => Promise<void>;
 }
 
 export const useAdminMutations = ({
@@ -25,6 +27,8 @@ export const useAdminMutations = ({
   onSetProductVisibility,
   onCancelWorkshop,
   onRestoreWorkshop,
+  onCancelWorkshopRegistrations,
+  onRefreshRegistrations,
 }: AdminMutations) => {
   const { t } = useTranslation();
   const { success: notifySuccess, error: notifyError } = useToast();
@@ -131,8 +135,22 @@ export const useAdminMutations = ({
   };
 
   const handleCancelWorkshop = async (workshop: CatalogItem) => {
+    const id = String(workshop.id);
+
     setIsCancellingWorkshop(true);
-    const isCancelled = await onCancelWorkshop(String(workshop.id));
+
+    const isMarked = await onCancelWorkshop(id);
+    let isCancelled = false;
+
+    if (isMarked) {
+      isCancelled = await onCancelWorkshopRegistrations(id);
+      await onRefreshRegistrations();
+
+      if (!isCancelled) {
+        await onRestoreWorkshop(id);
+      }
+    }
+
     setIsCancellingWorkshop(false);
 
     if (isCancelled) {
