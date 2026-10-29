@@ -5,6 +5,7 @@ import {
   readRegistrationRow,
 } from '../utils/registrationResponse';
 import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
+import { createLocalStore } from './localStore';
 import type {
   WorkshopRegistration,
   RegistrationFormData,
@@ -13,23 +14,7 @@ import type {
 
 const LOCAL_STORAGE_KEY = MOCK_STORAGE_KEYS.registrations;
 const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
-
-const getStoredLocalRegistrations = (): WorkshopRegistration[] => {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as WorkshopRegistration[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveStoredLocalRegistrations = (items: WorkshopRegistration[]): void => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    return;
-  }
-};
+const registrationStore = createLocalStore<WorkshopRegistration>(LOCAL_STORAGE_KEY);
 
 const mapRegistrationError = (
   code: string | undefined,
@@ -54,11 +39,11 @@ export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
     return (data || []) as WorkshopRegistration[];
   }
 
-  return getStoredLocalRegistrations();
+  return registrationStore.read();
 };
 
 export const hasMarketingConsentRegistrations = (productId: string): boolean =>
-  getStoredLocalRegistrations().some(
+  registrationStore.read().some(
     (registration) =>
       registration.product_id === productId && registration.marketing_consent
   );
@@ -84,7 +69,7 @@ export const fetchMarketingRegistrations = async (): Promise<
     return (data || []) as WorkshopRegistration[];
   }
 
-  return getStoredLocalRegistrations()
+  return registrationStore.read()
     .filter((registration) => registration.marketing_consent)
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
 };
@@ -146,7 +131,7 @@ export const createRegistration = async (
     return readRegistrationRow(payload);
   }
 
-  const localRegistrations = getStoredLocalRegistrations();
+  const localRegistrations = registrationStore.read();
   const isActiveForWorkshop = (registration: WorkshopRegistration): boolean =>
     registration.product_id === productId && registration.status !== 'cancelado';
 
@@ -175,7 +160,7 @@ export const createRegistration = async (
     created_at: new Date().toISOString(),
   };
 
-  saveStoredLocalRegistrations([newRegistration, ...localRegistrations]);
+  registrationStore.write([newRegistration, ...localRegistrations]);
   return newRegistration;
 };
 
@@ -198,11 +183,11 @@ export const updateRegistrationStatus = async (
     return data as WorkshopRegistration;
   }
 
-  const localRegistrations = getStoredLocalRegistrations();
+  const localRegistrations = registrationStore.read();
   const updated = localRegistrations.map((registration) =>
     registration.id === id ? { ...registration, status } : registration
   );
-  saveStoredLocalRegistrations(updated);
+  registrationStore.write(updated);
 
   const found = updated.find((registration) => registration.id === id);
   if (!found) {
@@ -224,7 +209,7 @@ export const deleteRegistration = async (id: string): Promise<void> => {
     return;
   }
 
-  const localRegistrations = getStoredLocalRegistrations();
+  const localRegistrations = registrationStore.read();
   const registration = localRegistrations.find((item) => item.id === id);
 
   if (!registration) {
@@ -235,7 +220,7 @@ export const deleteRegistration = async (id: string): Promise<void> => {
     throw new RegistrationError('marketingConsentProtected');
   }
 
-  saveStoredLocalRegistrations(
+  registrationStore.write(
     localRegistrations.filter((item) => item.id !== id)
   );
 };
@@ -258,7 +243,7 @@ export const withdrawMarketingConsent = async (
     return data as WorkshopRegistration;
   }
 
-  const localRegistrations = getStoredLocalRegistrations();
+  const localRegistrations = registrationStore.read();
   const registration = localRegistrations.find((item) => item.id === id);
 
   if (!registration) {
@@ -270,7 +255,7 @@ export const withdrawMarketingConsent = async (
     marketing_consent: false,
   };
 
-  saveStoredLocalRegistrations(
+  registrationStore.write(
     localRegistrations.map((item) => (item.id === id ? updated : item))
   );
 
@@ -295,7 +280,7 @@ export const cancelWorkshopRegistrations = async (
     return (data || []).length;
   }
 
-  const localRegistrations = getStoredLocalRegistrations();
+  const localRegistrations = registrationStore.read();
   let cancelledCount = 0;
 
   const updated = localRegistrations.map((registration) => {
@@ -310,6 +295,6 @@ export const cancelWorkshopRegistrations = async (
     return { ...registration, status: 'cancelado' as RegistrationStatus };
   });
 
-  saveStoredLocalRegistrations(updated);
+  registrationStore.write(updated);
   return cancelledCount;
 };
