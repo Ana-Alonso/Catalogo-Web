@@ -86,9 +86,28 @@ describe('readRegistrationClaim', () => {
 });
 
 describe('resolveClientIp', () => {
-  it('usa la primera entrada de x-forwarded-for', () => {
-    const headers = new Headers({ 'x-forwarded-for': ' 203.0.113.9, 10.0.0.1' });
-    expect(resolveClientIp(headers)).toBe('203.0.113.9');
+  it('prioriza x-real-ip frente a una cadena forjada', () => {
+    const headers = new Headers({
+      'x-real-ip': '198.51.100.4',
+      'x-forwarded-for': '203.0.113.9, 198.51.100.4',
+    });
+
+    expect(resolveClientIp(headers)).toBe('198.51.100.4');
+  });
+
+  it('usa la última entrada de x-forwarded-for, que añade la plataforma', () => {
+    const headers = new Headers({ 'x-forwarded-for': ' 203.0.113.9, 198.51.100.4' });
+
+    expect(resolveClientIp(headers)).toBe('198.51.100.4');
+  });
+
+  it('descarta una x-forwarded-for sin entradas útiles', () => {
+    const headers = new Headers({
+      'x-forwarded-for': ' , ',
+      'cf-connecting-ip': '198.51.100.7',
+    });
+
+    expect(resolveClientIp(headers)).toBe('198.51.100.7');
   });
 
   it('recurre a cf-connecting-ip', () => {

@@ -92,17 +92,36 @@ export const readRegistrationClaim = async (
   return parseRegistrationClaim(payload);
 };
 
-export const resolveClientIp = (headers: Headers): string => {
-  const forwardedFor = headers.get('x-forwarded-for');
+const lastForwardedEntry = (forwardedFor: string): string | undefined => {
+  const entries = forwardedFor.split(',');
 
-  if (forwardedFor) {
-    const [clientIp] = forwardedFor.split(',');
-    const trimmed = clientIp?.trim();
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const trimmed = entries[index]?.trim();
 
     if (trimmed) {
       return trimmed;
     }
   }
 
-  return headers.get('cf-connecting-ip') ?? 'unknown-ip';
+  return undefined;
+};
+
+export const resolveClientIp = (headers: Headers): string => {
+  const realIp = headers.get('x-real-ip')?.trim();
+
+  if (realIp) {
+    return realIp;
+  }
+
+  const forwardedFor = headers.get('x-forwarded-for');
+
+  if (forwardedFor) {
+    const trustedIp = lastForwardedEntry(forwardedFor);
+
+    if (trustedIp) {
+      return trustedIp;
+    }
+  }
+
+  return headers.get('cf-connecting-ip')?.trim() || 'unknown-ip';
 };
