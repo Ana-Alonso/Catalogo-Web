@@ -1,18 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AdminDashboardContent } from './AdminDashboardContent';
-import type { AdminDashboardProps } from './AdminDashboardContent';
 import { AdminLoginForm } from './auth/AdminLoginForm';
 import { Box, Icon, Typography } from '../ui';
 import { useAdminSession } from '../../hooks/useAdminSession';
 import { LoaderCircle } from 'lucide-react';
 
-type AdminDashboardOwnProps = Omit<AdminDashboardProps, 'onLogout'>;
+interface AdminDashboardProps {
+  onClose: () => void;
+}
 
-export const AdminDashboard: React.FC<AdminDashboardOwnProps> = ({
-  onClose,
-  ...dashboardProps
-}) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const { t } = useTranslation();
   const { isLoading, isAuthenticated, authError, handleLogin, handleLogout } =
     useAdminSession();
@@ -48,11 +46,7 @@ export const AdminDashboard: React.FC<AdminDashboardOwnProps> = ({
   }
 
   return (
-    <AdminDashboardContent
-      {...dashboardProps}
-      onClose={onClose}
-      onLogout={handleLogout}
-    />
+    <AdminDashboardContent onClose={onClose} onLogout={handleLogout} />
   );
 };
 
