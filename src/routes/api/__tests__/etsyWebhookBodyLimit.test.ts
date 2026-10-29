@@ -1,9 +1,10 @@
 import { createHmac } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { syncSingleEtsyListingMock, hideEtsyListingMock, webhookEnv } = vi.hoisted(() => ({
+const { syncSingleEtsyListingMock, hideEtsyListingMock, consumeRateLimitMock, webhookEnv } = vi.hoisted(() => ({
   syncSingleEtsyListingMock: vi.fn(),
   hideEtsyListingMock: vi.fn(),
+  consumeRateLimitMock: vi.fn(),
   webhookEnv: {
     supabaseUrl: 'https://example.supabase.co',
     supabaseServiceRoleKey: 'service-role-key',
@@ -25,6 +26,10 @@ vi.mock('../../../lib/server/etsySync', () => ({
 
 vi.mock('../../../lib/server/env', () => ({
   getServerEnv: () => webhookEnv,
+}));
+
+vi.mock('../../../lib/server/rateLimit', () => ({
+  consumeRateLimit: consumeRateLimitMock,
 }));
 
 const secret = 'whsec_c2VjcmV0by1kZS1wcnVlYmE=';
@@ -62,6 +67,7 @@ describe('POST /api/etsy-webhook body limit', () => {
     hideEtsyListingMock.mockReset();
     syncSingleEtsyListingMock.mockResolvedValue(undefined);
     hideEtsyListingMock.mockResolvedValue(undefined);
+    consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 

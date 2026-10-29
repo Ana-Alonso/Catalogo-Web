@@ -1,8 +1,15 @@
 import { timingSafeEqual } from 'node:crypto';
 import { getServerEnv, type ServerEnv } from '../../lib/server/env';
 import { syncEtsyListings } from '../../lib/server/etsySync';
+import { consumeRateLimit } from '../../lib/server/rateLimit';
+import { resolveClientIp } from '../../lib/server/registrations';
 import { createSupabaseAdmin } from '../../lib/server/supabaseAdmin';
 import { isAdminUser } from '../../utils/adminAccess';
+
+const CRON_WINDOW_MS = 15 * 60 * 1000;
+const CRON_LIMIT = 20;
+const ADMIN_WINDOW_MS = 5 * 60 * 1000;
+const ADMIN_LIMIT = 10;
 
 const bearerToken = (headers: Headers): string | null => {
   const header = headers.get('authorization');
@@ -55,6 +62,12 @@ const readEnv = (): ServerEnv | null => {
   }
 };
 
+const tooManyRequests = (retryAfterSeconds: number): Response =>
+  Response.json(
+    { error: 'Demasiadas peticiones.' },
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+  );
+
 export const loader = async ({ request }: { request: Request }) => {
   const env = readEnv();
 
@@ -63,6 +76,16 @@ export const loader = async ({ request }: { request: Request }) => {
       { error: 'Configuración del servidor incompleta.' },
       { status: 500 }
     );
+  }
+
+  const cronLimit = await consumeRateLimit(
+    `etsy-sync-cron:${resolveClientIp(request.headers)}`,
+    CRON_LIMIT,
+    CRON_WINDOW_MS
+  );
+
+  if (!cronLimit.allowed) {
+    return tooManyRequests(cronLimit.retryAfterSeconds);
   }
 
   const token = bearerToken(request.headers);
@@ -89,6 +112,16 @@ export const action = async ({ request }: { request: Request }) => {
       { error: 'Configuración del servidor incompleta.' },
       { status: 500 }
     );
+  }
+
+  const adminLimit = await consumeRateLimit(
+    `etsy-sync-admin:${resolveClientIp(request.headers)}`,
+    ADMIN_LIMIT,
+    ADMIN_WINDOW_MS
+  );
+
+  if (!adminLimit.allowed) {
+    return tooManyRequests(adminLimit.retryAfterSeconds);
   }
 
   const token = bearerToken(request.headers);

@@ -1,36 +1,76 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const { rpcMock } = vi.hoisted(() => ({ rpcMock: vi.fn() }));
+
+vi.mock('../supabaseAdmin', () => ({
+  createSupabaseAdmin: () => ({ rpc: rpcMock }),
+}));
+
 import { consumeRateLimit } from '../rateLimit';
 
 describe('consumeRateLimit', () => {
-  it('permite las peticiones dentro del límite y bloquea la siguiente', () => {
-    const now = 1_000_000;
+  beforeEach(() => {
+    rpcMock.mockReset();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
 
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      expect(consumeRateLimit('ip-1', 3, 60_000, now)).toEqual({
-        allowed: true,
-        retryAfterSeconds: 0,
-      });
-    }
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-    expect(consumeRateLimit('ip-1', 3, 60_000, now)).toEqual({
-      allowed: false,
-      retryAfterSeconds: 60,
+  it('permite cuando la RPC lo autoriza y reenvía la clave y el límite', async () => {
+    rpcMock.mockResolvedValue({
+      data: [{ allowed: true, retry_after_seconds: 0 }],
+      error: null,
+    });
+
+    await expect(consumeRateLimit('ip-1', 3, 60_000)).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
+    });
+
+    expect(rpcMock).toHaveBeenCalledWith('consume_rate_limit', {
+      p_bucket_key: 'ip-1',
+      p_limit: 3,
+      p_window_ms: 60_000,
     });
   });
 
-  it('reinicia la ventana cuando expira', () => {
-    const start = 2_000_000;
-    consumeRateLimit('ip-2', 1, 10_000, start);
+  it('rechaza y reenvía los segundos de reintento cuando la RPC lo deniega', async () => {
+    rpcMock.mockResolvedValue({
+      data: [{ allowed: false, retry_after_seconds: 42 }],
+      error: null,
+    });
 
-    expect(consumeRateLimit('ip-2', 1, 10_000, start + 5_000).allowed).toBe(false);
-    expect(consumeRateLimit('ip-2', 1, 10_000, start + 10_000).allowed).toBe(true);
+    await expect(consumeRateLimit('ip-2', 3, 60_000)).resolves.toEqual({
+      allowed: false,
+      retryAfterSeconds: 42,
+    });
   });
 
-  it('no comparte contador entre claves distintas', () => {
-    const now = 3_000_000;
-    consumeRateLimit('ip-3', 1, 10_000, now);
+  it('repliega a memoria y avisa por consola cuando la RPC falla', async () => {
+    rpcMock.mockRejectedValue(new Error('conexión interrumpida'));
 
-    expect(consumeRateLimit('ip-3', 1, 10_000, now).allowed).toBe(false);
-    expect(consumeRateLimit('ip-4', 1, 10_000, now).allowed).toBe(true);
+    await expect(consumeRateLimit('ip-3', 1, 60_000)).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
+    });
+    await expect(consumeRateLimit('ip-3', 1, 60_000)).resolves.toEqual({
+      allowed: false,
+      retryAfterSeconds: 60,
+    });
+
+    expect(console.error).toHaveBeenCalledWith('[rate-limit]', 'conexión interrumpida');
+  });
+
+  it('repliega a memoria cuando la RPC no devuelve ninguna fila', async () => {
+    rpcMock.mockResolvedValue({ data: [], error: null });
+
+    await expect(consumeRateLimit('ip-4', 1, 30_000)).resolves.toEqual({
+      allowed: true,
+      retryAfterSeconds: 0,
+    });
+
+    expect(console.error).toHaveBeenCalledWith('[rate-limit]', expect.any(String));
   });
 });
