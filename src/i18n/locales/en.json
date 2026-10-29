@@ -52,13 +52,6 @@
   "gallery": {
     "newButton": "Don't miss our new arrivals"
   },
-  "featured": {
-    "newArrivals": "New arrivals",
-    "offers": "Offers",
-    "new": "New",
-    "offer": "Offer",
-    "viewInCatalog": "View in catalog"
-  },
   "catalog": {
     "heading": "Visual",
     "headingAccent": "Catalog",
