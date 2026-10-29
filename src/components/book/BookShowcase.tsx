@@ -90,12 +90,12 @@ export const BookShowcase: React.FC = () => {
             onBlur={resumeAutoAdvance}
           >
             <Box position="absolute" edge="left-out" zIndex={30}>
-              <IconButton onClick={goToPrevious} aria-label="Previous">
+              <IconButton onClick={goToPrevious} aria-label={t('a11y.previousImage')}>
                 <Icon as={ChevronLeft} size="lg" />
               </IconButton>
             </Box>
             <Box position="absolute" edge="right-out" zIndex={30}>
-              <IconButton onClick={goToNext} aria-label="Next">
+              <IconButton onClick={goToNext} aria-label={t('a11y.nextImage')}>
                 <Icon as={ChevronRight} size="lg" />
               </IconButton>
             </Box>
@@ -150,7 +150,7 @@ export const BookShowcase: React.FC = () => {
                   key={src}
                   onClick={() => setCurrentIndex(index)}
                   active={index === currentIndex}
-                  aria-label={`Go to slide ${index + 1}`}
+                  aria-label={t('a11y.goToImage', { number: index + 1 })}
                 />
               ))}
             </Box>
@@ -222,12 +222,12 @@ export const BookShowcase: React.FC = () => {
                 </IconButton>
               </Box>
               <Box position="absolute" edge="left-md">
-                <IconButton onClick={goToPrevious} aria-label="Previous">
+                <IconButton onClick={goToPrevious} aria-label={t('a11y.previousImage')}>
                   <Icon as={ChevronLeft} size="xl" />
                 </IconButton>
               </Box>
               <Box position="absolute" edge="right-md">
-                <IconButton onClick={goToNext} aria-label="Next">
+                <IconButton onClick={goToNext} aria-label={t('a11y.nextImage')}>
                   <Icon as={ChevronRight} size="xl" />
                 </IconButton>
               </Box>

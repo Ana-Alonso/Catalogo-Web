@@ -145,7 +145,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           <Box marginBottom="xl">
             <Chip tone="text" active={newOnly} onClick={onToggleNew}>
               <Typography as="span" variant="caption" tracking="widest">
-                {t('gallery.newButton', 'No te pierdas nuestras novedades')}
+                {t('gallery.newButton')}
               </Typography>
               <Icon as={ArrowRight} hoverTranslate />
             </Chip>

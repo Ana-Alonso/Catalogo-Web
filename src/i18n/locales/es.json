@@ -49,6 +49,9 @@
     "cta": "Comprar en Amazon",
     "imageAlt": "Portada del libro"
   },
+  "gallery": {
+    "newButton": "No te pierdas nuestras novedades"
+  },
   "featured": {
     "newArrivals": "Novedades",
     "offers": "Ofertas",
@@ -193,7 +196,12 @@
   },
   "a11y": {
     "skipToContent": "Saltar al contenido principal",
-    "closeDialog": "Cerrar diálogo"
+    "closeDialog": "Cerrar diálogo",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "goToImage": "Ir a la imagen {{number}}",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "notifications": {
     "title": "Notificaciones"

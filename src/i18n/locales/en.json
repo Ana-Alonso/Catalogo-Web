@@ -49,6 +49,9 @@
     "cta": "Buy on Amazon",
     "imageAlt": "Book cover"
   },
+  "gallery": {
+    "newButton": "Don't miss our new arrivals"
+  },
   "featured": {
     "newArrivals": "New arrivals",
     "offers": "Offers",
@@ -193,7 +196,12 @@
   },
   "a11y": {
     "skipToContent": "Skip to main content",
-    "closeDialog": "Close dialog"
+    "closeDialog": "Close dialog",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "goToImage": "Go to image {{number}}",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "notifications": {
     "title": "Notifications"
