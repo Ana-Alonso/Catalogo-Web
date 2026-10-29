@@ -21,6 +21,30 @@ class IntersectionObserverStub {
 
 vi.stubGlobal('IntersectionObserver', IntersectionObserverStub);
 
+class MediaQueryListStub {
+  matches = false;
+  media: string;
+  onchange: ((this: MediaQueryList, ev: MediaQueryListEvent) => void) | null = null;
+
+  constructor(media: string) {
+    this.media = media;
+  }
+
+  addListener(): void {}
+
+  removeListener(): void {}
+
+  addEventListener(): void {}
+
+  removeEventListener(): void {}
+
+  dispatchEvent(): boolean {
+    return false;
+  }
+}
+
+vi.stubGlobal('matchMedia', (query: string) => new MediaQueryListStub(query));
+
 beforeEach(async () => {
   await i18n.changeLanguage('es');
 });
