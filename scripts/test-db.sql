@@ -210,6 +210,26 @@ BEGIN
     RAISE EXCEPTION 'FAIL: anon puede ejecutar prevent_marketing_consent_delete';
   END IF;
 
+  IF to_regprocedure('public.consume_rate_limit(text,integer,integer)') IS NULL THEN
+    RAISE EXCEPTION 'FAIL: función consume_rate_limit ausente';
+  END IF;
+
+  IF has_function_privilege('anon', 'public.consume_rate_limit(text,integer,integer)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon puede ejecutar consume_rate_limit';
+  END IF;
+
+  IF has_table_privilege('anon', 'public.rate_limit_buckets', 'SELECT') THEN
+    RAISE EXCEPTION 'FAIL: anon puede leer rate_limit_buckets';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_roles WHERE rolname = 'service_role'
+  ) AND NOT has_function_privilege(
+    'service_role', 'public.consume_rate_limit(text,integer,integer)', 'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: service_role no puede ejecutar consume_rate_limit';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
