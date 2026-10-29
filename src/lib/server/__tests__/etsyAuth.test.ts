@@ -145,3 +145,28 @@ describe('etsyAuth · credenciales cifradas', () => {
     expect(decryptToken(payload.refresh_token, KEY)).toBe('refresh-entorno');
   });
 });
+
+describe('etsyAuth · marca de sincronización', () => {
+  it('avisa cuando la base de datos rechaza la nueva marca de tiempo', async () => {
+    const { markEtsySync, client } = await loadAuth({ id: 1 });
+    client.update.mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: { message: 'columna inexistente' } }),
+    });
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(markEtsySync()).resolves.toBeUndefined();
+
+    expect(report).toHaveBeenCalledWith('[etsy-auth]', 'columna inexistente');
+    report.mockRestore();
+  });
+
+  it('no avisa cuando la marca se guarda correctamente', async () => {
+    const { markEtsySync } = await loadAuth({ id: 1 });
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await markEtsySync();
+
+    expect(report).not.toHaveBeenCalled();
+    report.mockRestore();
+  });
+});
