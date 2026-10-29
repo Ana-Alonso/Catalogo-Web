@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
 import { Animated, AnimatedButton, AnimatedImage, Box, Button, Container, Dot, IconButton, Image, Presence, Section, Typography, Icon } from '../ui';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import libro1 from '../../assets/book/Libro1.jpeg';
 import libro2 from '../../assets/book/Libro2.jpeg';
 import libro3 from '../../assets/book/Libro3.jpeg';
@@ -10,21 +11,25 @@ import libro4 from '../../assets/book/Libro4.jpeg';
 
 const images = [libro1, libro2, libro3, libro4];
 
+const AUTO_ADVANCE_INTERVAL_MS = 4_000;
+
 const AMAZON_BOOK_URL =
   import.meta.env.VITE_AMAZON_BOOK_URL || 'https://amzn.eu/d/0dU00KQa';
 
 export const BookShowcase: React.FC = () => {
   const { t } = useTranslation();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isAutoAdvancePaused, setIsAutoAdvancePaused] = useState(false);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, []);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
+  }, []);
 
   const lightboxRef = useRef<HTMLDivElement>(null);
 
@@ -34,10 +39,26 @@ export const BookShowcase: React.FC = () => {
 
   useFocusTrap(lightboxRef, isLightboxOpen, closeLightbox);
 
+  const pauseAutoAdvance = () => {
+    setIsAutoAdvancePaused(true);
+  };
+
+  const resumeAutoAdvance = () => {
+    setIsAutoAdvancePaused(false);
+  };
+
+  const isAutoAdvanceBlocked =
+    prefersReducedMotion || isAutoAdvancePaused || isLightboxOpen;
+
   useEffect(() => {
-    const timer = setInterval(goToNext, 4000);
+    if (isAutoAdvanceBlocked) {
+      return;
+    }
+
+    const timer = setInterval(goToNext, AUTO_ADVANCE_INTERVAL_MS);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [isAutoAdvanceBlocked, goToNext]);
 
   return (
     <Section paddingY="lg" background="neutral" overflow="hidden">
@@ -63,6 +84,10 @@ export const BookShowcase: React.FC = () => {
             display="flex"
             align="center"
             justify="center"
+            onPointerEnter={pauseAutoAdvance}
+            onPointerLeave={resumeAutoAdvance}
+            onFocus={pauseAutoAdvance}
+            onBlur={resumeAutoAdvance}
           >
             <Box position="absolute" edge="left-out" zIndex={30}>
               <IconButton onClick={goToPrevious} aria-label="Previous">

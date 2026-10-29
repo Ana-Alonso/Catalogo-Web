@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import i18n from '../../../i18n';
 import BookShowcase from '../BookShowcase';
@@ -57,5 +57,99 @@ describe('BookShowcase', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+});
+
+const pressedSlide = (position: number): HTMLElement =>
+  screen.getByRole('button', { name: `Go to slide ${position}` });
+
+const setReducedMotionPreference = (isReduced: boolean): void => {
+  vi.stubGlobal(
+    'matchMedia',
+    (query: string) =>
+      ({
+        matches: isReduced,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList
+  );
+};
+
+const advance = (ms: number): void => {
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+};
+
+describe('autoavance del carrusel', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('muestra la portada siguiente cuando pasa el intervalo', () => {
+    vi.useFakeTimers();
+    setReducedMotionPreference(false);
+    render(<BookShowcase />);
+
+    expect(pressedSlide(1)).toHaveAttribute('aria-pressed', 'true');
+
+    advance(4_000);
+
+    expect(pressedSlide(2)).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('no avanza solo cuando la visitante prefiere movimiento reducido', () => {
+    vi.useFakeTimers();
+    setReducedMotionPreference(true);
+    render(<BookShowcase />);
+
+    advance(12_000);
+
+    expect(pressedSlide(1)).toHaveAttribute('aria-pressed', 'true');
+    expect(pressedSlide(2)).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('pausa el autoavance mientras el cursor está sobre el carrusel', () => {
+    vi.useFakeTimers();
+    setReducedMotionPreference(false);
+    render(<BookShowcase />);
+
+    fireEvent.pointerOver(screen.getByRole('button', { name: i18n.t('book.imageAlt') }));
+
+    advance(12_000);
+
+    expect(pressedSlide(1)).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('pausa el autoavance mientras el foco está dentro del carrusel', () => {
+    vi.useFakeTimers();
+    setReducedMotionPreference(false);
+    render(<BookShowcase />);
+
+    fireEvent.focus(screen.getByRole('button', { name: i18n.t('book.imageAlt') }));
+
+    advance(12_000);
+
+    expect(pressedSlide(1)).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('pausa el autoavance mientras el lightbox está abierto', () => {
+    vi.useFakeTimers();
+    setReducedMotionPreference(false);
+    render(<BookShowcase />);
+
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('book.imageAlt') }));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    advance(12_000);
+
+    expect(pressedSlide(1)).toHaveAttribute('aria-pressed', 'true');
   });
 });
