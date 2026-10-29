@@ -58,10 +58,24 @@ describe('BookShowcase', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
+
+  it('anuncia sus controles de carrusel en el idioma activo', () => {
+    render(<BookShowcase />);
+
+    expect(
+      screen.getByRole('button', { name: 'Imagen anterior' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Imagen siguiente' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Ir a la imagen 3' })
+    ).toBeInTheDocument();
+  });
 });
 
 const pressedSlide = (position: number): HTMLElement =>
-  screen.getByRole('button', { name: `Go to slide ${position}` });
+  screen.getByRole('button', { name: `Ir a la imagen ${position}` });
 
 const setReducedMotionPreference = (isReduced: boolean): void => {
   vi.stubGlobal(

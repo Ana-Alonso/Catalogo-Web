@@ -107,7 +107,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ items = [], onShowNew 
               >
                 <Button variant="accent" onClick={onShowNew}>
                   <Icon as={Sparkles} />
-                  {t('gallery.newButton', 'No te pierdas nuestras novedades')}
+                  {t('gallery.newButton')}
                   <Icon as={ArrowRight} hoverTranslate />
                 </Button>
               </Animated>

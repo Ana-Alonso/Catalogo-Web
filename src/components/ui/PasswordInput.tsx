@@ -1,4 +1,5 @@
 import { useState, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff } from 'lucide-react';
 import { Input, type InputProps } from './Input';
 
@@ -6,6 +7,7 @@ export type PasswordInputProps = Omit<InputProps, 'type' | 'endAdornment'>;
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ className, ...props }, ref) => {
+    const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
 
     const toggleVisibility = () => {
@@ -21,7 +23,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <button
             type="button"
             onClick={toggleVisibility}
-            aria-label={isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-label={isVisible ? t('a11y.hidePassword') : t('a11y.showPassword')}
             className="p-1.5 text-neutral-400 hover:text-orange-400 focus:outline-none focus-visible:text-orange-400 rounded transition-colors"
           >
             {isVisible ? (
