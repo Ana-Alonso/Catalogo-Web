@@ -63,7 +63,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
             type="file"
             accept={ACCEPTED_IMAGE_INPUT}
             onChange={onFileChange}
-            className="hidden"
+            className="sr-only"
           />
         </Box>
 
@@ -96,6 +96,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
         </Typography>
         <Input
           type="url"
+          aria-label={t('admin.imageField.urlHint')}
           value={externalImageUrl}
           onChange={(event) => onExternalUrlChange(event.target.value)}
           placeholder="https://..."
