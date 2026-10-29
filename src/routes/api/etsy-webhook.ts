@@ -11,6 +11,8 @@ interface EtsyWebhookPayload {
   shop_id?: number | string;
 }
 
+const MAX_WEBHOOK_BODY_LENGTH = 65536;
+
 const LISTING_EVENTS = new Set([
   'listing.created',
   'listing.updated',
@@ -71,6 +73,10 @@ export const action = async ({
     rawBody = await request.text();
   } catch {
     return jsonError(400, 'No se pudo leer el cuerpo de la petición.');
+  }
+
+  if (rawBody.length > MAX_WEBHOOK_BODY_LENGTH) {
+    return jsonError(413, 'El cuerpo de la petición es demasiado grande.');
   }
 
   if (!verifyEtsyWebhook(request.headers, rawBody, env.etsyWebhookSecret)) {
