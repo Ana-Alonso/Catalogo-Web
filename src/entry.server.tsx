@@ -12,7 +12,7 @@ const getRuntimeEnv = (): Record<string, string | undefined> => {
   return runtime.process?.env ?? {};
 };
 
-const buildContentSecurityPolicy = (nonce: string): string =>
+export const buildContentSecurityPolicy = (nonce: string): string =>
   [
     "default-src 'self'",
     "base-uri 'self'",
@@ -51,7 +51,7 @@ export default async function handleDocumentRequest(
     responseHeaders.set('X-Robots-Tag', 'noindex, nofollow');
   }
 
-  if (env.NODE_ENV === 'production') {
+  if (env.VERCEL_ENV === 'production' || env.VERCEL_ENV === 'preview') {
     responseHeaders.set(
       'Content-Security-Policy',
       buildContentSecurityPolicy(nonce)
