@@ -75,6 +75,16 @@ describe('POST /api/etsy-webhook', () => {
     process.env = { ...originalEnv };
   });
 
+  it('anuncia Allow: POST también cuando el método llega al action', async () => {
+    const { action } = await loadRoute();
+    const response = await action({
+      request: new Request('http://localhost/api/etsy-webhook', { method: 'PUT' }),
+    });
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get('Allow')).toBe('POST');
+  });
+
   it('no permite sincronizar con GET y anuncia Allow: POST', async () => {
     const { loader } = await loadRoute();
     const response = loader();

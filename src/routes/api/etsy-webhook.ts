@@ -52,7 +52,7 @@ export const action = async ({
   request: Request;
 }): Promise<Response> => {
   if (request.method !== 'POST') {
-    return jsonError(405, 'Método no permitido.');
+    return jsonError(405, 'Método no permitido.', { Allow: 'POST' });
   }
 
   let env: ServerEnv;
