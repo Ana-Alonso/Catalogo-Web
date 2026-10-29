@@ -26,16 +26,8 @@ dist-ssr
 .env
 AGENTS.md
 *.sql
-!supabase-migration.sql
-!supabase-hardening.sql
-!supabase-offers-etsy.sql
-!supabase-workshop-links.sql
-!supabase-schema.sql
-!supabase-rls-hardening.sql
-
-supabase/
-!supabase/migrations/
-scripts/
+supabase/*
+scripts/*
 .etsy-oauth.json
 .vercel
 .env*
@@ -47,3 +39,7 @@ build/
 .env.development
 .env.production
 .qoder/
+
+!supabase/migrations
+!supabase/migrations/**
+!scripts/*.sql
