@@ -42,12 +42,12 @@
     "etsyCta": "Tienda Etsy"
   },
   "book": {
-    "sectionHeading": "Libro Destacado",
+    "sectionHeading": "Poemario Destacado",
     "badge": "Nuevo",
-    "title": "Mi libro",
-    "description": "Descubre mi nuevo libro con ilustraciones únicas y relatos que conectan con el alma. Una obra para disfrutar página a página.",
+    "title": "Mi Poemario",
+    "description": "Descubre mi nuevo poemario con ilustraciones únicas y relatos que conectan con el alma. Una obra para disfrutar página a página.",
     "cta": "Comprar en Amazon",
-    "imageAlt": "Portada del libro"
+    "imageAlt": "Portada del Poemario"
   },
   "gallery": {
     "newButton": "No te pierdas nuestras novedades"
@@ -156,7 +156,7 @@
   "footer": {
     "heading": "Pie de página",
     "emailAria": "Enviar correo a {{email}}",
-    "amazonAria": "Comprar libro en Amazon",
+    "amazonAria": "Comprar poemario en Amazon",
     "etsyAria": "Visitar tienda oficial en Etsy",
     "instagramAria": "Visitar perfil de Instagram",
     "tiktokAria": "Visitar perfil de TikTok",
