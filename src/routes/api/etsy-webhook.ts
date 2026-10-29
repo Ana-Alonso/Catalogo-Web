@@ -89,10 +89,11 @@ export const action = async ({
     return jsonError(400, 'Payload inválido.');
   }
 
-  if (
-    payload.shop_id != null &&
-    String(payload.shop_id) !== String(env.etsyShopId)
-  ) {
+  if (payload.shop_id == null) {
+    return Response.json({ received: true, ignored: 'sin tienda' });
+  }
+
+  if (String(payload.shop_id) !== String(env.etsyShopId)) {
     return Response.json({ received: true, ignored: 'otra tienda' });
   }
 

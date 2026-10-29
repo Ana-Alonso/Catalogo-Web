@@ -55,10 +55,12 @@ const buildWebhookRequest = (
   });
 };
 
-const postEvent = (payload: unknown): Promise<Response> =>
-  loadRoute().then(({ action }) =>
-    action({ request: buildWebhookRequest(JSON.stringify(payload)) })
+const postEvent = (payload: Record<string, unknown> = {}): Promise<Response> => {
+  const body = JSON.stringify({ shop_id: SHOP_ID, ...payload });
+  return loadRoute().then(({ action }) =>
+    action({ request: buildWebhookRequest(body) })
   );
+};
 
 describe('POST /api/etsy-webhook', () => {
   beforeEach(() => {
@@ -121,6 +123,19 @@ describe('POST /api/etsy-webhook', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true, ignored: 'otra tienda' });
     expect(syncSingleEtsyListingMock).not.toHaveBeenCalled();
+  });
+
+  it('ignora un webhook firmado que no identifica a ninguna tienda', async () => {
+    const response = await postEvent({
+      event_type: 'listing.updated',
+      listing_id: 42,
+      shop_id: undefined,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ received: true, ignored: 'sin tienda' });
+    expect(syncSingleEtsyListingMock).not.toHaveBeenCalled();
+    expect(hideEtsyListingMock).not.toHaveBeenCalled();
   });
 
   it('ignora los eventos que no afectan a publicaciones', async () => {
