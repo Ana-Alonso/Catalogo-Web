@@ -62,6 +62,12 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.consume_rate_limit(text, integer, integer) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.consume_rate_limit(text, integer, integer) TO service_role;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+        EXECUTE 'GRANT EXECUTE ON FUNCTION public.consume_rate_limit(text, integer, integer) TO service_role';
+    END IF;
+END $$;
 
 NOTIFY pgrst, 'reload schema';
