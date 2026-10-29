@@ -5,7 +5,6 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Button } from './Button';
 import { Card } from './Card';
-import { theme } from '../../theme';
 
 interface ErrorStateProps {
   title: string;
@@ -32,7 +31,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       <AlertTriangle className="w-8 h-8 text-orange-500" aria-hidden="true" />
       <div className="space-y-2">
         <h3 className="text-lg font-bold text-white">{title}</h3>
-        <Typography variant="body" className={`${theme.colors.textMuted} text-sm max-w-md mx-auto`}>
+        <Typography variant="body" tone="muted" className="text-sm max-w-md mx-auto">
           {description}
         </Typography>
       </div>
