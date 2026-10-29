@@ -84,6 +84,8 @@ const Footer: React.FC = () => {
               alt={t('nav.logoAlt')}
               height={11}
               width="auto"
+              intrinsicWidth={2048}
+              intrinsicHeight={2048}
               fit="contain"
             />
             <Typography variant="h4" transform="uppercase" tracking="wider">

@@ -29,7 +29,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ kind }) => {
       <Container size="sm" padding="md" display="flex" align="center" justify="between" gap="md">
         <Box display="flex" align="center" gap="sm">
           <NavLink to={`/${language}`} aria-label={t('nav.logoAlt')}>
-            <Image src={logoImg} alt={t('nav.logoAlt')} height={11} width="auto" fit="contain" />
+            <Image src={logoImg} alt={t('nav.logoAlt')} height={11} width="auto" fit="contain" intrinsicWidth={2048} intrinsicHeight={2048} />
           </NavLink>
           <Typography variant="h4" transform="uppercase" tracking="wider">
             <Trans

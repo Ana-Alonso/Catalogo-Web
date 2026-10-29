@@ -39,10 +39,15 @@ export interface ImageProps {
   block?: boolean;
   displaySm?: keyof typeof DISPLAY_SM;
   loading?: 'lazy' | 'eager';
+  intrinsicWidth?: number;
+  intrinsicHeight?: number;
   className?: string;
 }
 
-export type ImageDesignProps = Omit<ImageProps, 'src' | 'alt' | 'loading' | 'className'>;
+export type ImageDesignProps = Omit<
+  ImageProps,
+  'src' | 'alt' | 'loading' | 'className' | 'intrinsicWidth' | 'intrinsicHeight'
+>;
 
 const IMAGE_DESIGN_KEYS = new Set<string>([
   'width', 'height', 'widthSm', 'heightSm', 'maxWidth', 'maxHeight', 'fit',
