@@ -3,6 +3,8 @@ import {
   hideEtsyListing,
   syncSingleEtsyListing,
 } from '../../lib/server/etsySync';
+import { consumeRateLimit } from '../../lib/server/rateLimit';
+import { resolveClientIp } from '../../lib/server/registrations';
 import { verifyEtsyWebhook } from '../../lib/server/verifyWebhook';
 
 interface EtsyWebhookPayload {
@@ -12,6 +14,8 @@ interface EtsyWebhookPayload {
 }
 
 const MAX_WEBHOOK_BODY_LENGTH = 65536;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_EVENTS = 60;
 
 const LISTING_EVENTS = new Set([
   'listing.created',
@@ -65,6 +69,18 @@ export const action = async ({
       err instanceof Error ? err.message : 'Configuración incompleta'
     );
     return jsonError(500, 'Configuración del servidor incompleta.');
+  }
+
+  const rateLimit = await consumeRateLimit(
+    `etsy-webhook:${resolveClientIp(request.headers)}`,
+    RATE_LIMIT_MAX_EVENTS,
+    RATE_LIMIT_WINDOW_MS
+  );
+
+  if (!rateLimit.allowed) {
+    return jsonError(429, 'Demasiadas peticiones.', {
+      'Retry-After': String(rateLimit.retryAfterSeconds),
+    });
   }
 
   let rawBody: string;

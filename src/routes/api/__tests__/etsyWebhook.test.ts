@@ -1,14 +1,19 @@
 import { createHmac } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { hideEtsyListingMock, syncSingleEtsyListingMock } = vi.hoisted(() => ({
+const { hideEtsyListingMock, syncSingleEtsyListingMock, consumeRateLimitMock } = vi.hoisted(() => ({
   hideEtsyListingMock: vi.fn(),
   syncSingleEtsyListingMock: vi.fn(),
+  consumeRateLimitMock: vi.fn(),
 }));
 
 vi.mock('../../../lib/server/etsySync', () => ({
   hideEtsyListing: hideEtsyListingMock,
   syncSingleEtsyListing: syncSingleEtsyListingMock,
+}));
+
+vi.mock('../../../lib/server/rateLimit', () => ({
+  consumeRateLimit: consumeRateLimitMock,
 }));
 
 const WEBHOOK_SECRET = `whsec_${Buffer.alloc(16, 7).toString('base64')}`;
@@ -67,6 +72,7 @@ describe('POST /api/etsy-webhook', () => {
     Object.assign(process.env, requiredEnv);
     hideEtsyListingMock.mockReset().mockResolvedValue(undefined);
     syncSingleEtsyListingMock.mockReset().mockResolvedValue(undefined);
+    consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -81,6 +87,22 @@ describe('POST /api/etsy-webhook', () => {
 
     expect(response.status).toBe(405);
     expect(response.headers.get('Allow')).toBe('POST');
+  });
+
+  it('devuelve 429 con Retry-After cuando el limitador rechaza la ráfaga', async () => {
+    consumeRateLimitMock.mockResolvedValue({ allowed: false, retryAfterSeconds: 25 });
+    const { action } = await loadRoute();
+    const body = JSON.stringify({ shop_id: SHOP_ID, event_type: 'listing.updated', listing_id: 42 });
+    const response = await action({ request: buildWebhookRequest(body) });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe('25');
+    expect(syncSingleEtsyListingMock).not.toHaveBeenCalled();
+    expect(consumeRateLimitMock).toHaveBeenCalledWith(
+      expect.stringContaining('etsy-webhook:'),
+      60,
+      60 * 1000
+    );
   });
 
   it.each([

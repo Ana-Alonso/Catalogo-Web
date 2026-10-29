@@ -1,12 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { syncEtsyListingsMock, getUserMock } = vi.hoisted(() => ({
+const { syncEtsyListingsMock, getUserMock, consumeRateLimitMock } = vi.hoisted(() => ({
   syncEtsyListingsMock: vi.fn(),
   getUserMock: vi.fn(),
+  consumeRateLimitMock: vi.fn(),
 }));
 
 vi.mock('../../../lib/server/etsySync', () => ({
   syncEtsyListings: syncEtsyListingsMock,
+}));
+
+vi.mock('../../../lib/server/rateLimit', () => ({
+  consumeRateLimit: consumeRateLimitMock,
 }));
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -53,6 +58,7 @@ describe('GET /api/etsy-sync · sincronización programada con secreto de cron',
     Object.assign(process.env, requiredEnv);
     syncEtsyListingsMock.mockReset();
     getUserMock.mockReset();
+    consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -126,6 +132,21 @@ describe('GET /api/etsy-sync · sincronización programada con secreto de cron',
     expect(body).toBe('{"error":"No se pudo sincronizar con Etsy."}');
     expect(body).not.toContain('datos privados');
   });
+
+  it('devuelve 429 cuando el limitador rechaza la llamada programada', async () => {
+    consumeRateLimitMock.mockResolvedValue({ allowed: false, retryAfterSeconds: 30 });
+    const { loader } = await loadRoute();
+    const response = await loader({ request: buildRequest('GET', CRON_SECRET) });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe('30');
+    expect(syncEtsyListingsMock).not.toHaveBeenCalled();
+    expect(consumeRateLimitMock).toHaveBeenCalledWith(
+      expect.stringContaining('etsy-sync-cron:'),
+      20,
+      15 * 60 * 1000
+    );
+  });
 });
 
 describe('POST /api/etsy-sync · sincronización manual de administrador', () => {
@@ -133,6 +154,7 @@ describe('POST /api/etsy-sync · sincronización manual de administrador', () =>
     Object.assign(process.env, requiredEnv);
     syncEtsyListingsMock.mockReset();
     getUserMock.mockReset();
+    consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -196,5 +218,21 @@ describe('POST /api/etsy-sync · sincronización manual de administrador', () =>
     expect(await response.json()).toEqual({
       error: 'Configuración del servidor incompleta.',
     });
+  });
+
+  it('devuelve 429 cuando el limitador rechaza la sincronización manual', async () => {
+    consumeRateLimitMock.mockResolvedValue({ allowed: false, retryAfterSeconds: 15 });
+    const { action } = await loadRoute();
+    const response = await action({ request: buildRequest('POST', 'token-de-admin') });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe('15');
+    expect(getUserMock).not.toHaveBeenCalled();
+    expect(syncEtsyListingsMock).not.toHaveBeenCalled();
+    expect(consumeRateLimitMock).toHaveBeenCalledWith(
+      expect.stringContaining('etsy-sync-admin:'),
+      10,
+      5 * 60 * 1000
+    );
   });
 });

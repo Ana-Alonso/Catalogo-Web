@@ -1,9 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const { rpcMock } = vi.hoisted(() => ({ rpcMock: vi.fn() }));
+const { rpcMock, consumeRateLimitMock } = vi.hoisted(() => ({
+  rpcMock: vi.fn(),
+  consumeRateLimitMock: vi.fn(),
+}));
 
 vi.mock('../../../lib/server/supabaseAdmin', () => ({
   createSupabaseAdmin: () => ({ rpc: rpcMock }),
+}));
+
+vi.mock('../../../lib/server/rateLimit', () => ({
+  consumeRateLimit: consumeRateLimitMock,
 }));
 
 const PRODUCT_ID = '00000000-0000-0000-0000-000000000002';
@@ -42,6 +49,7 @@ const loadRoute = async () => {
 describe('POST /api/registrations', () => {
   beforeEach(() => {
     rpcMock.mockReset();
+    consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -158,15 +166,28 @@ describe('POST /api/registrations', () => {
     const { action } = await loadRoute();
     const ip = '203.0.113.40';
 
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const response = await action({ request: postJson(validBody(), ip) });
-      expect(response.status).toBe(201);
-    }
-
+    consumeRateLimitMock.mockResolvedValue({ allowed: false, retryAfterSeconds: 120 });
     const blocked = await action({ request: postJson(validBody(), ip) });
+
     expect(blocked.status).toBe(429);
     expect(await blocked.json()).toEqual({ error: 'rateLimited' });
-    expect(Number(blocked.headers.get('Retry-After'))).toBeGreaterThan(0);
+    expect(blocked.headers.get('Retry-After')).toBe('120');
+    expect(rpcMock).not.toHaveBeenCalled();
+    expect(consumeRateLimitMock).toHaveBeenCalledWith(
+      `workshop-registration:${ip}`,
+      5,
+      60 * 60 * 1000
+    );
+  });
+
+  it('no permite escribir con métodos que no son POST y anuncia Allow', async () => {
+    const { action } = await loadRoute();
+    const response = await action({
+      request: new Request('http://localhost/api/registrations', { method: 'GET' }),
+    });
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get('Allow')).toBe('POST');
   });
 
   it('no permite leer la colección con GET', async () => {

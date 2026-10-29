@@ -41,11 +41,11 @@ export const action = async ({
   request: Request;
 }): Promise<Response> => {
   if (request.method !== 'POST') {
-    return jsonError(405, 'invalidData');
+    return jsonError(405, 'invalidData', { Allow: 'POST' });
   }
 
   const clientIp = resolveClientIp(request.headers);
-  const rateLimit = consumeRateLimit(
+  const rateLimit = await consumeRateLimit(
     `workshop-registration:${clientIp}`,
     MAX_REGISTRATIONS_PER_WINDOW,
     RATE_LIMIT_WINDOW_MS
