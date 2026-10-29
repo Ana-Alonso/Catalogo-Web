@@ -42,10 +42,10 @@
     "etsyCta": "Etsy Shop"
   },
   "book": {
-    "sectionHeading": "Featured Book",
+    "sectionHeading": "Featured Book of Poems",
     "badge": "New",
-    "title": "My Book",
-    "description": "Discover my new book with unique illustrations and stories that connect with the soul. A work to enjoy page by page.",
+    "title": "My Book of Poems",
+    "description": "Discover my new book of poems with unique illustrations and stories that connect with the soul. A work to enjoy page by page.",
     "cta": "Buy on Amazon",
     "imageAlt": "Book cover"
   },
