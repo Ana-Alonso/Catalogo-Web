@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from 'lucide-react';
 import { Animated, AnimatedButton, AnimatedImage, Box, Button, Container, Dot, IconButton, Image, Presence, Section, Typography, Icon } from '../ui';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import libro1 from '../../assets/book/Libro1.jpeg';
 import libro2 from '../../assets/book/Libro2.jpeg';
 import libro3 from '../../assets/book/Libro3.jpeg';
@@ -25,21 +26,18 @@ export const BookShowcase: React.FC = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
+  const lightboxRef = useRef<HTMLDivElement>(null);
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  useFocusTrap(lightboxRef, isLightboxOpen, closeLightbox);
+
   useEffect(() => {
     const timer = setInterval(goToNext, 4000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    if (isLightboxOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isLightboxOpen]);
 
   return (
     <Section paddingY="lg" background="neutral" overflow="hidden">
@@ -170,48 +168,57 @@ export const BookShowcase: React.FC = () => {
             align="center"
             justify="center"
             padding="md"
-            onClick={() => setIsLightboxOpen(false)}
           >
-            <Box position="absolute" corner="top-right-md">
-              <IconButton onClick={() => setIsLightboxOpen(false)} aria-label="Close">
-                <Icon as={X} size="xl" />
-              </IconButton>
-            </Box>
-            <Box position="absolute" edge="left-md">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToPrevious();
-                }}
-                aria-label="Previous"
-              >
-                <Icon as={ChevronLeft} size="xl" />
-              </IconButton>
-            </Box>
-            <Box position="absolute" edge="right-md">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToNext();
-                }}
-                aria-label="Next"
-              >
-                <Icon as={ChevronRight} size="xl" />
-              </IconButton>
-            </Box>
-            <AnimatedImage
-              key={currentIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              src={images[currentIndex]}
-              alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
-              maxWidth="full"
-              maxHeight="full"
-              fit="contain"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              type="button"
+              className="absolute inset-0 cursor-default"
+              tabIndex={-1}
+              onClick={closeLightbox}
+              aria-label={t('a11y.closeDialog')}
             />
+            <Box
+              ref={lightboxRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label={t('book.imageAlt')}
+              tabIndex={-1}
+              position="relative"
+              zIndex={10}
+              width="full"
+              height="full"
+              display="flex"
+              align="center"
+              justify="center"
+              className="outline-none"
+            >
+              <Box position="absolute" corner="top-right-md">
+                <IconButton onClick={closeLightbox} aria-label={t('common.close')}>
+                  <Icon as={X} size="xl" />
+                </IconButton>
+              </Box>
+              <Box position="absolute" edge="left-md">
+                <IconButton onClick={goToPrevious} aria-label="Previous">
+                  <Icon as={ChevronLeft} size="xl" />
+                </IconButton>
+              </Box>
+              <Box position="absolute" edge="right-md">
+                <IconButton onClick={goToNext} aria-label="Next">
+                  <Icon as={ChevronRight} size="xl" />
+                </IconButton>
+              </Box>
+              <AnimatedImage
+                key={currentIndex}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                src={images[currentIndex]}
+                alt={`${t('book.imageAlt')} ${currentIndex + 1}`}
+                maxWidth="full"
+                maxHeight="full"
+                fit="contain"
+              />
+            </Box>
           </Animated>
         )}
       </Presence>

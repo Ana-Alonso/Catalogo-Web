@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, SubmitEventHandler } from 'react';
+import type { ElementType, HTMLAttributes, Ref, SubmitEventHandler } from 'react';
 import { cn } from '../../design-system/utils/cn';
 import {
   ALIGN,
@@ -75,6 +75,7 @@ import {
 
 export interface BoxProps extends Omit<HTMLAttributes<HTMLElement>, 'onSubmit'> {
   as?: ElementType;
+  ref?: Ref<HTMLElement | null>;
   display?: DisplayToken;
   direction?: keyof typeof DIRECTION;
   align?: keyof typeof ALIGN;
