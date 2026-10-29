@@ -42,6 +42,7 @@ export const WorkshopConsentFields: React.FC<WorkshopConsentFieldsProps> = ({
         id="signup-privacy-consent"
         checked={privacyConsent}
         onChange={onPrivacyConsentChange}
+        error={hasPrivacyError ? t('workshop.form.errors.privacyRequired') : undefined}
         label={
           <SentenceLabel>
             <Trans
@@ -51,12 +52,6 @@ export const WorkshopConsentFields: React.FC<WorkshopConsentFieldsProps> = ({
           </SentenceLabel>
         }
       />
-
-      {hasPrivacyError && (
-        <Typography as="span" variant="body" size="xs" tone="danger" role="alert">
-          {t('workshop.form.errors.privacyRequired')}
-        </Typography>
-      )}
 
       <Checkbox
         id="signup-marketing-consent"
