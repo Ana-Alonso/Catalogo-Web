@@ -6,9 +6,18 @@ export const Image: React.FC<ImageProps> = ({
   alt,
   loading,
   className,
+  intrinsicWidth,
+  intrinsicHeight,
   ...props
 }) => (
-  <img src={src} alt={alt} loading={loading} className={imageClasses(props, className)} />
+  <img
+    src={src}
+    alt={alt}
+    loading={loading}
+    width={intrinsicWidth}
+    height={intrinsicHeight}
+    className={imageClasses(props, className)}
+  />
 );
 
 Image.displayName = 'Image';

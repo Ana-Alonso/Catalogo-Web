@@ -61,6 +61,8 @@ export const AnimatedImage: React.FC<AnimatedImageProps> = ({
   src,
   alt,
   loading,
+  intrinsicWidth,
+  intrinsicHeight,
   ...rest
 }) => {
   const { design, dom } = splitImageProps(rest as Record<string, unknown>);
@@ -70,6 +72,8 @@ export const AnimatedImage: React.FC<AnimatedImageProps> = ({
       src={src}
       alt={alt}
       loading={loading}
+      width={intrinsicWidth}
+      height={intrinsicHeight}
       className={imageClasses(design)}
     />
   );

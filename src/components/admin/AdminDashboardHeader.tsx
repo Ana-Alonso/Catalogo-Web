@@ -36,7 +36,7 @@ export const AdminDashboardHeader: React.FC<AdminDashboardHeaderProps> = ({
         gap="tight"
       >
         <Box display="flex" align="center" gap="xs" minWidth="zero">
-          <Image src={logoImg} alt={t('nav.logoAlt')} height={10} fit="contain" shrink={false} />
+          <Image src={logoImg} alt={t('nav.logoAlt')} height={10} fit="contain" shrink={false} intrinsicWidth={2048} intrinsicHeight={2048} />
           <Box minWidth="zero">
             <Typography
               as="h1"

@@ -11,6 +11,9 @@ import libro4 from '../../assets/book/Libro4.jpeg';
 
 const images = [libro1, libro2, libro3, libro4];
 
+const COVER_WIDTH = 1200;
+const COVER_HEIGHT = 1600;
+
 const AUTO_ADVANCE_INTERVAL_MS = 4_000;
 
 const AMAZON_BOOK_URL =
@@ -134,6 +137,8 @@ export const BookShowcase: React.FC = () => {
                     fullWidth
                     height="full"
                     loading="eager"
+                    intrinsicWidth={COVER_WIDTH}
+                    intrinsicHeight={COVER_HEIGHT}
                   />
                 </Box>
               </AnimatedButton>
@@ -242,6 +247,8 @@ export const BookShowcase: React.FC = () => {
                 maxWidth="full"
                 maxHeight="full"
                 fit="contain"
+                intrinsicWidth={COVER_WIDTH}
+                intrinsicHeight={COVER_HEIGHT}
               />
             </Box>
           </Animated>

@@ -61,7 +61,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
         shadow="dramatic"
       >
         <Box display="flex" justify="center" marginBottom="lg">
-          <Image src={logoImg} alt={t('nav.logoAlt')} height={12} fit="contain" />
+          <Image src={logoImg} alt={t('nav.logoAlt')} height={12} fit="contain" intrinsicWidth={2048} intrinsicHeight={2048} />
         </Box>
         <Box
           width={12}
