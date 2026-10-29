@@ -113,9 +113,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         <Presence>
           {isOpen && (
             <Animated
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
               hideFrom="md"
               background="surface"
