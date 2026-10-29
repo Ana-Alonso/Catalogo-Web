@@ -52,9 +52,9 @@ Plataforma web de catálogo digital, portfolio y reserva de plazas en talleres p
 3. **Variables de entorno**:
    Copia la plantilla base:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env.development
    ```
-   Rellena `.env.local` con tus credenciales de desarrollo. Puedes activar `VITE_USE_MOCKS=true` para trabajar en frontend sin conectar una base de datos real.
+   Rellena `.env.development` con tus credenciales de desarrollo (las versiones de producción leen `.env.production`). Puedes activar `VITE_USE_MOCKS=true` para trabajar en frontend sin conectar una base de datos real.
 
 4. **Iniciar el servidor local**:
    ```bash
@@ -72,7 +72,7 @@ Plataforma web de catálogo digital, portfolio y reserva de plazas en talleres p
 | `VITE_USE_MOCKS` | Cliente | `true` para usar datos simulados en desarrollo |
 | `VITE_SITE_URL` | Cliente | URL canónica para metadatos SEO |
 | `SUPABASE_SERVICE_ROLE_KEY` | Servidor (API) | Clave con permisos elevados para webhooks seguros |
-| `ETSY_API_KEY` | Servidor (API) | API key de la aplicación en Etsy Open API |
+| `ETSY_KEYSTRING` | Servidor (API) | Clave keystring de la aplicación en Etsy Open API |
 | `ETSY_SHARED_SECRET` | Servidor (API) | Secreto de validación de firma para webhooks |
 
 > **Importante**: Las claves con privilegios de administración o secretos de servidor nunca deben incluirse en bundles de cliente ni comitearse al repositorio.
@@ -88,8 +88,8 @@ npm run test
 # Modo observador (watch)
 npm run test:watch
 
-# Verificación de tipos TypeScript
-npm run typecheck
+# Verificación de tipos TypeScript y build de producción
+npm run build
 
 # Linter
 npm run lint

@@ -52,9 +52,9 @@ Online portfolio, dynamic product catalog, and workshop registration platform fo
 3. **Configure environment variables**:
    Copy the example environment configuration:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env.development
    ```
-   Populate `.env.local` with your development credentials. For local frontend testing without an active database, set `VITE_USE_MOCKS=true`.
+   Populate `.env.development` with your development credentials (production builds read `.env.production`). For local frontend testing without an active database, set `VITE_USE_MOCKS=true`.
 
 4. **Run the development server**:
    ```bash
@@ -72,7 +72,7 @@ Online portfolio, dynamic product catalog, and workshop registration platform fo
 | `VITE_USE_MOCKS` | Client | Set to `true` to use mock catalog data in dev |
 | `VITE_SITE_URL` | Client | Canonical URL for SEO metadata generation |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server (API) | Elevated key for secure serverless webhook endpoints |
-| `ETSY_API_KEY` | Server (API) | Etsy Open API application key |
+| `ETSY_KEYSTRING` | Server (API) | Etsy Open API keystring |
 | `ETSY_SHARED_SECRET` | Server (API) | Webhook payload signature verification secret |
 
 > **Note**: Never expose server-side credentials (`SUPABASE_SERVICE_ROLE_KEY`, `ETSY_SHARED_SECRET`) to client-side bundles or public pull requests.
@@ -93,8 +93,8 @@ npm run test:watch
 # Code linting
 npm run lint
 
-# TypeScript verification
-npm run typecheck
+# TypeScript verification and production build
+npm run build
 ```
 
 ---
