@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { getServerEnv, type ServerEnv } from '../../lib/server/env';
 import { syncEtsyListings } from '../../lib/server/etsySync';
 import { createSupabaseAdmin } from '../../lib/server/supabaseAdmin';
@@ -13,14 +13,11 @@ const bearerToken = (headers: Headers): string | null => {
   return match ? match[1] : null;
 };
 
-const safeEqual = (provided: string, expected: string): boolean => {
-  const providedBuffer = Buffer.from(provided);
-  const expectedBuffer = Buffer.from(expected);
-  return (
-    providedBuffer.length === expectedBuffer.length &&
-    timingSafeEqual(providedBuffer, expectedBuffer)
-  );
-};
+const digest = (value: string): Buffer =>
+  createHash('sha256').update(value).digest();
+
+const safeEqual = (provided: string, expected: string): boolean =>
+  timingSafeEqual(digest(provided), digest(expected));
 
 const authorizeUser = async (token: string): Promise<boolean> => {
   const { data, error } = await createSupabaseAdmin().auth.getUser(token);
