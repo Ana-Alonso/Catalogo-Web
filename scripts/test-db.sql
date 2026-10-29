@@ -193,6 +193,23 @@ BEGIN
     RAISE EXCEPTION 'FAIL: CHECK de formato de email ausente';
   END IF;
 
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+     NOT LIKE '%pg_advisory_xact_lock%' THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no serializa las inscripciones';
+  END IF;
+
+  IF pg_get_functiondef('public.workshop_spots()'::regprocedure) NOT LIKE '%isVisible%' THEN
+    RAISE EXCEPTION 'FAIL: workshop_spots no filtra por visibilidad';
+  END IF;
+
+  IF has_function_privilege('anon', 'public.check_workshop_capacity()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon puede ejecutar check_workshop_capacity';
+  END IF;
+
+  IF has_function_privilege('anon', 'public.prevent_marketing_consent_delete()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: anon puede ejecutar prevent_marketing_consent_delete';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM pg_constraint
@@ -712,6 +729,21 @@ BEGIN
   END;
 END $$;
 
+INSERT INTO public.products (id, title, description, image, category, status, featured)
+VALUES ('00000000-0000-0000-0000-000000000013', 'Taller que se ocultara', 'Descripción', 'img.png', 'talleres', 'disponible', false);
+
+INSERT INTO public.products (id, title, description, image, category, status, featured)
+VALUES ('00000000-0000-0000-0000-000000000014', 'Taller que se cancelara', 'Descripción', 'img.png', 'talleres', 'disponible', false);
+
+INSERT INTO public.workshop_registrations (product_id, name, email)
+VALUES ('00000000-0000-0000-0000-000000000013', 'Oculto Inscrito', 'oculto@test.com');
+
+INSERT INTO public.workshop_registrations (product_id, name, email)
+VALUES ('00000000-0000-0000-0000-000000000014', 'Cancelado Inscrito', 'programado@test.com');
+
+UPDATE public.products SET "isVisible" = false WHERE id = '00000000-0000-0000-0000-000000000013';
+UPDATE public.products SET "workshopCancelled" = true WHERE id = '00000000-0000-0000-0000-000000000014';
+
 SET ROLE anon;
 
 DO $$
@@ -772,6 +804,22 @@ BEGIN
 
   IF ocupadas <> 1 THEN
     RAISE EXCEPTION 'FAIL: workshop_spots devuelve % plazas en vez de 1', ocupadas;
+  END IF;
+END $$;
+
+DO $$
+DECLARE
+  filtradas INTEGER;
+BEGIN
+  SELECT count(*) INTO filtradas
+  FROM public.workshop_spots()
+  WHERE product_id IN (
+    '00000000-0000-0000-0000-000000000013',
+    '00000000-0000-0000-0000-000000000014'
+  );
+
+  IF filtradas <> 0 THEN
+    RAISE EXCEPTION 'FAIL: anon obtiene plazas de talleres ocultos o cancelados';
   END IF;
 END $$;
 
@@ -861,6 +909,32 @@ BEGIN
   END;
 END $$;
 
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000001',
+      'Pedro Lleno',
+      'pedro@test.com',
+      now(),
+      false
+    );
+    RAISE EXCEPTION 'FAIL: register_for_workshop permitio superar el cupo';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+      IF SQLERRM <> 'workshop_full' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al superar el cupo via RPC: %', SQLERRM;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'workshop_full' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al superar el cupo via RPC: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
 RESET ROLE;
 
 SET ROLE authenticated;
@@ -913,6 +987,24 @@ BEGIN
   END IF;
 END $$;
 
+DO $$
+DECLARE
+  ocultas BIGINT;
+  canceladas BIGINT;
+BEGIN
+  SELECT taken INTO ocultas
+  FROM public.workshop_spots()
+  WHERE product_id = '00000000-0000-0000-0000-000000000013';
+
+  SELECT taken INTO canceladas
+  FROM public.workshop_spots()
+  WHERE product_id = '00000000-0000-0000-0000-000000000014';
+
+  IF ocultas IS DISTINCT FROM 1::BIGINT OR canceladas IS DISTINCT FROM 1::BIGINT THEN
+    RAISE EXCEPTION 'FAIL: el admin no ve las plazas de los talleres ocultos o cancelados';
+  END IF;
+END $$;
+
 RESET ROLE;
 
 RESET request.jwt.claims;
@@ -926,3 +1018,5 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000003';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000004';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000011';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000012';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000013';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000014';
