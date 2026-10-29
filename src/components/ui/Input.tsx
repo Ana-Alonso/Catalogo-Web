@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Typography } from './Typography';
@@ -11,6 +11,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, id, endAdornment, ...props }, ref) => {
+    const errorId = useId();
     return (
       <div className="w-full">
         {label && (
@@ -34,6 +35,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               )
             )}
             {...props}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
           />
           {endAdornment && (
             <div className="absolute inset-y-0 right-2 flex items-center">
@@ -41,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && <Typography variant="body" className="mt-1 text-xs text-red-400">{error}</Typography>}
+        {error && <Typography id={errorId} variant="body" className="mt-1 text-xs text-red-400">{error}</Typography>}
       </div>
     );
   }
