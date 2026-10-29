@@ -15,3 +15,6 @@ export const isAdminUser = (user: User | null): boolean => {
 
   return readRole(user.app_metadata) === 'admin';
 };
+
+export const canUseDemoAccess = (isMockMode: boolean, isDev: boolean): boolean =>
+  isMockMode && isDev;

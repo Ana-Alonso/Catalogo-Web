@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured, isMockMode } from '../utils/supabase';
+import { supabase, isSupabaseConfigured, isMockAuthEnabled } from '../utils/supabase';
 import { isAdminUser } from '../utils/adminAccess';
 
 interface SignInResult {
@@ -53,7 +53,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
   const signIn = useCallback(
     async (email: string, password: string): Promise<SignInResult> => {
       if (!isSupabaseConfigured || !supabase) {
-        if (isMockMode) {
+        if (isMockAuthEnabled) {
           return { success: true };
         }
         return { success: false, errorKey: 'admin.login.authNotConfigured' };

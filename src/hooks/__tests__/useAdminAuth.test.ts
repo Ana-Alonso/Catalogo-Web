@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 
-const loadUseAdminAuth = async (useMocks: boolean) => {
+const loadUseAdminAuth = async (useMocks: boolean, dev = true) => {
   vi.resetModules();
   vi.stubEnv('VITE_SUPABASE_URL', '');
   vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
   vi.stubEnv('VITE_USE_MOCKS', String(useMocks));
+  vi.stubEnv('DEV', dev);
   const mod = await import('../useAdminAuth');
   return mod.useAdminAuth;
 };
@@ -17,6 +18,16 @@ describe('useAdminAuth sin Supabase configurado', () => {
 
   it('rechaza el acceso cuando los mocks no estan activados', async () => {
     const useAdminAuth = await loadUseAdminAuth(false);
+    const { result } = renderHook(() => useAdminAuth());
+
+    const outcome = await act(async () => result.current.signIn('a@b.co', 'clave'));
+
+    expect(outcome.success).toBe(false);
+    expect(outcome.errorKey).toBe('admin.login.authNotConfigured');
+  });
+
+  it('rechaza la demo de una build de producción con mocks activados', async () => {
+    const useAdminAuth = await loadUseAdminAuth(true, false);
     const { result } = renderHook(() => useAdminAuth());
 
     const outcome = await act(async () => result.current.signIn('a@b.co', 'clave'));
