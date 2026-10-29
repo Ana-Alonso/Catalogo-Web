@@ -106,6 +106,7 @@ export interface CheckboxProps {
   onChange: (checked: boolean) => void;
   label: ReactNode;
   disabled?: boolean;
+  error?: string;
 }
 
 export const Checkbox: React.FC<CheckboxProps> = ({
@@ -114,23 +115,46 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   onChange,
   label,
   disabled,
-}) => (
-  <div className="flex items-center gap-2">
-    <input
-      id={id}
-      type="checkbox"
-      checked={checked}
-      disabled={disabled}
-      onChange={(event) => onChange(event.target.checked)}
-      className="w-4 h-4 accent-orange-600 bg-neutral-950 border-neutral-800 rounded focus:ring-orange-600 cursor-pointer"
-    />
-    <label
-      htmlFor={id}
-      className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
-    >
-      {label}
-    </label>
-  </div>
-);
+  error,
+}) => {
+  const errorId = useId();
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.checked)}
+          className={twMerge(
+            clsx(
+              'w-4 h-4 accent-orange-600 bg-neutral-950 border-neutral-800 rounded focus:ring-orange-600 cursor-pointer',
+              error && 'ring-1 ring-red-500'
+            )
+          )}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+        />
+        <label
+          htmlFor={id}
+          className="text-xs uppercase font-semibold text-neutral-300 cursor-pointer"
+        >
+          {label}
+        </label>
+      </div>
+      {error && (
+        <Typography
+          id={errorId}
+          role="alert"
+          variant="body"
+          className="mt-1 text-xs text-red-400"
+        >
+          {error}
+        </Typography>
+      )}
+    </div>
+  );
+};
 
 Checkbox.displayName = 'Checkbox';
