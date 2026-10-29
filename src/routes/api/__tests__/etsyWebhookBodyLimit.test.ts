@@ -84,7 +84,7 @@ describe('POST /api/etsy-webhook body limit', () => {
   });
 
   it('sigue procesando un webhook firmado válido dentro del límite', async () => {
-    const body = JSON.stringify({ event_type: 'listing.updated', listing_id: 123 });
+    const body = JSON.stringify({ event_type: 'listing.updated', listing_id: 123, shop_id: 987654321 });
     const { action } = await loadRoute();
     const response = await action({ request: postWebhook(body) });
 
@@ -94,7 +94,7 @@ describe('POST /api/etsy-webhook body limit', () => {
   });
 
   it('oculta el listing en listing.deleted firmado y dentro del límite', async () => {
-    const body = JSON.stringify({ event_type: 'listing.deleted', listing_id: 456 });
+    const body = JSON.stringify({ event_type: 'listing.deleted', listing_id: 456, shop_id: 987654321 });
     const { action } = await loadRoute();
     const response = await action({ request: postWebhook(body) });
 
