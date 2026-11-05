@@ -26,6 +26,6 @@ describe('resolvePurchaseLinks', () => {
   });
 
   it('descarta enlaces vacíos', () => {
-    expect(resolvePurchaseLinks('camisetas', '   ', '')).toEqual({});
+    expect(resolvePurchaseLinks('textiles', '   ', '')).toEqual({});
   });
 });

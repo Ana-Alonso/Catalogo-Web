@@ -20,7 +20,7 @@ interface AdminEtsyProductFormProps {
 
 const CATEGORY_OPTIONS: Exclude<CategoryType, 'todas'>[] = [
   'ilustraciones',
-  'camisetas',
+  'textiles',
   'personalizados',
 ];
 

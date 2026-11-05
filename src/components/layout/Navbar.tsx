@@ -15,7 +15,7 @@ interface NavbarProps {
 const navLinks = [
   { labelKey: 'nav.links.all', category: 'todas', href: '#galeria' },
   { labelKey: 'nav.links.custom', category: 'personalizados', href: '#galeria' },
-  { labelKey: 'nav.links.tshirts', category: 'camisetas', href: '#galeria' },
+  { labelKey: 'nav.links.textiles', category: 'textiles', href: '#galeria' },
   { labelKey: 'nav.links.illustrations', category: 'ilustraciones', href: '#galeria' },
   { labelKey: 'nav.links.workshops', category: 'talleres', href: '#galeria' },
 ] as const satisfies readonly NavLinkItem[];

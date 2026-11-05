@@ -31,7 +31,7 @@ export interface GallerySectionProps {
 const categories: CategoryType[] = [
   'todas',
   'ilustraciones',
-  'camisetas',
+  'textiles',
   'talleres',
   'personalizados',
 ];
