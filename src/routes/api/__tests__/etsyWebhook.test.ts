@@ -241,6 +241,35 @@ describe('POST /api/etsy-webhook', () => {
     expect(body).not.toContain('detalle interno');
   });
 
+  it('deduplica el webhook-id una vez validada la firma', async () => {
+    consumeRateLimitMock
+      .mockResolvedValueOnce({ allowed: true, retryAfterSeconds: 0 })
+      .mockResolvedValueOnce({ allowed: false, retryAfterSeconds: 0 });
+    const response = await postEvent({ event_type: 'listing.updated', listing_id: 42 });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ received: true, ignored: 'replay' });
+    expect(syncSingleEtsyListingMock).not.toHaveBeenCalled();
+    expect(consumeRateLimitMock).toHaveBeenCalledWith(
+      'etsy-webhook-id:msg_123',
+      1,
+      6 * 60 * 1000
+    );
+  });
+
+  it('no registra el webhook-id cuando la firma no valida', async () => {
+    const body = JSON.stringify({ shop_id: SHOP_ID, event_type: 'listing.updated', listing_id: 42 });
+    const { action } = await loadRoute();
+    const response = await action({
+      request: buildWebhookRequest(body, { signature: 'v1,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }),
+    });
+
+    expect(response.status).toBe(401);
+    expect(
+      consumeRateLimitMock.mock.calls.some(([key]) => String(key).startsWith('etsy-webhook-id:'))
+    ).toBe(false);
+  });
+
   it('devuelve 500 cuando falta configuración del servidor', async () => {
     delete process.env.ETSY_WEBHOOK_SECRET;
     const response = await postEvent({ event_type: 'listing.updated', listing_id: 42 });

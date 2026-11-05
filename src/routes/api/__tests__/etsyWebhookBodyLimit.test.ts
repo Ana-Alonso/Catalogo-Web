@@ -89,6 +89,27 @@ describe('POST /api/etsy-webhook body limit', () => {
     expect(hideEtsyListingMock).not.toHaveBeenCalled();
   });
 
+  it('rechaza por content-length un cuerpo declarado por encima del límite sin leerlo', async () => {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const body = JSON.stringify({ event_type: 'listing.updated', listing_id: 123, shop_id: 987654321 });
+    const request = new Request('http://localhost/api/etsy-webhook', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'content-length': '7000000',
+        'webhook-id': 'msg_123',
+        'webhook-timestamp': String(timestamp),
+        'webhook-signature': sign(body, timestamp),
+      },
+      body,
+    });
+    const { action } = await loadRoute();
+    const response = await action({ request });
+
+    expect(response.status).toBe(413);
+    expect(syncSingleEtsyListingMock).not.toHaveBeenCalled();
+  });
+
   it('sigue procesando un webhook firmado válido dentro del límite', async () => {
     const body = JSON.stringify({ event_type: 'listing.updated', listing_id: 123, shop_id: 987654321 });
     const { action } = await loadRoute();

@@ -1,3 +1,4 @@
+import { isIP } from 'node:net';
 import { type RegistrationErrorCode } from '../../errors/registrationError';
 
 const UUID_PATTERN =
@@ -92,36 +93,50 @@ export const readRegistrationClaim = async (
   return parseRegistrationClaim(payload);
 };
 
-const lastForwardedEntry = (forwardedFor: string): string | undefined => {
+const MAX_IP_LENGTH = 45;
+
+const asValidIp = (value: string | undefined | null): string | null => {
+  const candidate = value?.trim().toLowerCase();
+
+  if (!candidate || candidate.length > MAX_IP_LENGTH) {
+    return null;
+  }
+
+  return isIP(candidate) > 0 ? candidate : null;
+};
+
+// Las cabeceras de rebote las escribe el cliente hasta que un proxy de confianza
+// añade la IP real al final de x-forwarded-for, así que esa última entrada es la
+// única que no puede forjarse. x-real-ip y cf-connecting-ip solo valen cuando no
+// hay cadena: son la alternativa en despliegues sin proxy delante.
+const trustedForwardedIp = (forwardedFor: string): string | null => {
   const entries = forwardedFor.split(',');
 
   for (let index = entries.length - 1; index >= 0; index -= 1) {
-    const trimmed = entries[index]?.trim();
+    const ip = asValidIp(entries[index]);
 
-    if (trimmed) {
-      return trimmed;
+    if (ip) {
+      return ip;
     }
   }
 
-  return undefined;
+  return null;
 };
 
 export const resolveClientIp = (headers: Headers): string => {
-  const realIp = headers.get('x-real-ip')?.trim();
-
-  if (realIp) {
-    return realIp;
-  }
-
   const forwardedFor = headers.get('x-forwarded-for');
 
   if (forwardedFor) {
-    const trustedIp = lastForwardedEntry(forwardedFor);
+    const forwardedIp = trustedForwardedIp(forwardedFor);
 
-    if (trustedIp) {
-      return trustedIp;
+    if (forwardedIp) {
+      return forwardedIp;
     }
   }
 
-  return headers.get('cf-connecting-ip')?.trim() || 'unknown-ip';
+  return (
+    asValidIp(headers.get('x-real-ip')) ??
+    asValidIp(headers.get('cf-connecting-ip')) ??
+    'unknown-ip'
+  );
 };

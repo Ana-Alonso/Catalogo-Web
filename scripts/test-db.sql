@@ -210,6 +210,35 @@ BEGIN
     RAISE EXCEPTION 'FAIL: anon puede ejecutar prevent_marketing_consent_delete';
   END IF;
 
+  IF has_function_privilege('authenticated', 'public.check_workshop_capacity()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: authenticated puede ejecutar check_workshop_capacity';
+  END IF;
+
+  IF has_function_privilege('authenticated', 'public.prevent_marketing_consent_delete()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FAIL: authenticated puede ejecutar prevent_marketing_consent_delete';
+  END IF;
+
+  IF pg_get_functiondef('public.check_workshop_capacity()'::regprocedure)
+     NOT LIKE '%pg_advisory_xact_lock%' THEN
+    RAISE EXCEPTION 'FAIL: check_workshop_capacity no serializa por producto';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_roles WHERE rolname = 'service_role'
+  ) AND NOT has_function_privilege(
+    'service_role', 'public.check_workshop_capacity()', 'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: service_role no puede ejecutar check_workshop_capacity';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_roles WHERE rolname = 'service_role'
+  ) AND has_function_privilege(
+    'authenticated', 'public.register_for_workshop(uuid,text,text,timestamp with time zone,boolean)', 'EXECUTE'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: authenticated puede ejecutar register_for_workshop';
+  END IF;
+
   IF to_regprocedure('public.consume_rate_limit(text,integer,integer)') IS NULL THEN
     RAISE EXCEPTION 'FAIL: función consume_rate_limit ausente';
   END IF;

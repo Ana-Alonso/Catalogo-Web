@@ -11,8 +11,14 @@ const IP_WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS_PER_IP = 10;
 const EMAIL_WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS_PER_EMAIL = 5;
+const EMAIL_SOFT_DELAY_MS = 1000;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const NO_STORE = { 'Cache-Control': 'no-store' };
 
@@ -120,8 +126,13 @@ export const action = async ({
     EMAIL_WINDOW_MS
   );
 
+  // La clave de este bucket la escribe quien ataca, así que negar el acceso
+  // permitía bloquear el panel de una única cuenta con cinco peticiones
+  // anónimas y renovarlo indefinidamente. El retraso encarece el guessing
+  // distribuido sin dejar fuera a la administración; el techo duro sigue siendo
+  // el límite por IP y la protección de brute force de Supabase Auth.
   if (!emailLimit.allowed) {
-    return tooManyRequests(emailLimit.retryAfterSeconds);
+    await delay(EMAIL_SOFT_DELAY_MS);
   }
 
   const { data, error } = await createSupabaseAnon().auth.signInWithPassword({

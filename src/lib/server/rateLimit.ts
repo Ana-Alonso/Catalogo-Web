@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { createSupabaseAdmin } from './supabaseAdmin';
 
 interface RateLimitBucket {
@@ -11,6 +12,14 @@ export interface RateLimitResult {
 }
 
 const MAX_TRACKED_KEYS = 5000;
+const MAX_KEY_LENGTH = 128;
+
+// La clave acaba en una columna text de Postgres y parte de ella viene del
+// cliente (email, cabeceras), así que se acota para que nadie haga crecer la
+// tabla con claves kilométricas. El hash es determinista: la misma clave
+// sigue compartiendo bucket.
+const boundedKey = (key: string): string =>
+  key.length <= MAX_KEY_LENGTH ? key : createHash('sha256').update(key).digest('hex');
 
 const buckets = new Map<string, RateLimitBucket>();
 
@@ -73,9 +82,11 @@ export const consumeRateLimit = async (
   limit: number,
   windowMs: number
 ): Promise<RateLimitResult> => {
+  const bucket = boundedKey(key);
+
   try {
     const { data, error } = await createSupabaseAdmin().rpc('consume_rate_limit', {
-      p_bucket_key: key,
+      p_bucket_key: bucket,
       p_limit: limit,
       p_window_ms: windowMs,
     });
@@ -93,6 +104,6 @@ export const consumeRateLimit = async (
     return result;
   } catch (err) {
     console.error('[rate-limit]', err instanceof Error ? err.message : 'Error desconocido');
-    return consumeFromMemory(key, limit, windowMs, Date.now());
+    return consumeFromMemory(bucket, limit, windowMs, Date.now());
   }
 };

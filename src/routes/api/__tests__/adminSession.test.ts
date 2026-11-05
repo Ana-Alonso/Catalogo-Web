@@ -97,18 +97,24 @@ describe('POST /api/admin-session', () => {
     expect(signInMock).not.toHaveBeenCalled();
   });
 
-  it('devuelve 429 cuando se agota el límite específico del correo', async () => {
+  it('retrasa pero no bloquea cuando se agota el límite específico del correo', async () => {
     consumeRateLimitMock
       .mockResolvedValueOnce({ allowed: true, retryAfterSeconds: 0 })
       .mockResolvedValueOnce({ allowed: false, retryAfterSeconds: 90 });
+    signInMock.mockResolvedValue({
+      data: { session: null, user: null },
+      error: { message: 'Invalid login credentials' },
+    });
     const { action } = await loadRoute();
+    const startedAt = Date.now();
     const response = await action({ request: postJson(credentials()) });
 
-    expect(response.status).toBe(429);
+    expect(response.status).toBe(401);
     expect(consumeRateLimitMock).toHaveBeenCalledTimes(2);
     expect(consumeRateLimitMock.mock.calls[1]?.[0]).toContain('ana@example.com');
-    expect(signInMock).not.toHaveBeenCalled();
-  });
+    expect(signInMock).toHaveBeenCalled();
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1000);
+  }, 15000);
 
   it('devuelve 401 sin distinguir si el fallo es de usuario o de contraseña', async () => {
     signInMock.mockResolvedValue({ data: { session: null, user: null }, error: { message: 'Invalid login credentials' } });

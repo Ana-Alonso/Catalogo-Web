@@ -86,9 +86,9 @@ describe('readRegistrationClaim', () => {
 });
 
 describe('resolveClientIp', () => {
-  it('prioriza x-real-ip frente a una cadena forjada', () => {
+  it('ignora una x-real-ip forjada cuando la plataforma dejó la IP real en x-forwarded-for', () => {
     const headers = new Headers({
-      'x-real-ip': '198.51.100.4',
+      'x-real-ip': '1.2.3.4',
       'x-forwarded-for': '203.0.113.9, 198.51.100.4',
     });
 
@@ -97,6 +97,12 @@ describe('resolveClientIp', () => {
 
   it('usa la última entrada de x-forwarded-for, que añade la plataforma', () => {
     const headers = new Headers({ 'x-forwarded-for': ' 203.0.113.9, 198.51.100.4' });
+
+    expect(resolveClientIp(headers)).toBe('198.51.100.4');
+  });
+
+  it('no permite ensuciar la cadena con entradas inválidas al final', () => {
+    const headers = new Headers({ 'x-forwarded-for': '203.0.113.9, 198.51.100.4, boleto' });
 
     expect(resolveClientIp(headers)).toBe('198.51.100.4');
   });
@@ -110,10 +116,31 @@ describe('resolveClientIp', () => {
     expect(resolveClientIp(headers)).toBe('198.51.100.7');
   });
 
+  it('recurre a x-real-ip cuando no hay cadena de rebote', () => {
+    expect(resolveClientIp(new Headers({ 'x-real-ip': '198.51.100.4' }))).toBe(
+      '198.51.100.4'
+    );
+  });
+
   it('recurre a cf-connecting-ip', () => {
     expect(resolveClientIp(new Headers({ 'cf-connecting-ip': '198.51.100.7' }))).toBe(
       '198.51.100.7'
     );
+  });
+
+  it('normaliza una IPv6 a minúsculas', () => {
+    expect(resolveClientIp(new Headers({ 'x-forwarded-for': '2001:DB8::0001' }))).toBe(
+      '2001:db8::0001'
+    );
+  });
+
+  it.each([
+    ['una clave cualquiera', 'no-soy-una-ip'],
+    ['un dominio', 'atacante.example.com'],
+    ['una cadena larga de relleno', 'a'.repeat(60)],
+    ['un prefuesto inválido', '999.1.1.1'],
+  ])('descarta %s en x-real-ip y cae en la clave común', (_label, value) => {
+    expect(resolveClientIp(new Headers({ 'x-real-ip': value }))).toBe('unknown-ip');
   });
 
   it('devuelve una clave común cuando no hay cabecera', () => {

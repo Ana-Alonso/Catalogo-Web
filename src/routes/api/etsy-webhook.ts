@@ -16,6 +16,10 @@ interface EtsyWebhookPayload {
 const MAX_WEBHOOK_BODY_LENGTH = 65536;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_EVENTS = 60;
+// Debe cubrir como mínimo la tolerancia de reloj de verifyWebhook: mientras un
+// payload firmado sea aceptable, ese mismo payload vuelve a presentarse como
+// evento nuevo si no se guarda el webhook-id.
+const REPLAY_WINDOW_MS = 6 * 60 * 1000;
 
 const LISTING_EVENTS = new Set([
   'listing.created',
@@ -83,6 +87,12 @@ export const action = async ({
     });
   }
 
+  const declaredLength = Number(request.headers.get('content-length'));
+
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_WEBHOOK_BODY_LENGTH) {
+    return jsonError(413, 'El cuerpo de la petición es demasiado grande.');
+  }
+
   let rawBody: string;
 
   try {
@@ -97,6 +107,19 @@ export const action = async ({
 
   if (!verifyEtsyWebhook(request.headers, rawBody, env.etsyWebhookSecret)) {
     return jsonError(401, 'Firma de webhook inválida.');
+  }
+
+  // La firma ya es válida, así que el webhook-id es fiable y se puede usar como
+  // clave de deduplicación. Comprobarlo antes permitiría envenenar el almacén
+  // con ids inventados por quien no sabe el secreto.
+  const firstSight = await consumeRateLimit(
+    `etsy-webhook-id:${request.headers.get('webhook-id')}`,
+    1,
+    REPLAY_WINDOW_MS
+  );
+
+  if (!firstSight.allowed) {
+    return Response.json({ received: true, ignored: 'replay' });
   }
 
   const payload = parsePayload(rawBody);
