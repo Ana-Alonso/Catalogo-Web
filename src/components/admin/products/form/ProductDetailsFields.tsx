@@ -30,7 +30,7 @@ interface ProductDetailsFieldsProps {
 
 const CATEGORY_OPTIONS: FormCategory[] = [
   'ilustraciones',
-  'camisetas',
+  'textiles',
   'talleres',
   'personalizados',
 ];

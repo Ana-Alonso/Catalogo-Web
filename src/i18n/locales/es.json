@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Laurel en Lienzo | Ilustraciones personalizadas y talleres creativos",
-    "description": "Catálogo de ilustraciones personalizadas, camisetas y talleres creativos. Piezas exclusivas hechas a mano para conectar contigo."
+    "description": "Catálogo de ilustraciones personalizadas, textiles y talleres creativos. Piezas exclusivas hechas a mano para conectar contigo."
   },
   "brand": {
     "name": "<highlight>Laurel</highlight> en Lienzo"
@@ -30,7 +30,7 @@
     "links": {
       "all": "Todos",
       "custom": "Personalizados",
-      "tshirts": "Camisetas",
+      "textiles": "Textiles",
       "illustrations": "Ilustraciones",
       "workshops": "Talleres"
     }
@@ -66,7 +66,7 @@
     "categories": {
       "all": "Todas las obras",
       "custom": "Personalizados",
-      "tshirts": "Camisetas",
+      "textiles": "Textiles",
       "illustrations": "Ilustraciones",
       "workshops": "Talleres"
     },
@@ -319,7 +319,7 @@
       "editTitle": "Modificar Producto",
       "createTitle": "Añadir Nuevo Producto",
       "editDescription": "Editando los datos de \"{{title}}\"",
-      "createDescription": "Sube nuevas obras, camisetas o talleres al catálogo.",
+      "createDescription": "Sube nuevas obras, textiles o talleres al catálogo.",
       "cancelEdit": "Cancelar Edición",
       "cancel": "Cancelar",
       "saving": "Guardando...",

@@ -57,11 +57,11 @@ describe('productService · metadatos de productos Etsy', () => {
     const { updateEtsyProductMetadata, fetchProducts } = await loadService();
 
     const updated = await updateEtsyProductMetadata('etsy-1', {
-      category: 'camisetas',
+      category: 'textiles',
       etsyOnSale: true,
     });
 
-    expect(updated.category).toBe('camisetas');
+    expect(updated.category).toBe('textiles');
     expect(updated.etsyOnSale).toBe(true);
 
     const stored = (await fetchProducts()).find((item) => item.id === 'local-1');

@@ -5,7 +5,7 @@ import type { CategoryType } from '../../types/catalog';
 
 const categories: Exclude<CategoryType, 'todas'>[] = [
   'personalizados',
-  'camisetas',
+  'textiles',
   'ilustraciones',
   'talleres',
 ];

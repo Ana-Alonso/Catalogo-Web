@@ -4,7 +4,7 @@ import type { RegistrationStatus } from '../types/registrations';
 export const categoryTranslationKeys = {
   todas: 'catalog.categories.all',
   personalizados: 'catalog.categories.custom',
-  camisetas: 'catalog.categories.tshirts',
+  textiles: 'catalog.categories.textiles',
   ilustraciones: 'catalog.categories.illustrations',
   talleres: 'catalog.categories.workshops',
 } as const satisfies Record<CategoryType, string>;

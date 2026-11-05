@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Laurel en Lienzo | Custom illustrations and creative workshops",
-    "description": "Catalog of custom illustrations, T-shirts and creative workshops. Exclusive handmade pieces to connect with you."
+    "description": "Catalog of custom illustrations, textiles and creative workshops. Exclusive handmade pieces to connect with you."
   },
   "brand": {
     "name": "<highlight>Laurel</highlight> en Lienzo"
@@ -30,7 +30,7 @@
     "links": {
       "all": "All",
       "custom": "Custom",
-      "tshirts": "T-shirts",
+      "textiles": "Textiles",
       "illustrations": "Illustrations",
       "workshops": "Workshops"
     }
@@ -66,7 +66,7 @@
     "categories": {
       "all": "All works",
       "custom": "Custom",
-      "tshirts": "T-shirts",
+      "textiles": "Textiles",
       "illustrations": "Illustrations",
       "workshops": "Workshops"
     },
@@ -319,7 +319,7 @@
       "editTitle": "Edit Product",
       "createTitle": "Add New Product",
       "editDescription": "Editing the details of \"{{title}}\"",
-      "createDescription": "Add new artwork, t-shirts or workshops to the catalog.",
+      "createDescription": "Add new artworks, textiles or workshops to the catalog.",
       "cancelEdit": "Cancel Editing",
       "cancel": "Cancel",
       "saving": "Saving...",

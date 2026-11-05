@@ -78,12 +78,12 @@ describe('AdminEtsyProductForm', () => {
 
     await user.selectOptions(
       screen.getByLabelText(i18n.t('admin.etsyForm.categoryLabel')),
-      'camisetas'
+      'textiles'
     );
     await user.click(saveButton());
 
     expect(onSubmit).toHaveBeenCalledWith({
-      category: 'camisetas',
+      category: 'textiles',
       etsyOnSale: true,
     });
   });
