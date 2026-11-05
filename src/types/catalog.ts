@@ -1,4 +1,4 @@
-export type CategoryType = 'todas' | 'personalizados' | 'camisetas' | 'ilustraciones' | 'talleres';
+export type CategoryType = 'todas' | 'personalizados' | 'textiles' | 'ilustraciones' | 'talleres' | 'especiales';
 
 export type AvailabilityStatus = 'disponible' | 'reservado' | 'vendido';
 

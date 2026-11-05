@@ -8,6 +8,7 @@ const categories: Exclude<CategoryType, 'todas'>[] = [
   'camisetas',
   'ilustraciones',
   'talleres',
+  'especiales',
 ];
 
 describe('mocks de ofertas', () => {
