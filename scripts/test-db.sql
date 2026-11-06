@@ -1457,6 +1457,22 @@ BEGIN
     RAISE EXCEPTION 'FAIL: una tabla nueva hereda privilegios para anon/authenticated';
   END IF;
 
+  -- La 032 extiende el corte a los demas roles con CREATE sobre public:
+  -- una tabla creada por otro dueno tampoco nace accesible.
+  IF has_schema_privilege(current_role, 'public', 'CREATE') THEN
+    EXECUTE format('GRANT CREATE ON SCHEMA public TO %I', current_role);
+    EXECUTE format('SET ROLE %I', current_role);
+    CREATE TABLE public.probe_default_privs_032 (id integer);
+    IF has_table_privilege('anon', 'public.probe_default_privs_032', 'SELECT')
+       OR has_table_privilege('authenticated', 'public.probe_default_privs_032', 'INSERT') THEN
+      RESET ROLE;
+      DROP TABLE public.probe_default_privs_032;
+      RAISE EXCEPTION 'FAIL: una tabla creada por otro rol hereda privilegios para anon/authenticated';
+    END IF;
+    RESET ROLE;
+    DROP TABLE public.probe_default_privs_032;
+  END IF;
+
   -- PostgreSQL concede EXECUTE a PUBLIC por valor por defecto y no se puede
   -- suprimir con ALTER DEFAULT PRIVILEGES (comprobado sobre postgres:15). La
   -- sonda documenta el límite: las migraciones futuras deben revocar por

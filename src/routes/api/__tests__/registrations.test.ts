@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const { rpcMock, consumeRateLimitMock } = vi.hoisted(() => ({
+const { rpcMock, productCategoryMock, consumeRateLimitMock } = vi.hoisted(() => ({
   rpcMock: vi.fn(),
+  productCategoryMock: vi.fn(),
   consumeRateLimitMock: vi.fn(),
 }));
 
 vi.mock('../../../lib/server/supabaseAdmin', () => ({
-  createSupabaseAdmin: () => ({ rpc: rpcMock }),
+  createSupabaseAdmin: () => ({
+    rpc: rpcMock,
+    from: () => ({
+      select: () => ({
+        eq: () => ({ maybeSingle: productCategoryMock }),
+      }),
+    }),
+  }),
 }));
 
 vi.mock('../../../lib/server/rateLimit', () => ({
@@ -49,6 +57,7 @@ const loadRoute = async () => {
 describe('POST /api/registrations', () => {
   beforeEach(() => {
     rpcMock.mockReset();
+    productCategoryMock.mockReset().mockResolvedValue({ data: { category: 'talleres' }, error: null });
     consumeRateLimitMock.mockReset().mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -76,10 +85,20 @@ describe('POST /api/registrations', () => {
     );
   });
 
-  it('repercute la cantidad pedida en la RPC', async () => {
+  it('fuerza una plaza en los talleres aunque el cliente pida más', async () => {
     rpcMock.mockResolvedValue({ data: registrationRow, error: null });
     const { action } = await loadRoute();
     await action({ request: postJson({ ...validBody(), quantity: 3 }) });
+
+    const args = rpcMock.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(args.p_quantity).toBe(1);
+  });
+
+  it('repercute la cantidad pedida en la RPC para una edición especial', async () => {
+    rpcMock.mockResolvedValue({ data: registrationRow, error: null });
+    productCategoryMock.mockResolvedValue({ data: { category: 'especiales' }, error: null });
+    const { action } = await loadRoute();
+    await action({ request: postJson({ ...validBody(), quantity: 3 }, '203.0.113.50') });
 
     const args = rpcMock.mock.calls[0]?.[1] as Record<string, unknown>;
     expect(args.p_quantity).toBe(3);
@@ -184,6 +203,28 @@ describe('POST /api/registrations', () => {
 
     expect(response.status).toBe(500);
     expect(await response.json()).toEqual({ error: 'unknown' });
+  });
+
+  it('rechaza un producto inexistente sin llamar a la RPC', async () => {
+    productCategoryMock.mockResolvedValue({ data: null, error: null });
+    const { action } = await loadRoute();
+    const response = await action({ request: postJson(validBody(), '203.0.113.51') });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalidData' });
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
+
+  it('devuelve 500 unknown si la categoría del producto no puede leerse', async () => {
+    productCategoryMock.mockResolvedValue({
+      data: null,
+      error: { code: '42P01', message: 'relation not found' },
+    });
+    const { action } = await loadRoute();
+    const response = await action({ request: postJson(validBody(), '203.0.113.52') });
+
+    expect(response.status).toBe(500);
+    expect(rpcMock).not.toHaveBeenCalled();
   });
 
   it('limita las inscripciones por dirección IP', async () => {

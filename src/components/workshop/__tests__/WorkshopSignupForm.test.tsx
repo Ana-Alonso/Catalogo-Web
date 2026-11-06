@@ -225,6 +225,19 @@ describe('WorkshopSignupForm · unidades en especiales', () => {
     expect(input.value).toBe('2');
   });
 
+  it('mantiene el botón «-» bloqueado con la cantidad vacía', async () => {
+    const user = userEvent.setup();
+    renderSpecialForm(vi.fn().mockResolvedValue(undefined));
+
+    await user.clear(
+      screen.getByLabelText(i18n.t('workshop.form.quantityLabel'))
+    );
+
+    expect(
+      screen.getByRole('button', { name: i18n.t('workshop.form.quantityMinus') })
+    ).toBeDisabled();
+  });
+
   it('muestra el aviso de unidades agotadas cuando la API devuelve workshopFull', async () => {
     const user = userEvent.setup();
     const onRegister = vi.fn().mockRejectedValue(new RegistrationError('workshopFull'));

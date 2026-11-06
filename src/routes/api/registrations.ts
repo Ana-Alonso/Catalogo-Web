@@ -67,13 +67,32 @@ export const action = async ({
 
   try {
     const supabaseAdmin = createSupabaseAdmin();
+
+    // El servidor decide la cantidad de un taller: siempre una plaza, sin
+    // depender de que la RPC rechace un quantity abusivo (plan #83 §2).
+    const { data: producto, error: errorProducto } = await supabaseAdmin
+      .from('products')
+      .select('category')
+      .eq('id', claim.productId)
+      .maybeSingle();
+
+    if (errorProducto) {
+      return jsonError(500, 'unknown');
+    }
+
+    if (!producto) {
+      return jsonError(400, 'invalidData');
+    }
+
+    const esTaller = producto.category === 'talleres';
+
     const { data, error } = await supabaseAdmin.rpc('register_for_workshop', {
       p_product_id: claim.productId,
       p_name: claim.name,
       p_email: claim.email,
       p_privacy_consent_at: claim.privacyConsentAt,
       p_marketing_consent: claim.marketingConsent,
-      p_quantity: claim.quantity,
+      p_quantity: esTaller ? 1 : claim.quantity,
     });
 
     if (error) {
