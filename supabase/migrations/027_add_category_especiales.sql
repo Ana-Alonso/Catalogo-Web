@@ -1,7 +1,7 @@
 -- Añadir la categoria 'especiales' (Ocasionales o de Temporada) al CHECK de products.
 
 ALTER TABLE public.products
-    DROP CONSTRAINT products_category_check;
+    DROP CONSTRAINT IF EXISTS products_category_check;
 
 ALTER TABLE public.products
     ADD CONSTRAINT products_category_check
