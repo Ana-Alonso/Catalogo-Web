@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '../../i18n/languages';
 import type { LegalBlock, LegalDocument, LegalSection } from '../../data/legal/types';
+import { ContentBlockView } from '../content/ContentBlockView';
 import {
   Box,
   Container,
@@ -15,52 +16,34 @@ import {
 } from '../ui';
 
 const LegalBlockView: React.FC<{ block: LegalBlock }> = ({ block }) => {
-  if (block.kind === 'list') {
-    return (
-      <Box as="ul" className="list-disc space-y-1 pl-5">
-        {block.items.map((item) => (
-          <Box as="li" key={item}>
-            <Typography variant="body" size="sm">
-              {item}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    );
-  }
-
-  if (block.kind === 'table') {
-    return (
-      <Box overflow="xAuto">
-        <Table fullWidth>
-          <caption className="sr-only">{block.table.caption}</caption>
-          <TableHead>
-            <TableRow head>
-              {block.table.columns.map((column) => (
-                <TableHeader key={column}>{column}</TableHeader>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {block.table.rows.map((row) => (
-              <TableRow key={row[0]}>
-                {row.map((cell) => (
-                  <TableCell key={cell}>
-                    {cell}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>
-    );
+  if (block.kind !== 'table') {
+    return <ContentBlockView block={block} />;
   }
 
   return (
-    <Typography variant="body" size="sm">
-      {block.text}
-    </Typography>
+    <Box overflow="xAuto">
+      <Table fullWidth>
+        <caption className="sr-only">{block.table.caption}</caption>
+        <TableHead>
+          <TableRow head>
+            {block.table.columns.map((column) => (
+              <TableHeader key={column}>{column}</TableHeader>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {block.table.rows.map((row) => (
+            <TableRow key={row[0]}>
+              {row.map((cell) => (
+                <TableCell key={cell}>
+                  {cell}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
   );
 };
 

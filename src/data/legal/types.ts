@@ -1,3 +1,5 @@
+import type { ContentBlock } from '../content/types';
+
 export interface LegalTable {
   caption: string;
   columns: string[];
@@ -5,8 +7,7 @@ export interface LegalTable {
 }
 
 export type LegalBlock =
-  | { kind: 'paragraph'; text: string }
-  | { kind: 'list'; items: string[] }
+  | ContentBlock
   | { kind: 'table'; table: LegalTable };
 
 export interface LegalSection {
