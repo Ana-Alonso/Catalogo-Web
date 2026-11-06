@@ -48,6 +48,9 @@ export const mapRegistrationDatabaseError = (
   if (message.includes('not_a_workshop')) {
     return 'invalidData';
   }
+  if (message.includes('invalid_quantity')) {
+    return 'invalidData';
+  }
   if (message.includes('workshop_full')) {
     return 'workshopFull';
   }

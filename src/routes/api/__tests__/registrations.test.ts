@@ -71,8 +71,18 @@ describe('POST /api/registrations', () => {
         p_name: 'Ana',
         p_email: 'ana@example.com',
         p_marketing_consent: true,
+        p_quantity: 1,
       })
     );
+  });
+
+  it('repercute la cantidad pedida en la RPC', async () => {
+    rpcMock.mockResolvedValue({ data: registrationRow, error: null });
+    const { action } = await loadRoute();
+    await action({ request: postJson({ ...validBody(), quantity: 3 }) });
+
+    const args = rpcMock.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(args.p_quantity).toBe(3);
   });
 
   it('pone la marca de consentimiento en el servidor', async () => {
@@ -89,6 +99,7 @@ describe('POST /api/registrations', () => {
     ['productId que no es UUID', { ...validBody(), productId: 'prod-1' }],
     ['nombre vacío', { ...validBody(), name: '   ' }],
     ['sin consentimiento de privacidad', { ...validBody(), privacyConsent: false }],
+    ['quantity fuera de rango', { ...validBody(), quantity: 11 }],
     ['payload que no es objeto', 'texto'],
   ])('rechaza un %s sin tocar la base de datos', async (_label, body) => {
     const { action } = await loadRoute();
@@ -135,6 +146,20 @@ describe('POST /api/registrations', () => {
     });
     const { action } = await loadRoute();
     const response = await action({ request: postJson(validBody(), '203.0.113.26') });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: 'invalidData' });
+  });
+
+  it('traduce invalid_quantity a 400 invalidData', async () => {
+    rpcMock.mockResolvedValue({
+      data: null,
+      error: { code: 'P0001', message: 'invalid_quantity' },
+    });
+    const { action } = await loadRoute();
+    const response = await action({
+      request: postJson({ ...validBody(), quantity: 4 }, '203.0.113.27'),
+    });
 
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: 'invalidData' });

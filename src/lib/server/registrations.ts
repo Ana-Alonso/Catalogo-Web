@@ -6,6 +6,8 @@ const UUID_PATTERN =
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NAME_LENGTH = 80;
 const MAX_EMAIL_LENGTH = 254;
+const MIN_QUANTITY = 1;
+const MAX_QUANTITY = 10;
 
 export interface WorkshopRegistrationClaim {
   productId: string;
@@ -13,6 +15,7 @@ export interface WorkshopRegistrationClaim {
   email: string;
   privacyConsentAt: string | null;
   marketingConsent: boolean;
+  quantity: number;
 }
 
 export type RegistrationClaimResult =
@@ -55,6 +58,17 @@ export const parseRegistrationClaim = (payload: unknown): RegistrationClaimResul
     return invalid();
   }
 
+  const quantity = body.quantity ?? MIN_QUANTITY;
+
+  if (
+    typeof quantity !== 'number' ||
+    !Number.isInteger(quantity) ||
+    quantity < MIN_QUANTITY ||
+    quantity > MAX_QUANTITY
+  ) {
+    return invalid();
+  }
+
   return {
     ok: true,
     claim: {
@@ -63,6 +77,7 @@ export const parseRegistrationClaim = (payload: unknown): RegistrationClaimResul
       email: email.trim(),
       privacyConsentAt: new Date().toISOString(),
       marketingConsent: body.marketingConsent === true,
+      quantity,
     },
   };
 };

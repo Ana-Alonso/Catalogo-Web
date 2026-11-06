@@ -32,6 +32,7 @@ describe('parseRegistrationClaim', () => {
       email: 'ana@example.com',
       privacyConsentAt: expect.any(String),
       marketingConsent: true,
+      quantity: 1,
     });
   });
 
@@ -41,6 +42,10 @@ describe('parseRegistrationClaim', () => {
     ['nombre demasiado largo', claimBody({ name: 'A'.repeat(81) })],
     ['email demasiado largo', claimBody({ email: `${'a'.repeat(250)}@example.com` })],
     ['privacyConsent ausente', claimBody({ privacyConsent: undefined })],
+    ['quantity cero', claimBody({ quantity: 0 })],
+    ['quantity once', claimBody({ quantity: 11 })],
+    ['quantity decimal', claimBody({ quantity: 2.5 })],
+    ['quantity como texto', claimBody({ quantity: '3' })],
   ])('rechaza %s', (_label, body) => {
     expect(parseRegistrationClaim(body)).toEqual({ ok: false, code: 'invalidData' });
   });
@@ -57,6 +62,29 @@ describe('parseRegistrationClaim', () => {
       return;
     }
     expect(parsed.claim.marketingConsent).toBe(false);
+  });
+
+  it.each([
+    ['ausente', undefined],
+    ['null', null],
+  ])('cae en 1 unidad cuando la cantidad viene %s', (_label, value) => {
+    const parsed = parseRegistrationClaim(claimBody({ quantity: value }));
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(parsed.claim.quantity).toBe(1);
+  });
+
+  it('admite hasta 10 unidades', () => {
+    const parsed = parseRegistrationClaim(claimBody({ quantity: 10 }));
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(parsed.claim.quantity).toBe(10);
   });
 });
 
