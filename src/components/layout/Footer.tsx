@@ -169,15 +169,16 @@ const Footer: React.FC = () => {
                   {question}
                 </Typography>
               </summary>
-              <Typography
-                variant="body"
-                size="sm"
-                tone="subtle"
-                style={{ whiteSpace: 'pre-line' }}
-                padding="sm"
-              >
-                {answer}
-              </Typography>
+              <Box padding="sm">
+                <Typography
+                  variant="body"
+                  size="sm"
+                  tone="subtle"
+                  style={{ whiteSpace: 'pre-line' }}
+                >
+                  {answer}
+                </Typography>
+              </Box>
             </details>
           ))}
         </Box>
