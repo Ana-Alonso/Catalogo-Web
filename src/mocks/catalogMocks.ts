@@ -394,7 +394,7 @@ export const mockCatalogItems: CatalogItem[] = [
     currency: 'EUR',
     source: 'local',
     isVisible: true,
-    status: 'disponible',
+    status: 'vendido',
     eventDate: daysFromNow(-40),
     eventLocation: 'Madrid',
     created_at: twoDaysAgo,

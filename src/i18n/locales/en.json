@@ -32,7 +32,8 @@
       "custom": "Custom",
       "textiles": "Textiles",
       "illustrations": "Illustrations",
-      "workshops": "Workshops"
+      "workshops": "Workshops",
+      "specials": "Special editions"
     }
   },
   "hero": {
@@ -431,9 +432,9 @@
       "registrationDeadlineHint": "When this date/time is reached, registrations will close automatically.",
       "unitsLabel": "Available units (optional)",
       "unitsPlaceholder": "Until stock runs out",
-      "unitsHint": "Leave empty to take reservations until stock runs out.",
+      "unitsHint": "Leave empty to accept reservations without a unit limit.",
       "deadlineLabelUnits": "Reservation deadline (optional)",
-      "deadlineHintUnits": "When this date/time is reached, reservations will close automatically."
+      "deadlineHintUnits": "Leave empty to not set a closing deadline; reservations remain open."
     },
     "priceFields": {
       "priceLabel": "Estimated price in € (optional)",

@@ -18,6 +18,7 @@ const navLinks = [
   { labelKey: 'nav.links.textiles', category: 'textiles', href: '#galeria' },
   { labelKey: 'nav.links.illustrations', category: 'ilustraciones', href: '#galeria' },
   { labelKey: 'nav.links.workshops', category: 'talleres', href: '#galeria' },
+  { labelKey: 'nav.links.specials', category: 'especiales', href: '#galeria' },
 ] as const satisfies readonly NavLinkItem[];
 
 export const Navbar: React.FC<NavbarProps> = ({ 

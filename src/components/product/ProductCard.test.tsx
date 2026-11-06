@@ -237,7 +237,7 @@ describe('ProductCard · reservas de productos especiales', () => {
   });
 
   it('muestra el enlace de compra cuando la edición no activa las reservas', () => {
-    renderCard(special());
+    renderCard(special({ status: 'reservado' }));
 
     expect(signupButton()).toBeNull();
     expect(screen.getByText(i18n.t('product.buyEtsy'))).toBeInTheDocument();
