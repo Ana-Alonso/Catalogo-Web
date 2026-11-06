@@ -8,6 +8,7 @@ import type { RegistrationStatus, WorkshopRegistration } from '../../../types/re
 
 interface AdminWorkshopRegistrationsProps {
   registrations: WorkshopRegistration[];
+  showQuantity?: boolean;
   onSetStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
   onWithdrawMarketingConsent: (id: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
@@ -24,7 +25,7 @@ const statusBadgeVariant: Record<
 
 export const AdminWorkshopRegistrations: React.FC<
   AdminWorkshopRegistrationsProps
-> = ({ registrations, onSetStatus, onWithdrawMarketingConsent, onDelete }) => {
+> = ({ registrations, showQuantity = false, onSetStatus, onWithdrawMarketingConsent, onDelete }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
 
@@ -69,6 +70,14 @@ export const AdminWorkshopRegistrations: React.FC<
           </Box>
 
           <Box display="flex" wrap align="center" gap="sm">
+            {showQuantity && (
+              <Badge variant="neutral" size="micro">
+                {t('admin.registrations.quantityBadge', {
+                  count: registration.quantity || 1,
+                  quantity: registration.quantity || 1,
+                })}
+              </Badge>
+            )}
             <Typography variant="body" size="xs" tone="subtle">
               {formatDateTime(registration.created_at, language)}
             </Typography>

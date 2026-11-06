@@ -364,7 +364,10 @@
       "capacityPlaceholder": "No limit",
       "capacityHint": "Leave empty for unlimited registrations.",
       "registrationDeadlineLabel": "Registration deadline (optional)",
-      "registrationDeadlineHint": "When this date/time is reached, registrations will close automatically."
+      "registrationDeadlineHint": "When this date/time is reached, registrations will close automatically.",
+      "unitsLabel": "Available units (optional)",
+      "unitsPlaceholder": "Until stock runs out",
+      "unitsHint": "Leave empty to take reservations until stock runs out."
     },
     "priceFields": {
       "priceLabel": "Estimated price in € (optional)",
@@ -475,6 +478,10 @@
       "errorTitle": "Could not load registrations",
       "emptyWorkshops": "There are no published workshops in the catalog.",
       "spots": "{{active}} / {{cupo}} spots",
+      "units": "{{active}} / {{cupo}} units",
+      "noUnitsLimit": "Until stock runs out",
+      "quantityBadge_one": "{{quantity}} unit",
+      "quantityBadge_other": "{{quantity}} units",
       "attendee": "{{count}} registered",
       "attendees": "{{count}} registered",
       "empty": "No registrations yet.",
@@ -491,7 +498,8 @@
         "email": "Email",
         "workshop": "Workshop",
         "date": "Date",
-        "status": "Status"
+        "status": "Status",
+        "quantity": "Units"
       },
       "confirmAria": "Confirm registration for {{name}}",
       "cancelAria": "Cancel registration for {{name}}",

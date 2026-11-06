@@ -9,6 +9,7 @@ export interface MarketingCsvRow {
   workshop: string;
   date: string;
   status: string;
+  quantity: string;
 }
 
 const CSV_SEPARATOR = ';';
@@ -21,6 +22,7 @@ const toRowCells = (row: MarketingCsvRow): string[] => [
   row.workshop,
   row.date,
   row.status,
+  row.quantity,
 ];
 
 const escapeCell = (value: string): string => {
@@ -44,6 +46,7 @@ export const buildMarketingCsvRows = (
       workshop: workshopTitleById[registration.product_id] ?? '',
       date: registration.created_at.slice(0, 10),
       status: translateStatus(registration.status),
+      quantity: String(registration.quantity ?? 1),
     }));
 
 export const buildCsv = (

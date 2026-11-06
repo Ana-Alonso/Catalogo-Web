@@ -65,13 +65,24 @@ describe('buildMarketingCsvRows', () => {
         workshop: '',
         date: '2026-10-20',
         status: 'cancelado',
+        quantity: '1',
       },
     ]);
+  });
+
+  it('exporta la cantidad reservada en unidades', () => {
+    const rows = buildMarketingCsvRows(
+      [buildRegistration({ quantity: 3 })],
+      titles,
+      translateStatus
+    );
+
+    expect(rows[0].quantity).toBe('3');
   });
 });
 
 describe('buildCsv', () => {
-  const headers = ['Nombre', 'Email', 'Taller', 'Fecha', 'Estado'];
+  const headers = ['Nombre', 'Email', 'Taller', 'Fecha', 'Estado', 'Unidades'];
 
   it('escribe BOM, separador ; y saltos CRLF', () => {
     const csv = buildCsv(headers, [
@@ -81,12 +92,13 @@ describe('buildCsv', () => {
         workshop: 'Taller de acuarela',
         date: '2026-10-20',
         status: 'Confirmado',
+        quantity: '1',
       },
     ]);
 
     expect(csv.startsWith(BOM)).toBe(true);
     expect(csv).toBe(
-      `${BOM}Nombre;Email;Taller;Fecha;Estado\r\nMaría;maria@mail.com;Taller de acuarela;2026-10-20;Confirmado\r\n`
+      `${BOM}Nombre;Email;Taller;Fecha;Estado;Unidades\r\nMaría;maria@mail.com;Taller de acuarela;2026-10-20;Confirmado;1\r\n`
     );
   });
 
@@ -98,13 +110,14 @@ describe('buildCsv', () => {
         workshop: 'Acuarela\ny tinta',
         date: '2026-10-20',
         status: 'Pendiente',
+        quantity: '3',
       },
     ]);
 
     const [, fila] = csv.slice(BOM.length).split('\r\n');
 
     expect(fila).toBe(
-      '"Ana ""Anita""; López";ana@mail.com;"Acuarela\ny tinta";2026-10-20;Pendiente'
+      '"Ana ""Anita""; López";ana@mail.com;"Acuarela\ny tinta";2026-10-20;Pendiente;3'
     );
   });
 });

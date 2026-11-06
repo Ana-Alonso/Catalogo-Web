@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Input, Typography } from '../../../ui';
+import type { CategoryType } from '../../../../types/catalog';
 
 interface WorkshopFieldsProps {
+  category: CategoryType;
   eventDate: string;
   eventLocation: string;
   cupo: string;
@@ -14,6 +16,7 @@ interface WorkshopFieldsProps {
 }
 
 export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
+  category,
   eventDate,
   eventLocation,
   cupo,
@@ -24,6 +27,7 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
   onRegistrationDeadlineChange,
 }) => {
   const { t } = useTranslation();
+  const isSpecial = category === 'especiales';
 
   return (
     <Box
@@ -36,34 +40,40 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
       background="neutral"
       border
     >
-      <Input
-        id="prod-event-date"
-        label={t('admin.workshopFields.dateLabel')}
-        type="datetime-local"
-        value={eventDate}
-        onChange={(event) => onEventDateChange(event.target.value)}
-      />
-      <Input
-        id="prod-event-loc"
-        label={t('admin.workshopFields.locationLabel')}
-        maxLength={120}
-        value={eventLocation}
-        onChange={(event) => onEventLocationChange(event.target.value)}
-        placeholder={t('admin.workshopFields.locationPlaceholder')}
-      />
+      {!isSpecial && (
+        <Input
+          id="prod-event-date"
+          label={t('admin.workshopFields.dateLabel')}
+          type="datetime-local"
+          value={eventDate}
+          onChange={(event) => onEventDateChange(event.target.value)}
+        />
+      )}
+      {!isSpecial && (
+        <Input
+          id="prod-event-loc"
+          label={t('admin.workshopFields.locationLabel')}
+          maxLength={120}
+          value={eventLocation}
+          onChange={(event) => onEventLocationChange(event.target.value)}
+          placeholder={t('admin.workshopFields.locationPlaceholder')}
+        />
+      )}
       <Box>
         <Input
           id="prod-cupo"
-          label={t('admin.workshopFields.capacityLabel')}
+          label={t(isSpecial ? 'admin.workshopFields.unitsLabel' : 'admin.workshopFields.capacityLabel')}
           type="number"
           min={1}
           step={1}
           value={cupo}
           onChange={(event) => onCupoChange(event.target.value)}
-          placeholder={t('admin.workshopFields.capacityPlaceholder')}
+          placeholder={
+            t(isSpecial ? 'admin.workshopFields.unitsPlaceholder' : 'admin.workshopFields.capacityPlaceholder')
+          }
         />
         <Typography variant="body" tone="subtle" size="xs" marginTop="xs">
-          {t('admin.workshopFields.capacityHint')}
+          {t(isSpecial ? 'admin.workshopFields.unitsHint' : 'admin.workshopFields.capacityHint')}
         </Typography>
       </Box>
       <Box>

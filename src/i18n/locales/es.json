@@ -364,7 +364,10 @@
       "capacityPlaceholder": "Sin límite",
       "capacityHint": "Deja vacío para inscripciones sin límite.",
       "registrationDeadlineLabel": "Plazo para inscribirse (opcional)",
-      "registrationDeadlineHint": "Cuando llegue esta fecha/hora, las inscripciones se cerrarán automáticamente."
+      "registrationDeadlineHint": "Cuando llegue esta fecha/hora, las inscripciones se cerrarán automáticamente.",
+      "unitsLabel": "Unidades disponibles (opcional)",
+      "unitsPlaceholder": "Hasta agotar existencias",
+      "unitsHint": "Deja vacío para reservar hasta agotar existencias."
     },
     "priceFields": {
       "priceLabel": "Precio estimado en € (opcional)",
@@ -475,6 +478,10 @@
       "errorTitle": "No se pudieron cargar las inscripciones",
       "emptyWorkshops": "No hay talleres publicados en el catálogo.",
       "spots": "{{active}} / {{cupo}} plazas",
+      "units": "{{active}} / {{cupo}} unidades",
+      "noUnitsLimit": "Hasta agotar existencias",
+      "quantityBadge_one": "{{quantity}} unidad",
+      "quantityBadge_other": "{{quantity}} unidades",
       "attendee": "{{count}} inscrito",
       "attendees": "{{count}} inscritos",
       "empty": "Sin inscripciones todavía.",
@@ -491,7 +498,8 @@
         "email": "Email",
         "workshop": "Taller",
         "date": "Fecha",
-        "status": "Estado"
+        "status": "Estado",
+        "quantity": "Unidades"
       },
       "confirmAria": "Confirmar inscripción de {{name}}",
       "cancelAria": "Cancelar inscripción de {{name}}",

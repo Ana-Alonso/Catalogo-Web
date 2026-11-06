@@ -19,6 +19,7 @@ import { formatDateTime } from '../../../utils/dateFormat';
 import { isWorkshopRegistrationClosed } from '../../../utils/workshopSignupState';
 import {
   getActiveRegistrationCount,
+  getActiveRegistrationUnits,
   getRegistrationStats,
 } from '../../../utils/workshopSummary';
 import type { WorkshopFinishedReason } from '../../../utils/workshopPhase';
@@ -69,6 +70,8 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
   const language = i18n.resolvedLanguage ?? i18n.language;
   const stats = getRegistrationStats(registrations);
   const activeCount = getActiveRegistrationCount(stats);
+  const isSpecial = workshop.category === 'especiales';
+  const activeUnits = getActiveRegistrationUnits(registrations);
   const cupo = workshop.cupo ?? null;
   const isDeadlineClosed = isWorkshopRegistrationClosed(
     workshop.registrationDeadline,
@@ -79,8 +82,11 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
 
   const capacityText =
     cupo !== null
-      ? t('admin.registrations.spots', { active: activeCount, cupo })
-      : t('admin.workshops.noCapacity');
+      ? t(isSpecial ? 'admin.registrations.units' : 'admin.registrations.spots', {
+          active: isSpecial ? activeUnits : activeCount,
+          cupo,
+        })
+      : t(isSpecial ? 'admin.registrations.noUnitsLimit' : 'admin.workshops.noCapacity');
 
   const handleCancelWorkshop = async (): Promise<void> => {
     const isConfirmed = await confirm({
@@ -198,18 +204,22 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
         </Box>
 
         <Box display="flex" wrap gap="lg">
-          <Box display="flex" align="center" gap="xs">
-            <Icon as={CalendarDays} size="sm" tone="muted" />
-            <Typography size="xs" tone="subtle">
-              {eventDate ?? t('admin.workshops.noDate')}
-            </Typography>
-          </Box>
-          <Box display="flex" align="center" gap="xs">
-            <Icon as={MapPin} size="sm" tone="muted" />
-            <Typography size="xs" tone="subtle">
-              {workshop.eventLocation || t('admin.workshops.noLocation')}
-            </Typography>
-          </Box>
+          {!isSpecial && (
+            <Box display="flex" align="center" gap="xs">
+              <Icon as={CalendarDays} size="sm" tone="muted" />
+              <Typography size="xs" tone="subtle">
+                {eventDate ?? t('admin.workshops.noDate')}
+              </Typography>
+            </Box>
+          )}
+          {!isSpecial && (
+            <Box display="flex" align="center" gap="xs">
+              <Icon as={MapPin} size="sm" tone="muted" />
+              <Typography size="xs" tone="subtle">
+                {workshop.eventLocation || t('admin.workshops.noLocation')}
+              </Typography>
+            </Box>
+          )}
           <Box display="flex" align="center" gap="xs">
             <Icon as={Clock} size="sm" tone="muted" />
             <Typography size="xs" tone="subtle">
@@ -252,6 +262,7 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
           <Box display="flex" direction="column" gap="md">
             <AdminWorkshopRegistrations
               registrations={registrations}
+              showQuantity={isSpecial}
               onSetStatus={onSetStatus}
               onWithdrawMarketingConsent={onWithdrawMarketingConsent}
               onDelete={onDeleteRegistration}

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { WorkshopRegistration } from '../../types/registrations';
 import {
   getActiveRegistrationCount,
+  getActiveRegistrationUnits,
   getProtectedWorkshopIds,
   getRegistrationStats,
   groupRegistrationsByWorkshop,
@@ -106,5 +107,26 @@ describe('sortRegistrationsByDate', () => {
       'antigua',
     ]);
     expect(input.map((item) => item.id)).toEqual(['antigua', 'reciente']);
+  });
+});
+
+describe('getActiveRegistrationUnits', () => {
+  it('suma las unidades de las inscripciones activas', () => {
+    expect(
+      getActiveRegistrationUnits([
+        registration({ id: 'r-1', quantity: 2 }),
+        registration({ id: 'r-2', quantity: 3, status: 'confirmado' }),
+        registration({ id: 'r-3', quantity: 4, status: 'cancelado' }),
+      ])
+    ).toBe(5);
+  });
+
+  it('asume una unidad cuando la cantidad falta', () => {
+    expect(
+      getActiveRegistrationUnits([
+        registration({ id: 'r-1' }),
+        registration({ id: 'r-2', quantity: 0 as number }),
+      ])
+    ).toBe(2);
   });
 });

@@ -161,7 +161,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       imageFile,
       externalImageUrl,
       category,
-      eventDate: isReservationCategory(category) ? eventDate : undefined,
+      eventDate: category === 'talleres' ? eventDate : undefined,
       registrationDeadline: isReservationCategory(category) ? registrationDeadline : undefined,
     });
 
@@ -180,8 +180,8 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       discountPercent: priceOnRequest ? '' : discountPercent,
       ...purchaseLinks,
       status,
-      eventDate: isReservationCategory(category) ? eventDate : undefined,
-      eventLocation: isReservationCategory(category) ? eventLocation : undefined,
+      eventDate: category === 'talleres' ? eventDate : undefined,
+      eventLocation: category === 'talleres' ? eventLocation : undefined,
       cupo: isReservationCategory(category) ? cupo : '',
       registrationDeadline: isReservationCategory(category) ? registrationDeadline : undefined,
       imageFile,
@@ -246,6 +246,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
 
         {isReservationCategory(category) && (
           <WorkshopFields
+            category={category}
             eventDate={eventDate}
             eventLocation={eventLocation}
             cupo={cupo}

@@ -68,7 +68,7 @@ describe('validateProductForm', () => {
     ).toBeNull();
   });
 
-  it('rechaza un plazo posterior a la fecha en productos especiales', () => {
+  it('ya no aplica la coherencia plazo-fecha en productos especiales', () => {
     expect(
       validateProductForm({
         ...baseInput,
@@ -76,7 +76,7 @@ describe('validateProductForm', () => {
         registrationDeadline: '2026-12-10T18:00:00.000Z',
         eventDate: '2026-12-01T18:00:00.000Z',
       })
-    ).toBe('registrationDeadlineAfterEvent');
+    ).toBeNull();
   });
 
   it('no exige coherencia de plazos en categorías sin reservas', () => {

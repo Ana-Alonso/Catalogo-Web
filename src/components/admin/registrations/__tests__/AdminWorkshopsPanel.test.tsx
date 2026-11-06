@@ -303,6 +303,33 @@ describe('AdminWorkshopsPanel', () => {
     );
   });
 
+  it('cuenta unidades y muestra insignias de cantidad en ediciones especiales', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({
+          id: 'e-1',
+          title: 'Edición de temporada',
+          category: 'especiales',
+          eventDate: undefined,
+          cupo: 5,
+          registrationDeadline: futureDate(),
+        }),
+      ],
+      registrations: [
+        registration({ id: 'r-1', product_id: 'e-1', quantity: 2 }),
+        registration({ id: 'r-2', product_id: 'e-1', quantity: 1, status: 'confirmado' }),
+        registration({ id: 'r-3', product_id: 'e-1', quantity: 4, status: 'cancelado' }),
+      ],
+    });
+
+    expect(screen.getByText('3 / 5 unidades')).toBeInTheDocument();
+    expect(screen.getByText('2 unidades')).toBeInTheDocument();
+    expect(screen.getByText('1 unidad')).toBeInTheDocument();
+    expect(screen.queryByText('Sin fecha')).toBeNull();
+    expect(screen.queryByText('Sin lugar')).toBeNull();
+  });
+
   it('muestra el estado vacío y el error de carga', () => {
     const { rerender } = renderPanel(buildProps());
 
