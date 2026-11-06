@@ -7,6 +7,7 @@ import {
   type ImageValidationError,
 } from '../../../utils/imageValidation';
 import { resolvePurchaseLinks } from '../../../utils/productLinks';
+import { isReservationCategory } from '../../../utils/reservableProduct';
 import {
   validateProductForm,
   type ProductFormValidationError,
@@ -160,8 +161,8 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       imageFile,
       externalImageUrl,
       category,
-      eventDate: category === 'talleres' ? eventDate : undefined,
-      registrationDeadline: category === 'talleres' ? registrationDeadline : undefined,
+      eventDate: isReservationCategory(category) ? eventDate : undefined,
+      registrationDeadline: isReservationCategory(category) ? registrationDeadline : undefined,
     });
 
     if (validationError) {
@@ -179,10 +180,10 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
       discountPercent: priceOnRequest ? '' : discountPercent,
       ...purchaseLinks,
       status,
-      eventDate: category === 'talleres' ? eventDate : undefined,
-      eventLocation: category === 'talleres' ? eventLocation : undefined,
-      cupo: category === 'talleres' ? cupo : '',
-      registrationDeadline: category === 'talleres' ? registrationDeadline : undefined,
+      eventDate: isReservationCategory(category) ? eventDate : undefined,
+      eventLocation: isReservationCategory(category) ? eventLocation : undefined,
+      cupo: isReservationCategory(category) ? cupo : '',
+      registrationDeadline: isReservationCategory(category) ? registrationDeadline : undefined,
       imageFile,
       imageUrl: externalImageUrl.trim() || (editingProduct ? editingProduct.image : undefined),
     });
@@ -243,7 +244,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
           onVintedLinkChange={setVintedLink}
         />
 
-        {category === 'talleres' && (
+        {isReservationCategory(category) && (
           <WorkshopFields
             eventDate={eventDate}
             eventLocation={eventLocation}

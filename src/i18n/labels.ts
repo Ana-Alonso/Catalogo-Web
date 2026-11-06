@@ -7,6 +7,7 @@ export const categoryTranslationKeys = {
   textiles: 'catalog.categories.textiles',
   ilustraciones: 'catalog.categories.illustrations',
   talleres: 'catalog.categories.workshops',
+  especiales: 'catalog.categories.especiales',
 } as const satisfies Record<CategoryType, string>;
 
 export const availabilityTranslationKeys = {

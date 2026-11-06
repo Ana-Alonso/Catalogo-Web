@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useNow } from './useNow';
 import { getProtectedWorkshopIds } from '../utils/workshopSummary';
 import { groupWorkshops } from '../utils/workshopPhase';
+import { isReservationCategory } from '../utils/reservableProduct';
 import type { CatalogItem } from '../types/catalog';
 import type { WorkshopRegistration } from '../types/registrations';
 
@@ -27,7 +28,7 @@ export const useAdminCollections = (
   );
 
   const workshops = useMemo(
-    () => products.filter((product) => product.category === 'talleres'),
+    () => products.filter((product) => isReservationCategory(product.category)),
     [products]
   );
 

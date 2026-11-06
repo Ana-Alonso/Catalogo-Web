@@ -1,5 +1,6 @@
 import { parsePriceToCents } from './price';
 import { toUtcDeadline } from './deadlineTime';
+import { isReservationCategory } from './reservableProduct';
 import type { ProductFormData } from '../types/catalog';
 
 const parseCupo = (value?: string): number | null => {
@@ -27,7 +28,7 @@ export const resolveWorkshopFields = (formData: ProductFormData): WorkshopFields
 export const resolveWorkshopPayload = (
   formData: ProductFormData
 ): Record<string, unknown> => {
-  if (formData.category !== 'talleres') {
+  if (!isReservationCategory(formData.category)) {
     return {};
   }
 
@@ -44,7 +45,7 @@ export const resolveWorkshopPayload = (
 export const resolveCancelledReset = (
   formData: ProductFormData
 ): Record<string, unknown> =>
-  formData.category === 'talleres' ? {} : { workshopCancelled: false };
+  isReservationCategory(formData.category) ? {} : { workshopCancelled: false };
 
 export interface LocalPriceFields {
   priceCents: number | null;

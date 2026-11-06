@@ -34,6 +34,7 @@ const categories: CategoryType[] = [
   'textiles',
   'talleres',
   'personalizados',
+  'especiales',
 ];
 
 const SKELETON_ITEMS = 6;

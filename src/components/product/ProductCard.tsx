@@ -18,6 +18,7 @@ import {
 import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
 import { getDaysUntilRegistrationDeadline } from '../../utils/registrationDeadline';
 import { getWorkshopSignupState } from '../../utils/workshopSignupState';
+import { isReservationCategory, usesReservationFlow } from '../../utils/reservableProduct';
 import { useNow } from '../../hooks/useNow';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
@@ -51,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const descriptionId = `product-description-${item.id}`;
 
-  const isWorkshop = item.category === 'talleres';
+  const isWorkshop = usesReservationFlow(item);
   const nowMs = useNow();
   const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
@@ -143,7 +144,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           </Typography>
         </Box>
 
-        {item.category === 'talleres' && (item.eventDate || item.eventLocation) && (
+        {isReservationCategory(item.category) && (item.eventDate || item.eventLocation) && (
           <Box marginY="sm" padding="sm" rounded="sm" background="neutral" border>
             {item.eventDate && (
               <Box display="flex" align="center" gap="sm" marginBottom="xs">

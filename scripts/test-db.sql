@@ -463,6 +463,54 @@ BEGIN
   END;
 END $$;
 
+-- Ocasionales o de Temporada: reservas con el metodo de talleres (opt-in por producto)
+INSERT INTO public.products (
+    id, title, description, image, category, status, featured, cupo
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000015', 'Edición especial con cupo', 'Descripción',
+    'img.png', 'especiales', 'disponible', false, 2
+);
+
+DO $$
+BEGIN
+  PERFORM public.register_for_workshop(
+    '00000000-0000-0000-0000-000000000015', 'Pilar Reserva', 'pilar@test.com', now(), false
+  );
+EXCEPTION WHEN others THEN
+  RAISE EXCEPTION 'FAIL: register_for_workshop rechazó una reserva de especiales: %', SQLERRM;
+END $$;
+
+INSERT INTO public.workshop_registrations (product_id, name, email)
+VALUES ('00000000-0000-0000-0000-000000000015', 'Rosa Tirada', 'rosa@test.com');
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.workshop_registrations (product_id, name, email)
+    VALUES ('00000000-0000-0000-0000-000000000015', 'Eva Tirada', 'eva@test.com');
+    RAISE EXCEPTION 'FAIL: no se bloqueó el exceso de cupo en especiales';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'workshop_full' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al exceder cupo en especiales: %', SQLERRM;
+      END IF;
+  END;
+END $$;
+
+DO $$
+BEGIN
+  UPDATE public.products
+  SET "workshopCancelled" = true
+  WHERE id = '00000000-0000-0000-0000-000000000015';
+EXCEPTION WHEN others THEN
+  RAISE EXCEPTION 'FAIL: no se permitió cancelar una reserva de especiales: %', SQLERRM;
+END $$;
+
 INSERT INTO public.workshop_registrations (product_id, name, email)
 VALUES ('00000000-0000-0000-0000-000000000002', 'Lucía Prevía', 'lucia@test.com');
 
@@ -1103,6 +1151,7 @@ END $$;
 UPDATE public.workshop_registrations SET marketing_consent = false WHERE marketing_consent;
 
 DELETE FROM public.workshop_registrations WHERE email = 'ana@test.com';
+DELETE FROM public.workshop_registrations WHERE email IN ('pilar@test.com', 'rosa@test.com');
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000001';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000002';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000003';
@@ -1111,4 +1160,5 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000011';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000012';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000013';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000014';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000015';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000099';

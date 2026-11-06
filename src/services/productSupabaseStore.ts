@@ -66,7 +66,7 @@ export const createRemoteProduct = async (
         eventDate: product.eventDate || null,
         eventLocation: product.eventLocation || null,
         cupo: product.cupo ?? null,
-        ...(product.category === 'talleres'
+        ...(product.category === 'talleres' || product.category === 'especiales'
           ? { registrationDeadline: product.registrationDeadline ?? null }
           : {})
       }

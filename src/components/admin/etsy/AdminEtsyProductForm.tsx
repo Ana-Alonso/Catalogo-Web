@@ -22,6 +22,7 @@ const CATEGORY_OPTIONS: Exclude<CategoryType, 'todas'>[] = [
   'ilustraciones',
   'textiles',
   'personalizados',
+  'especiales',
 ];
 
 export const AdminEtsyProductForm: React.FC<AdminEtsyProductFormProps> = ({

@@ -1,5 +1,6 @@
 import type { CatalogItem } from '../types/catalog';
 import { hasWorkshopHappened } from './workshopSignupState';
+import { usesReservationFlow } from './reservableProduct';
 
 export type WorkshopFinishedReason = 'archivado' | 'cancelado' | 'vendido' | 'celebrado';
 export type WorkshopPhase = 'activo' | 'finalizado';
@@ -73,7 +74,7 @@ export const groupWorkshops = (
   nowMs: number
 ): WorkshopGroups => {
   const candidates = workshops.filter(
-    (workshop) => workshop.category === 'talleres' && workshop.isVisible !== false
+    (workshop) => usesReservationFlow(workshop) && workshop.isVisible !== false
   );
 
   const active: CatalogItem[] = [];
