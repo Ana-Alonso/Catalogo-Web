@@ -202,7 +202,30 @@
     "legal": "Aviso Legal",
     "privacy": "Política de privacidad",
     "cookies": "Política de cookies",
-    "cookieSettings": "Configuración de cookies"
+    "cookieSettings": "Configuración de cookies",
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "soul": {
+        "question": "¿Cuál es el alma de la marca?",
+        "answer": "Laurel en Lienzo nace de la conexión con la naturaleza y con lo sensible. El proyecto se llama Laurel en Lienzo y nuestro lema es Crear, sentir y conectar.\n\nEsta identidad está profundamente inspirada en el concepto de la hoja de laurel —un símbolo medicinal, que acompaña, que influye de forma positiva en los demás— y en mi libro Florecillas, donde siempre me he identificado con lo orgánico. Cada una de las palabras de nuestro lema tiene un porqué:\n\n- Crear, porque necesitamos expresar todo lo que llevamos dentro.\n- Sentir, porque sin las emociones la vida no tendría sentido.\n- Conectar, porque no somos seres individuales; necesitamos de los demás para nutrirnos, compartir y crecer juntos."
+      },
+      "products": {
+        "question": "¿Qué productos se pueden comprar y cómo funcionan?",
+        "answer": "En Laurel en Lienzo encontrarás diferentes piezas creadas a mano. Dependiendo del producto, la disponibilidad y los plazos varían:\n\n- Ilustraciones del catálogo: Son de carácter ILIMITADO. Puedes conseguirlas en formato digital o solicitar el envío en físico (añadiendo un dinero extra por los costes de envío).\n- Ilustraciones personalizadas: Se realizan bajo ENCARGO DIRECTO. El tiempo de elaboración es de 1 a 3 días. Una vez listas, se envían por correo electrónico en formato digital. Si prefieres la versión en físico, el proceso total de preparación lleva de 1 a 7 días. Si se quiere en otro formato, consultar por email a laurelenlienzo@gmail.com\n- Camisetas pintadas a mano: Aunque en teoría son LIMITADAS, cada diseño es único. Si una camiseta ya está vendida, puedes solicitar exactamente el mismo diseño por encargo; al ser pintadas a mano, tardaré entre 3 y 5 días en tenerla lista antes de enviarla.\n- Joyas artesanales: Son LIMITADAS. Al trabajar con materiales muy concretos y específicos, se elaboran en tiradas muy cerradas o piezas únicas. Si una joya se agota, no es posible repetirla exactamente igual porque no dispongo de los mismos materiales."
+      },
+      "shipping": {
+        "question": "¿Cómo funcionan los envíos y los plazos?",
+        "answer": "Envíos nacionales (España): Los envíos físicos dentro de España se realizan los lunes y los viernes de cada semana.\n\nEnvíos internacionales: Si te encuentras fuera de España y te gustaría adquirir alguna pieza, los envíos internacionales se gestionan de forma personalizada a través de Instagram. ¡Escríbeme por mensaje directo y lo organizamos!"
+      },
+      "platforms": {
+        "question": "Si quiero comprar más de un producto, pero están en plataformas diferentes (como Etsy, Vinted o Amazon), ¿qué hago?",
+        "answer": "Si te has enamorado de varias piezas que tengo repartidas en diferentes plataformas y quieres llevártelas juntas, no tienes que pagar envíos separados en cada sitio.\n\nPuedes consultármelo directamente por correo electrónico o a través de un mensaje directo en Instagram. Cuéntame qué productos son los que te interesan y nos organizamos: te prepararé un lote de productos personalizado en una sola plataforma (la que ambos decidamos que te sea más cómoda) para que así el coste del envío sea único y te cueste mucho menos."
+      },
+      "handover": {
+        "question": "¿Se pueden hacer entregas en mano?",
+        "answer": "¡Sí, por supuesto! Si vives por la zona, realizamos entregas en mano lunes y viernes en Benidorm y sus alrededores."
+      }
+    }
   },
   "cookie": {
     "bannerAria": "Aviso de cookies",
