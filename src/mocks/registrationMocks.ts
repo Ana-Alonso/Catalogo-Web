@@ -1,3 +1,4 @@
+import { withPaymentDefaults } from '../utils/registrationResponse';
 import type { WorkshopRegistration } from '../types/registrations';
 
 const now = Date.now();
@@ -6,7 +7,13 @@ const daysFromNow = (days: number): string =>
 
 const consent = (days: number): string | null => daysFromNow(days);
 
-export const mockRegistrations: WorkshopRegistration[] = [
+type MockRegistration = Omit<
+  WorkshopRegistration,
+  'amount' | 'paid' | 'paid_at' | 'fulfilled_at'
+> &
+  Partial<Pick<WorkshopRegistration, 'amount' | 'paid' | 'paid_at' | 'fulfilled_at'>>;
+
+const mockRegistrationRows: MockRegistration[] = [
   {
     id: 'mock-reg-open-1',
     product_id: 'mock-workshop-open',
@@ -16,6 +23,9 @@ export const mockRegistrations: WorkshopRegistration[] = [
     privacy_consent_at: consent(-6),
     marketing_consent: true,
     quantity: 1,
+    amount: 35,
+    paid: true,
+    paid_at: daysFromNow(-6),
     created_at: daysFromNow(-6),
   },
   {
@@ -137,6 +147,10 @@ export const mockRegistrations: WorkshopRegistration[] = [
     privacy_consent_at: consent(-45),
     marketing_consent: true,
     quantity: 1,
+    amount: 35,
+    paid: true,
+    paid_at: daysFromNow(-45),
+    fulfilled_at: daysFromNow(-30),
     created_at: daysFromNow(-45),
   },
   {
@@ -192,6 +206,9 @@ export const mockRegistrations: WorkshopRegistration[] = [
     privacy_consent_at: consent(-5),
     marketing_consent: true,
     quantity: 2,
+    amount: 42,
+    paid: true,
+    paid_at: daysFromNow(-5),
     created_at: daysFromNow(-5),
   },
   {
@@ -225,6 +242,9 @@ export const mockRegistrations: WorkshopRegistration[] = [
     privacy_consent_at: consent(-1),
     marketing_consent: true,
     quantity: 10,
+    amount: 150,
+    paid: true,
+    paid_at: daysFromNow(-1),
     created_at: daysFromNow(-1),
   },
   {
@@ -247,6 +267,12 @@ export const mockRegistrations: WorkshopRegistration[] = [
     privacy_consent_at: consent(-4),
     marketing_consent: false,
     quantity: 1,
+    amount: 20,
+    paid: true,
+    paid_at: daysFromNow(-4),
     created_at: daysFromNow(-4),
   },
 ];
+
+export const mockRegistrations: WorkshopRegistration[] =
+  mockRegistrationRows.map(withPaymentDefaults);

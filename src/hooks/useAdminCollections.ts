@@ -37,9 +37,21 @@ export const useAdminCollections = (
     [products, nowMs]
   );
 
+  const pendingPaymentCount = useMemo(() => {
+    const reservationIds = new Set(workshops.map((workshop) => String(workshop.id)));
+
+    return registrations.filter(
+      (registration) =>
+        registration.status !== 'cancelado' &&
+        registration.paid !== true &&
+        reservationIds.has(String(registration.product_id))
+    ).length;
+  }, [registrations, workshops]);
+
   const tabCounts = {
     catalogo: visibleProducts.length,
     talleres: workshopGroups.active.length,
+    pagos: pendingPaymentCount,
     archivados: archivedProducts.length,
   };
 

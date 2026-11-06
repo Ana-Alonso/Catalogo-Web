@@ -6,6 +6,7 @@ import { AdminEtsyOffersPanel } from './etsy/AdminEtsyOffersPanel';
 import { AdminProductTable } from './products/AdminProductTable';
 import { AdminArchivedPanel } from './products/AdminArchivedPanel';
 import { AdminWorkshopsPanel } from './registrations/AdminWorkshopsPanel';
+import { AdminPaymentsPanel } from './payments/AdminPaymentsPanel';
 import { AdminWorkshopCalendarPanel } from './workshops/AdminWorkshopCalendarPanel';
 import { AdminDashboardTabs } from './AdminDashboardTabs';
 import { AdminDashboardHeader } from './AdminDashboardHeader';
@@ -46,6 +47,7 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
     isLoading: isLoadingRegistrations,
     error: registrationsError,
     setStatus,
+    setPayment,
     remove,
     withdrawMarketingConsent,
     cancelWorkshopRegistrations,
@@ -179,6 +181,17 @@ export const AdminDashboardContent: React.FC<AdminDashboardProps> = ({
             isCancellingWorkshop={isCancellingWorkshop}
             onRestoreWorkshop={handleRestoreWorkshop}
             isRestoringWorkshop={isRestoringWorkshop}
+          />
+        )}
+
+        {activeTab === 'pagos' && (
+          <AdminPaymentsPanel
+            workshops={workshops}
+            registrations={registrations}
+            isLoading={isLoadingRegistrations}
+            error={registrationsError}
+            onRetry={refreshRegistrations}
+            onSetPayment={setPayment}
           />
         )}
 

@@ -264,6 +264,7 @@
       "products": "Añadir producto",
       "catalog": "Catálogo",
       "workshops": "Reservas",
+      "payments": "Pagos",
       "archived": "Archivados"
     },
     "archived": {
@@ -567,6 +568,32 @@
       "exportEmptyWorkshops": "No hay inscripciones de talleres que exportar.",
       "exportEmptySpecials": "No hay reservas de productos que exportar.",
       "exportError": "No se pudo generar el CSV de avisos. Inténtalo de nuevo."
+    },
+    "payments": {
+      "title": "Pagos",
+      "subtitle": "Importe, cobro y entrega o asistencia de cada reserva.",
+      "loading": "Cargando cobros...",
+      "errorTitle": "No se pudieron cargar los cobros",
+      "filterLabel": "Filtrar cobros",
+      "filterTodas": "Todas",
+      "filterSinCobrar": "Sin cobrar",
+      "filterCobradoSinEntregar": "Cobrado sin entregar",
+      "tableLabel": "Listado de cobros de reservas",
+      "colContact": "Contacto",
+      "colReservation": "Reserva",
+      "colUnits": "Unidades",
+      "colAmount": "Importe (€)",
+      "colPaid": "Pagado",
+      "colFulfilled": "Entregado / Asistencia",
+      "amountAria": "Importe cobrado a {{name}}, en euros",
+      "markPaid": "Pagado",
+      "markDelivered": "Entregado",
+      "markAttended": "Asistido",
+      "pendingCount_one": "{{count}} pendiente de cobro",
+      "pendingCount_other": "{{count}} pendientes de cobro",
+      "totalPaid": "{{amount}} cobrado en total",
+      "empty": "Todavía no hay reservas que cobrar.",
+      "emptyFiltered": "Ninguna reserva coincide con este filtro."
     },
     "calendarPanel": {
       "published": "Taller «{{title}}» publicado. Añade el evento a tu calendario:"

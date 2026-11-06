@@ -36,6 +36,10 @@ const registrationRow: WorkshopRegistration = {
   privacy_consent_at: '2026-11-01T10:00:00.000Z',
   marketing_consent: false,
   quantity: 1,
+  amount: null,
+  paid: false,
+  paid_at: null,
+  fulfilled_at: null,
   created_at: '2026-11-01T10:00:00.000Z',
 };
 
@@ -538,5 +542,113 @@ describe('registrationService · retirada del consentimiento de marketing', () =
     await expect(
       service.withdrawMarketingConsent('reg-1')
     ).rejects.toMatchObject({ code: 'unknown' });
+  });
+});
+
+describe('registrationService · gestión de cobros', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('guarda importe libre y marca el pago en el mock local', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+
+    const paid = await service.updateRegistrationPayment(created.id, {
+      amount: 12.5,
+      paid: true,
+    });
+
+    expect(paid.amount).toBe(12.5);
+    expect(paid.paid).toBe(true);
+    expect(paid.paid_at).toBeTruthy();
+
+    const [stored] = await service.fetchRegistrations();
+    expect(stored.paid).toBe(true);
+    expect(stored.amount).toBe(12.5);
+  });
+
+  it('desmarcar el pago deja paid_at a null', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+
+    await service.updateRegistrationPayment(created.id, { paid: true });
+    const reverted = await service.updateRegistrationPayment(created.id, {
+      paid: false,
+    });
+
+    expect(reverted.paid).toBe(false);
+    expect(reverted.paid_at).toBeNull();
+  });
+
+  it('entregado/asistido se guarda como fulfilled_at y se puede retirar', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com'),
+      null
+    );
+
+    const delivered = await service.updateRegistrationPayment(created.id, {
+      fulfilled: true,
+    });
+    expect(delivered.fulfilled_at).toBeTruthy();
+
+    const undone = await service.updateRegistrationPayment(created.id, {
+      fulfilled: false,
+    });
+    expect(undone.fulfilled_at).toBeNull();
+  });
+
+  it('lanza notFound al cobrar una inscripción inexistente', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'true');
+    const service = await loadService();
+
+    await expect(
+      service.updateRegistrationPayment('desconocida', { paid: true })
+    ).rejects.toMatchObject({ code: 'notFound' });
+  });
+
+  it('envía a Supabase solo las columnas del parche', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const single = vi.fn().mockResolvedValue({
+      data: { ...registrationRow, amount: 20, paid: true },
+      error: null,
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    supabaseMock.from.mockReturnValue({ update });
+
+    const service = await loadService();
+    const updated = await service.updateRegistrationPayment('reg-1', {
+      amount: 20,
+      paid: true,
+    });
+
+    expect(update).toHaveBeenCalledWith({
+      amount: 20,
+      paid: true,
+      paid_at: expect.any(String),
+    });
+    expect(eq).toHaveBeenCalledWith('id', 'reg-1');
+    expect(updated.amount).toBe(20);
+    expect(updated.paid).toBe(true);
   });
 });

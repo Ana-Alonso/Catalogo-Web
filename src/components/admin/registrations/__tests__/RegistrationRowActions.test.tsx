@@ -17,6 +17,10 @@ const registration = (
   privacy_consent_at: '2026-09-01T10:00:00.000Z',
   marketing_consent: false,
   quantity: 1,
+  amount: null,
+  paid: false,
+  paid_at: null,
+  fulfilled_at: null,
   created_at: '2026-09-01T10:00:00.000Z',
   ...overrides,
 });

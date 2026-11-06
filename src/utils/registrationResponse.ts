@@ -15,6 +15,27 @@ export const readApiErrorCode = (payload: unknown): RegistrationErrorCode => {
   return 'unknown';
 };
 
+// Las filas anteriores a la migracion 030 llegan sin los campos de cobros:
+// se normalizan a "sin importe, sin pagar y sin entregar".
+export const withPaymentDefaults = <
+  T extends Omit<
+    WorkshopRegistration,
+    'amount' | 'paid' | 'paid_at' | 'fulfilled_at'
+  >
+>(
+  row: T
+): T & WorkshopRegistration => {
+  const source = row as Partial<WorkshopRegistration>;
+
+  return {
+    ...row,
+    amount: source.amount ?? null,
+    paid: source.paid === true,
+    paid_at: source.paid_at ?? null,
+    fulfilled_at: source.fulfilled_at ?? null,
+  };
+};
+
 const isRegistrationRow = (value: unknown): value is WorkshopRegistration => {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -42,5 +63,9 @@ export const readRegistrationRow = (payload: unknown): WorkshopRegistration => {
 
   const quantity = (payload as { quantity?: unknown }).quantity;
 
-  return typeof quantity === 'number' ? payload : { ...payload, quantity: 1 };
+  return withPaymentDefaults(
+    typeof quantity === 'number'
+      ? payload
+      : { ...payload, quantity: 1 }
+  );
 };
