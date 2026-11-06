@@ -18,7 +18,7 @@ import {
 import { getDiscountedCents, getOfferPercent, isOfferActive } from '../../utils/price';
 import { getDaysUntilRegistrationDeadline } from '../../utils/registrationDeadline';
 import { getWorkshopSignupState } from '../../utils/workshopSignupState';
-import { isReservationCategory, usesReservationFlow } from '../../utils/reservableProduct';
+import { usesReservationFlow } from '../../utils/reservableProduct';
 import { useNow } from '../../hooks/useNow';
 import type { CatalogItem, AvailabilityStatus } from '../../types/catalog';
 import type { RegistrationFormData } from '../../types/registrations';
@@ -53,6 +53,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
   const descriptionId = `product-description-${item.id}`;
 
   const isWorkshop = usesReservationFlow(item);
+  const isSpecial = item.category === 'especiales';
   const nowMs = useNow();
   const hasOffer = isOfferActive(item);
   const priceCents = item.priceCents ?? null;
@@ -144,7 +145,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           </Typography>
         </Box>
 
-        {isReservationCategory(item.category) && (item.eventDate || item.eventLocation) && (
+        {item.category === 'talleres' && (item.eventDate || item.eventLocation) && (
           <Box marginY="sm" padding="sm" rounded="sm" background="neutral" border>
             {item.eventDate && (
               <Box display="flex" align="center" gap="sm" marginBottom="xs">
@@ -180,12 +181,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               <Icon as={Users} size="sm" tone="warning" shrink={false} />
               <Box display="flex" direction="column" gap="xs">
                 {cupo === null ? (
-                  <Typography variant="caption" tone="muted">{t('product.spotsOpen')}</Typography>
+                  <Typography variant="caption" tone="muted">
+                    {t(isSpecial ? 'product.unitsOpen' : 'product.spotsOpen')}
+                  </Typography>
                 ) : isFull ? (
-                  <Typography variant="caption" tone="danger">{t('product.spotsFull')}</Typography>
+                  <Typography variant="caption" tone="danger">
+                    {t(isSpecial ? 'product.spotsFullUnits' : 'product.spotsFull')}
+                  </Typography>
                 ) : (
                   <Typography variant="caption" tone="success">
-                    {t('product.spotsLeft', { spots: spotsLeft, total: cupo })}
+                    {t(isSpecial ? 'product.spotsLeftUnits' : 'product.spotsLeft', {
+                      spots: spotsLeft,
+                      total: cupo,
+                    })}
                   </Typography>
                 )}
                 {registrationDeadlineLabel && signupState === 'abierto' && (
@@ -228,15 +236,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
               variant="outline"
               fullWidth
               onClick={() => setIsSignupOpen(true)}
-              aria-label={t('product.signupAria', { title: item.title })}
+              aria-label={t(
+                isSpecial ? 'product.reserveAria' : 'product.signupAria',
+                { title: item.title }
+              )}
             >
               <Icon as={UserPlus} />
-              {t('product.signup')}
+              {t(isSpecial ? 'product.reserve' : 'product.signup')}
             </Button>
           )}
           {isWorkshop && !isFinished && signupState === 'lleno' && (
             <Box textAlign="center" paddingY="sm" background="dangerSoft" border borderTone="danger" rounded="sm">
-              <Typography variant="caption" tone="danger">{t('product.workshopFull')}</Typography>
+              <Typography variant="caption" tone="danger">
+                {t(isSpecial ? 'product.soldOut' : 'product.workshopFull')}
+              </Typography>
             </Box>
           )}
           {!isWorkshop && item.etsyLink && currentStatus !== 'vendido' && (
@@ -278,7 +291,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
     <Modal
       isOpen={isSignupOpen}
       onClose={() => setIsSignupOpen(false)}
-      title={t('product.signupModalTitle')}
+      title={t(isSpecial ? 'product.reserveModalTitle' : 'product.signupModalTitle')}
     >
       {onRegister && (
         <WorkshopSignupForm

@@ -123,6 +123,16 @@ describe('getWorkshopSignupState', () => {
     ).toBe('terminado');
   });
 
+  it('no celebra una edición especial aunque conserve una fecha heredada', () => {
+    expect(
+      getWorkshopSignupState(
+        itemWith({ category: 'especiales', eventDate: '2026-11-04T18:00:00.000Z', cupo: 4 }),
+        1,
+        now
+      )
+    ).toBe('abierto');
+  });
+
   it('da prioridad al plazo cerrado sobre el lleno y no al revés', () => {
     expect(
       getWorkshopSignupState(

@@ -1,6 +1,6 @@
 import React, { useState, type SubmitEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell } from 'lucide-react';
+import { CheckCircle, AlertCircle, UserPlus, LoaderCircle, Bell, Minus, Plus } from 'lucide-react';
 import { Button, Input, Box, CalendarEventActions, TextLink, Typography, Icon } from '../ui';
 import {
   getRegistrationErrorCode,
@@ -17,12 +17,18 @@ interface WorkshopSignupFormProps {
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_UNITS = 1;
+const MAX_UNITS = 10;
 
 type WorkshopFormErrorCode =
   | 'required'
   | 'invalidEmail'
   | 'privacyRequired'
+  | 'invalidQuantity'
   | RegistrationErrorCode;
+
+const clampUnits = (value: number): number =>
+  Math.min(MAX_UNITS, Math.max(MIN_UNITS, value));
 
 export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   workshop,
@@ -30,15 +36,25 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
+  const isSpecial = workshop.category === 'especiales';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [quantity, setQuantity] = useState(String(MIN_UNITS));
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<WorkshopFormErrorCode | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedUnits, setSubmittedUnits] = useState(MIN_UNITS);
   const instagramUrl = import.meta.env.VITE_INSTAGRAM_URL;
   const tiktokUrl = import.meta.env.VITE_TIKTOK_URL;
+
+  const stepUnits = (delta: number): void =>
+    setQuantity((prev) => {
+      const parsed = Number.parseInt(prev, 10);
+      const base = Number.isNaN(parsed) ? MIN_UNITS : parsed;
+      return String(clampUnits(base + delta));
+    });
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,6 +73,17 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
       return;
     }
 
+    const parsedUnits = Number.parseInt(quantity, 10);
+    const units = Number.isNaN(parsedUnits) ? MIN_UNITS : clampUnits(parsedUnits);
+
+    if (
+      isSpecial &&
+      (Number.isNaN(parsedUnits) || parsedUnits < MIN_UNITS || parsedUnits > MAX_UNITS)
+    ) {
+      setErrorCode('invalidQuantity');
+      return;
+    }
+
     if (!privacyConsent) {
       setErrorCode('privacyRequired');
       return;
@@ -69,7 +96,9 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         email: trimmedEmail,
         privacyConsent,
         marketingConsent,
+        ...(isSpecial ? { quantity: units } : {}),
       });
+      setSubmittedUnits(units);
       setIsSuccess(true);
     } catch (err) {
       setErrorCode(getRegistrationErrorCode(err));
@@ -111,12 +140,19 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
               {t('workshop.form.successTitle')}
             </Typography>
             <Typography variant="body" size="sm" tone="muted" marginTop="xs">
-              {t('workshop.form.successBody', { title: workshop.title })}
+              {isSpecial
+                ? t('workshop.form.successBodyUnits', {
+                    title: workshop.title,
+                    quantity: submittedUnits,
+                  })
+                : t('workshop.form.successBody', { title: workshop.title })}
             </Typography>
           </Box>
         </Box>
 
-        <CalendarEventActions workshop={workshop} attendee={{ name, email }} />
+        {!isSpecial && (
+          <CalendarEventActions workshop={workshop} attendee={{ name, email }} />
+        )}
 
         <Box
           display="flex"
@@ -171,7 +207,9 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   return (
     <Box as="form" display="flex" direction="column" gap="md" onSubmit={handleSubmit} noValidate>
       <Typography variant="body" size="sm" tone="muted">
-        {t('workshop.form.intro', { title: workshop.title })}
+        {isSpecial
+          ? t('workshop.form.introUnits', { title: workshop.title })
+          : t('workshop.form.intro', { title: workshop.title })}
       </Typography>
 
       <Input
@@ -195,6 +233,47 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         placeholder={t('workshop.form.emailPlaceholder')}
         autoComplete="email"
       />
+
+      {isSpecial && (
+        <Box display="flex" align="end" gap="sm">
+          <Box grow>
+            <Input
+              id="signup-quantity"
+              label={t('workshop.form.quantityLabel')}
+              type="number"
+              inputMode="numeric"
+              min={MIN_UNITS}
+              max={MAX_UNITS}
+              step={1}
+              required
+              value={quantity}
+              onChange={(event) => setQuantity(event.target.value)}
+            />
+          </Box>
+          <Box display="flex" gap="xs">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => stepUnits(-1)}
+              disabled={Number.parseInt(quantity, 10) <= MIN_UNITS}
+              aria-label={t('workshop.form.quantityMinus')}
+            >
+              <Icon as={Minus} size="sm" />
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => stepUnits(1)}
+              disabled={Number.parseInt(quantity, 10) >= MAX_UNITS}
+              aria-label={t('workshop.form.quantityPlus')}
+            >
+              <Icon as={Plus} size="sm" />
+            </Button>
+          </Box>
+        </Box>
+      )}
 
       <WorkshopConsentFields
         privacyConsent={privacyConsent}
@@ -223,7 +302,11 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         >
           <Icon as={AlertCircle} tone="dangerStrong" shrink={false} />
           <Typography as="span" variant="body" size="sm" tone="dangerSoft">
-            {t(`workshop.form.errors.${errorCode}`)}
+            {t(
+              `workshop.form.errors.${
+                isSpecial && errorCode === 'workshopFull' ? 'workshopFullUnits' : errorCode
+              }`
+            )}
           </Typography>
         </Box>
       )}
@@ -232,12 +315,12 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
         {isSubmitting ? (
           <>
             <Icon as={LoaderCircle} spin />
-            {t('workshop.form.submitting')}
+            {t(isSpecial ? 'workshop.form.submittingUnits' : 'workshop.form.submitting')}
           </>
         ) : (
           <>
             <Icon as={UserPlus} />
-            {t('workshop.form.submit')}
+            {t(isSpecial ? 'workshop.form.submitUnits' : 'workshop.form.submit')}
           </>
         )}
       </Button>

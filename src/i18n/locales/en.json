@@ -95,6 +95,13 @@
     "registrationDayLeft": "1 day left to register",
     "spotsFull": "Full · no spots left",
     "spotsLeft": "{{spots}} of {{total}} spots left",
+    "unitsOpen": "Until stock runs out",
+    "spotsFullUnits": "Sold out · no units left",
+    "spotsLeftUnits": "{{spots}} of {{total}} units left",
+    "soldOut": "Out of stock",
+    "reserve": "Reserve",
+    "reserveAria": "Reserve {{title}}",
+    "reserveModalTitle": "Unit reservation",
     "signup": "Join the workshop",
     "signupAria": "Join the workshop {{title}}",
     "workshopFull": "Workshop full",
@@ -112,6 +119,10 @@
   "workshop": {
     "form": {
       "intro": "Leave your details to reserve your spot at «{{title}}».",
+      "introUnits": "Tell us how many you want and reserve your units of «{{title}}».",
+      "quantityLabel": "How many? *",
+      "quantityMinus": "Remove one unit",
+      "quantityPlus": "Add one unit",
       "nameLabel": "Your name *",
       "namePlaceholder": "Full name",
       "emailLabel": "Your email *",
@@ -120,22 +131,27 @@
       "marketingLabel": "Notify me about future workshops and news (optional).",
       "consentNote": "We use your data only to manage this registration and to contact you about the workshop.",
       "submit": "Join the workshop",
+      "submitUnits": "Reserve",
       "submitting": "Registering...",
+      "submittingUnits": "Reserving...",
       "errors": {
         "required": "Please enter your name and email.",
         "invalidEmail": "Enter a valid email.",
         "invalidData": "The data sent is not valid. Check your name and email.",
+        "invalidQuantity": "Choose a quantity between 1 and 10.",
         "rateLimited": "You tried to register too many times. Please try again later.",
         "privacyRequired": "You must accept the privacy policy to continue.",
         "alreadyRegistered": "You are already registered for this workshop with this email.",
         "workshopFull": "The workshop is full: no spots left.",
+        "workshopFullUnits": "There are no units available.",
         "registrationClosed": "Registration for this workshop is closed.",
         "marketingConsentProtected": "The data of someone who asked for workshop alerts cannot be deleted.",
         "notFound": "Registration not found.",
         "unknown": "Could not complete registration. Please try again."
       },
       "successTitle": "Registration complete!",
-      "successBody": "You have signed up for the workshop «{{title}}»."
+      "successBody": "You have signed up for the workshop «{{title}}».",
+      "successBodyUnits": "You have reserved {{quantity}} units of «{{title}}»."
     },
     "social": {
       "both": "Stay tuned to our social media: we will share news and updates about the workshop on <instagram>Instagram</instagram> and <tiktok>TikTok</tiktok>.",

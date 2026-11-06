@@ -110,11 +110,7 @@ describe('groupWorkshops', () => {
       NOW
     );
 
-    expect(groups.active.map((item) => item.id)).toEqual([
-      'edicion-fecha',
-      'edicion-cupo',
-      'edicion-plazo',
-    ]);
+    expect(groups.active.map((item) => item.id)).toEqual(['edicion-cupo', 'edicion-plazo']);
     expect(groups.finished).toEqual([]);
   });
 
