@@ -26,6 +26,9 @@ import type {
 
 type PaymentFilter = 'todas' | 'sin_cobrar' | 'cobrado_sin_entregar';
 
+// Es el techo del CHECK workshop_registrations_amount_check (migracion 030).
+const MAX_AMOUNT = 99999.99;
+
 interface AdminPaymentsPanelProps {
   workshops: CatalogItem[];
   registrations: WorkshopRegistration[];
@@ -109,16 +112,17 @@ export const AdminPaymentsPanel: React.FC<AdminPaymentsPanelProps> = ({
 
     if (raw !== '') {
       const parsed = Number(raw.replace(',', '.'));
+      amount = Math.round(parsed * 100) / 100;
 
-      if (!Number.isFinite(parsed) || parsed < 0) {
+      // El techo es el CHECK amount de la base de datos (030): mejor
+      // rechazar en el blur que devolver un error genérico de la BD.
+      if (!Number.isFinite(parsed) || amount < 0 || amount > MAX_AMOUNT) {
         input.value =
           registration.amount === null || registration.amount === undefined
             ? ''
             : String(registration.amount);
         return;
       }
-
-      amount = Math.round(parsed * 100) / 100;
     }
 
     if (amount === (registration.amount ?? null)) {

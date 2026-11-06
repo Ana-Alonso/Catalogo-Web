@@ -30,6 +30,13 @@ type WorkshopFormErrorCode =
 const clampUnits = (value: number): number =>
   Math.min(MAX_UNITS, Math.max(MIN_UNITS, value));
 
+// Un input vacio o sin digitos se comporta como el minimo: el boton «-»
+// debe seguir bloqueado aunque el texto no sea un numero.
+const parsedUnitsOrFloor = (value: string): number => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? MIN_UNITS : parsed;
+};
+
 const SPECIAL_ERROR_KEYS: Partial<
   Record<WorkshopFormErrorCode,
     'rateLimitedUnits' | 'alreadyRegisteredUnits' | 'workshopFullUnits' | 'registrationClosedUnits' | 'unknownUnits'
@@ -69,11 +76,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   const tiktokUrl = import.meta.env.VITE_TIKTOK_URL;
 
   const stepUnits = (delta: number): void =>
-    setQuantity((prev) => {
-      const parsed = Number.parseInt(prev, 10);
-      const base = Number.isNaN(parsed) ? MIN_UNITS : parsed;
-      return String(clampUnits(base + delta));
-    });
+    setQuantity((prev) => String(clampUnits(parsedUnitsOrFloor(prev) + delta)));
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -284,7 +287,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
               variant="secondary"
               size="sm"
               onClick={() => stepUnits(-1)}
-              disabled={Number.parseInt(quantity, 10) <= MIN_UNITS}
+              disabled={parsedUnitsOrFloor(quantity) <= MIN_UNITS}
               aria-label={t('workshop.form.quantityMinus')}
             >
               <Icon as={Minus} size="sm" />
@@ -294,7 +297,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
               variant="secondary"
               size="sm"
               onClick={() => stepUnits(1)}
-              disabled={Number.parseInt(quantity, 10) >= MAX_UNITS}
+              disabled={parsedUnitsOrFloor(quantity) >= MAX_UNITS}
               aria-label={t('workshop.form.quantityPlus')}
             >
               <Icon as={Plus} size="sm" />

@@ -146,6 +146,20 @@ describe('AdminPaymentsPanel', () => {
     expect(props.onSetPayment).not.toHaveBeenCalled();
   });
 
+  it('rechaza en el campo importes por encima del techo de la base de datos', () => {
+    const props = buildProps();
+    render(<AdminPaymentsPanel {...props} />);
+
+    const importe = screen.getByLabelText(
+      'Importe cobrado a Ana García, en euros'
+    ) as HTMLInputElement;
+    fireEvent.change(importe, { target: { value: '100000' } });
+    fireEvent.blur(importe);
+
+    expect(props.onSetPayment).not.toHaveBeenCalled();
+    expect(importe.value).toBe('');
+  });
+
   it('filtra por estado de cobro', async () => {
     const user = userEvent.setup();
     render(<AdminPaymentsPanel {...buildProps()} />);

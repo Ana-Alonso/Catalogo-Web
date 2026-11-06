@@ -104,6 +104,63 @@ describe('registrationService en modo mock (localStorage)', () => {
     ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
+  it('rechaza en el mock una cantidad de más de 10 unidades', async () => {
+    const service = await loadService();
+    await expect(
+      service.createRegistration(
+        'prod-1',
+        formData('Ana', 'ana@example.com', { quantity: 11 }),
+        null
+      )
+    ).rejects.toMatchObject({ code: 'invalidData' });
+  });
+
+  it('rechaza en el mock una cantidad por debajo de 1 unidad', async () => {
+    const service = await loadService();
+    await expect(
+      service.createRegistration(
+        'prod-1',
+        formData('Ana', 'ana@example.com', { quantity: 0 }),
+        null
+      )
+    ).rejects.toMatchObject({ code: 'invalidData' });
+  });
+
+  it('rechaza en el mock unidades en un taller, como la RPC', async () => {
+    const service = await loadService();
+    localStorage.setItem(
+      'laurel_custom_products_v2',
+      JSON.stringify([
+        { id: 't-1', category: 'talleres' },
+        { id: 'e-1', category: 'especiales' },
+        { id: 'i-1', category: 'ilustraciones' },
+      ])
+    );
+
+    await expect(
+      service.createRegistration(
+        't-1',
+        formData('Ana', 'ana@example.com', { quantity: 3 }),
+        null
+      )
+    ).rejects.toMatchObject({ code: 'invalidData' });
+
+    await expect(
+      service.createRegistration(
+        'i-1',
+        formData('Ana', 'ana@example.com', { quantity: 2 }),
+        null
+      )
+    ).rejects.toMatchObject({ code: 'invalidData' });
+
+    const ok = await service.createRegistration(
+      'e-1',
+      formData('Ana', 'ana@example.com', { quantity: 2 }),
+      null
+    );
+    expect(ok.quantity).toBe(2);
+  });
+
   it('cuenta unidades en la capacidad del mock local', async () => {
     const service = await loadService();
     const created = await service.createRegistration(

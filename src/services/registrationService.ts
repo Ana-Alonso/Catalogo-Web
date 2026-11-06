@@ -7,6 +7,7 @@ import {
 } from '../utils/registrationResponse';
 import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
 import { createLocalStore } from './localStore';
+import type { CatalogItem } from '../types/catalog';
 import type {
   WorkshopRegistration,
   RegistrationFormData,
@@ -22,6 +23,33 @@ const mapRegistrationError = (
   code: string | undefined,
   message: string
 ): RegistrationError => new RegistrationError(mapRegistrationDatabaseError(code, message));
+
+const REGISTRATION_CATEGORIES: string[] = ['talleres', 'especiales'];
+const MIN_UNITS = 1;
+const MAX_UNITS = 10;
+
+const productStore = createLocalStore<CatalogItem>(MOCK_STORAGE_KEYS.products);
+
+// Replica las reglas de cantidad de la RPC register_for_workshop (029):
+// sin categoria de reservas no hay inscription, los talleres valen 1 y en
+// especiales la cantidad debe caer dentro de 1..10.
+const assertMockQuantity = (productId: string, quantity: number): void => {
+  const category = productStore
+    .read()
+    .find((product) => product.id === productId)?.category;
+
+  if (category && !REGISTRATION_CATEGORIES.includes(category)) {
+    throw new RegistrationError('invalidData');
+  }
+
+  if (
+    quantity < MIN_UNITS ||
+    quantity > MAX_UNITS ||
+    (category === 'talleres' && quantity !== MIN_UNITS)
+  ) {
+    throw new RegistrationError('invalidData');
+  }
+};
 
 export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
   if (!useMocks) {
@@ -137,6 +165,9 @@ export const createRegistration = async (
   }
 
   const localRegistrations = registrationStore.read();
+  const quantity = formData.quantity ?? MIN_UNITS;
+  assertMockQuantity(productId, quantity);
+
   const isActiveForWorkshop = (registration: WorkshopRegistration): boolean =>
     registration.product_id === productId && registration.status !== 'cancelado';
 
@@ -154,7 +185,7 @@ export const createRegistration = async (
     .filter(isActiveForWorkshop)
     .reduce((sum, registration) => sum + (registration.quantity || 1), 0);
 
-  if (cupo !== null && takenUnits + (formData.quantity ?? 1) > cupo) {
+  if (cupo !== null && takenUnits + quantity > cupo) {
     throw new RegistrationError('workshopFull');
   }
 
