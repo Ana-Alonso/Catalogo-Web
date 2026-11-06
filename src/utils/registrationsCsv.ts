@@ -53,7 +53,9 @@ export const buildMarketingContacts = (
   return Array.from(contactsByEmail.values());
 };
 
-// Listas de gestión: una fila por inscripción, sin mezclar talleres y productos.
+// Listas de gestión: una fila por inscripción activa (pendiente o confirmada),
+// sin mezclar talleres y productos. Cancelados y productos ya finalizados
+// quedan fuera; para el histórico está el panel.
 export const buildRegistrationRows = (
   registrations: WorkshopRegistration[],
   productIds: Set<string>,
@@ -62,7 +64,11 @@ export const buildRegistrationRows = (
   options: { withQuantity: boolean }
 ): string[][] =>
   registrations
-    .filter((registration) => productIds.has(registration.product_id))
+    .filter(
+      (registration) =>
+        registration.status !== 'cancelado' &&
+        productIds.has(registration.product_id)
+    )
     .sort(
       (a, b) =>
         (productTitleById[a.product_id] ?? '').localeCompare(

@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Download, LoaderCircle } from 'lucide-react';
 import { Box, Button, Icon } from '../../ui';
 import { useToast } from '../../../hooks/useToast';
+import { useNow } from '../../../hooks/useNow';
 import { registrationStatusTranslationKeys } from '../../../i18n/labels';
+import { getWorkshopFinishedReason } from '../../../utils/workshopPhase';
 import { fetchMarketingRegistrations } from '../../../services/registrationService';
 import { logError } from '../../../utils/logger';
 import {
@@ -39,15 +41,21 @@ export const AdminRegistrationsExportButton: React.FC<
     [workshops]
   );
 
+  const nowMs = useNow();
+
+  // Los CSV operativos solo cubren reservas que quedan por gestionar:
+  // producto activo (sin celebrar, cancelar, vender ni archivar).
   const idsByCategory = useMemo(
     () =>
-      workshops.reduce<Record<string, Set<string>>>((accumulated, workshop) => {
-        const set = accumulated[workshop.category] ?? new Set<string>();
-        set.add(String(workshop.id));
-        accumulated[workshop.category] = set;
-        return accumulated;
-      }, {}),
-    [workshops]
+      workshops
+        .filter((workshop) => getWorkshopFinishedReason(workshop, nowMs) === null)
+        .reduce<Record<string, Set<string>>>((accumulated, workshop) => {
+          const set = accumulated[workshop.category] ?? new Set<string>();
+          set.add(String(workshop.id));
+          accumulated[workshop.category] = set;
+          return accumulated;
+        }, {}),
+    [workshops, nowMs]
   );
 
   const today = () => new Date().toISOString().slice(0, 10);

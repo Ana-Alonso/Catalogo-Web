@@ -164,6 +164,45 @@ describe('AdminRegistrationsExportButton', () => {
     expect(csv).not.toContain('Taller Creativo de Pintura');
   });
 
+  it('deja fuera los productos finalizados y las filas canceladas', async () => {
+    const user = userEvent.setup();
+    const tallerCelebrado: CatalogItem = {
+      ...taller,
+      id: 't2',
+      title: 'Taller de cerámica',
+      eventDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+    const especialCancelada: CatalogItem = {
+      ...especial,
+      id: 'e2',
+      title: 'Edición cancelada',
+      workshopCancelled: true,
+    };
+    renderButton(
+      [taller, especial, tallerCelebrado, especialCancelada],
+      [
+        registration(),
+        registration({ id: 'rc', name: 'Borrada', status: 'cancelado' }),
+        registration({ id: 'rp', product_id: 'e1', name: 'Luis', email: 'luis@mail.com', quantity: 2 }),
+        registration({ id: 'rx', product_id: 't2', name: 'Sara', email: 'sara@mail.com' }),
+        registration({ id: 'rz', product_id: 'e2', name: 'Iván', email: 'ivan@mail.com' }),
+      ]
+    );
+
+    await user.click(talleresButton());
+    await user.click(productosButton());
+
+    const [, csvTalleres] = vi.mocked(downloadCsvFile).mock.calls[0];
+    expect(csvTalleres).toContain('Ana;ana@mail.com');
+    expect(csvTalleres).not.toContain('Borrada');
+    expect(csvTalleres).not.toContain('Taller de cerámica');
+
+    const [, csvProductos] = vi.mocked(downloadCsvFile).mock.calls[1];
+    expect(csvProductos).toContain('Luis;luis@mail.com');
+    expect(csvProductos).not.toContain('Edición cancelada');
+    expect(csvProductos).not.toContain('Iván');
+  });
+
   it('avisa cuando una lista de gestión está vacía', async () => {
     const user = userEvent.setup();
     renderButton([taller, especial], [

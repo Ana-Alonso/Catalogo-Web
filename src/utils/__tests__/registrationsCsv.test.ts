@@ -119,7 +119,7 @@ describe('buildRegistrationRows', () => {
 
   it('conserva el estado traducido y la fecha en formato corto', () => {
     const rows = buildRegistrationRows(
-      [buildRegistration({ status: 'cancelado' })],
+      [buildRegistration({ status: 'confirmado' })],
       tallerIds,
       titles,
       (status) => `tr-${status}`,
@@ -127,7 +127,22 @@ describe('buildRegistrationRows', () => {
     );
 
     expect(rows[0][3]).toBe('2026-10-20');
-    expect(rows[0][4]).toBe('tr-cancelado');
+    expect(rows[0][4]).toBe('tr-confirmado');
+  });
+
+  it('deja fuera las inscripciones canceladas', () => {
+    const rows = buildRegistrationRows(
+      [
+        buildRegistration(),
+        buildRegistration({ id: 'r2', name: 'Borrada', status: 'cancelado' }),
+      ],
+      tallerIds,
+      titles,
+      translateStatus,
+      { withQuantity: false }
+    );
+
+    expect(rows.map((row) => row[0])).toEqual(['Ana']);
   });
 });
 
