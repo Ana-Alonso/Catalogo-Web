@@ -69,7 +69,7 @@
       "textiles": "Textiles",
       "illustrations": "Ilustraciones",
       "workshops": "Talleres",
-      "especiales": "Ocasionales o de Temporada"
+      "especiales": "Especiales"
     },
     "vatNotice": "Los precios de etsy mostrados no incluyen el IVA. El importe final con los impuestos aplicables es el que figura en la tienda donde se completa la compra."
   },
@@ -102,6 +102,12 @@
     "reserve": "Reservar",
     "reserveAria": "Reservar {{title}}",
     "reserveModalTitle": "Reserva de unidades",
+    "reserveUntil": "Reservas hasta el {{date}}",
+    "reserveClosed": "El plazo de reserva finalizó el {{date}}",
+    "reserveClosedNoDate": "El plazo de reserva está cerrado",
+    "reserveDayLeft": "Queda 1 día para reservar",
+    "reserveDaysLeft": "Quedan {{days}} días para reservar",
+    "editionCancelled": "Esta edición se ha cancelado. Si la habías reservado, contactaremos contigo.",
     "signup": "Apuntarse al taller",
     "signupAria": "Apuntarse al taller {{title}}",
     "workshopFull": "Taller lleno",
@@ -129,7 +135,9 @@
       "emailPlaceholder": "tu@email.com",
       "privacyLabel": "He leído y acepto la <privacy>política de privacidad</privacy>. *",
       "marketingLabel": "Quiero que me aviséis de futuros talleres y novedades (opcional).",
+      "marketingLabelUnits": "Quiero que me aviséis de futuros productos y novedades (opcional).",
       "consentNote": "Usamos tus datos únicamente para gestionar esta inscripción y comunicarnos contigo sobre el taller.",
+      "consentNoteUnits": "Usamos tus datos únicamente para gestionar esta reserva y comunicarnos contigo sobre el pedido.",
       "submit": "Apuntarme al taller",
       "submitUnits": "Reservar",
       "submitting": "Inscribiendo...",
@@ -140,16 +148,21 @@
         "invalidData": "Los datos enviados no son válidos. Revisa nombre y email.",
         "invalidQuantity": "Elige una cantidad entre 1 y 10.",
         "rateLimited": "Has intentado inscribirte demasiado rápido. Inténtalo de nuevo más tarde.",
+        "rateLimitedUnits": "Has intentado reservar demasiado rápido. Inténtalo de nuevo más tarde.",
         "privacyRequired": "Debes aceptar la política de privacidad para continuar.",
         "alreadyRegistered": "Ya estás apuntado a este taller con este email.",
+        "alreadyRegisteredUnits": "Ya tienes una reserva en esta edición con este email.",
         "workshopFull": "El taller está lleno: no quedan plazas.",
         "workshopFullUnits": "No quedan unidades disponibles.",
         "registrationClosed": "Las inscripciones para este taller ya están cerradas.",
+        "registrationClosedUnits": "El plazo de reserva de esta edición ya está cerrado.",
         "marketingConsentProtected": "No se pueden eliminar los datos de una persona que pidió avisos de talleres.",
         "notFound": "Inscripción no encontrada.",
-        "unknown": "No se pudo completar la inscripción. Inténtalo de nuevo."
+        "unknown": "No se pudo completar la inscripción. Inténtalo de nuevo.",
+        "unknownUnits": "No se pudo completar la reserva. Inténtalo de nuevo."
       },
       "successTitle": "¡Inscripción completada!",
+      "successTitleUnits": "¡Reserva completada!",
       "successBody": "Te has apuntado al taller «{{title}}».",
       "successBodyUnits": "Has reservado {{quantity}} unidades de «{{title}}»."
     },
@@ -158,8 +171,14 @@
       "instagram": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre el taller en <instagram>Instagram</instagram>.",
       "tiktok": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre el taller en <tiktok>TikTok</tiktok>.",
       "none": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre el taller.",
+      "bothUnits": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre esta edición en <instagram>Instagram</instagram> y <tiktok>TikTok</tiktok>.",
+      "instagramUnits": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre esta edición en <instagram>Instagram</instagram>.",
+      "tiktokUnits": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre esta edición en <tiktok>TikTok</tiktok>.",
+      "noneUnits": "Estate atento a nuestras redes sociales: publicaremos novedades y actualizaciones sobre esta edición.",
       "instagramAria": "Ver novedades del taller en Instagram",
-      "tiktokAria": "Ver novedades del taller en TikTok"
+      "tiktokAria": "Ver novedades del taller en TikTok",
+      "instagramAriaUnits": "Ver novedades de esta edición en Instagram",
+      "tiktokAriaUnits": "Ver novedades de esta edición en TikTok"
     }
   },
   "calendar": {
@@ -270,10 +289,14 @@
       "finishedEmpty": "Todavía no hay talleres finalizados.",
       "registrationCount_one": "{{count}} inscripción",
       "registrationCount_other": "{{count}} inscripciones",
+      "reservationCount_one": "{{count}} reserva",
+      "reservationCount_other": "{{count}} reservas",
       "noDate": "Sin fecha",
       "noLocation": "Sin lugar",
       "deadlineUntil": "Inscripciones hasta el {{date}}",
+      "deadlineUntilUnits": "Reservas hasta el {{date}}",
       "noDeadline": "Sin plazo de inscripción",
+      "noDeadlineUnits": "Sin plazo de reserva",
       "deadlineClosed": "Plazo cerrado",
       "noCapacity": "Sin cupo",
       "pending_one": "{{count}} pendiente",
@@ -285,8 +308,11 @@
       "marketing": "{{count}} con avisos",
       "expand": "Inscripciones",
       "collapse": "Ocultar",
+      "expandUnits": "Reservas",
       "expandAria": "Ver las inscripciones de {{title}}",
       "collapseAria": "Ocultar las inscripciones de {{title}}",
+      "expandAriaUnits": "Ver las reservas de {{title}}",
+      "collapseAriaUnits": "Ocultar las reservas de {{title}}",
       "editAria": "Modificar el taller {{title}}",
       "finishedReasons": {
         "celebrado": "Celebrado",
@@ -299,7 +325,13 @@
       "restoreWorkshop": "Reactivar taller",
       "restoreWorkshopAria": "Reactivar el taller {{title}} para aceptar nuevas inscripciones",
       "cancelConfirm": "¿Seguro que quieres cancelar el taller \"{{title}}\"? Se cancelarán todas sus inscripciones y pasará a finalizados.",
-      "cancelConfirmAction": "Sí, cancelar taller"
+      "cancelConfirmAction": "Sí, cancelar taller",
+      "cancelEdition": "Cancelar edición",
+      "cancelEditionAria": "Cancelar la edición {{title}} y todas sus reservas",
+      "restoreEdition": "Reactivar edición",
+      "restoreEditionAria": "Reactivar la edición {{title}} para aceptar nuevas reservas",
+      "cancelConfirmEdition": "¿Seguro que quieres cancelar la edición \"{{title}}\"? Se cancelarán todas sus reservas y pasará a finalizados.",
+      "cancelConfirmActionEdition": "Sí, cancelar edición"
     },
     "login": {
       "title": "Acceso Administrador",
@@ -367,7 +399,9 @@
       "registrationDeadlineHint": "Cuando llegue esta fecha/hora, las inscripciones se cerrarán automáticamente.",
       "unitsLabel": "Unidades disponibles (opcional)",
       "unitsPlaceholder": "Hasta agotar existencias",
-      "unitsHint": "Deja vacío para reservar hasta agotar existencias."
+      "unitsHint": "Deja vacío para reservar hasta agotar existencias.",
+      "deadlineLabelUnits": "Plazo para reservar (opcional)",
+      "deadlineHintUnits": "Cuando llegue esta fecha/hora, las reservas se cerrarán automáticamente."
     },
     "priceFields": {
       "priceLabel": "Precio estimado en € (opcional)",

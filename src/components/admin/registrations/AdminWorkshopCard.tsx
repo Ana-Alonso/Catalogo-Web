@@ -90,8 +90,15 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
 
   const handleCancelWorkshop = async (): Promise<void> => {
     const isConfirmed = await confirm({
-      message: t('admin.workshops.cancelConfirm', { title: workshop.title }),
-      confirmLabel: t('admin.workshops.cancelConfirmAction'),
+      message: t(
+        isSpecial ? 'admin.workshops.cancelConfirmEdition' : 'admin.workshops.cancelConfirm',
+        { title: workshop.title }
+      ),
+      confirmLabel: t(
+        isSpecial
+          ? 'admin.workshops.cancelConfirmActionEdition'
+          : 'admin.workshops.cancelConfirmAction'
+      ),
       isDanger: true,
     });
 
@@ -123,9 +130,10 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               )}
             </Box>
             <Typography size="xs" tone="subtle" marginTop="xs">
-              {t('admin.workshops.registrationCount', {
-                count: registrations.length,
-              })}
+              {t(
+                isSpecial ? 'admin.workshops.reservationCount' : 'admin.workshops.registrationCount',
+                { count: registrations.length }
+              )}
             </Typography>
           </Box>
 
@@ -138,8 +146,12 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 aria-expanded={isExpanded}
                 aria-label={t(
                   isExpanded
-                    ? 'admin.workshops.collapseAria'
-                    : 'admin.workshops.expandAria',
+                    ? isSpecial
+                      ? 'admin.workshops.collapseAriaUnits'
+                      : 'admin.workshops.collapseAria'
+                    : isSpecial
+                      ? 'admin.workshops.expandAriaUnits'
+                      : 'admin.workshops.expandAria',
                   { title: workshop.title }
                 )}
               >
@@ -147,7 +159,9 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 {t(
                   isExpanded
                     ? 'admin.workshops.collapse'
-                    : 'admin.workshops.expand'
+                    : isSpecial
+                      ? 'admin.workshops.expandUnits'
+                      : 'admin.workshops.expand'
                 )}
               </Button>
             )}
@@ -157,12 +171,15 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 size="sm"
                 disabled={isCancellingWorkshop}
                 onClick={() => void handleCancelWorkshop()}
-                aria-label={t('admin.workshops.cancelWorkshopAria', {
-                  title: workshop.title,
-                })}
+                aria-label={t(
+                  isSpecial
+                    ? 'admin.workshops.cancelEditionAria'
+                    : 'admin.workshops.cancelWorkshopAria',
+                  { title: workshop.title }
+                )}
               >
                 <Icon as={Ban} size="sm" tone="danger" />
-                {t('admin.workshops.cancelWorkshop')}
+                {t(isSpecial ? 'admin.workshops.cancelEdition' : 'admin.workshops.cancelWorkshop')}
               </Button>
             )}
             {finishedReason === 'cancelado' && (
@@ -171,12 +188,15 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 size="sm"
                 disabled={isRestoringWorkshop || isCancellingWorkshop}
                 onClick={() => void onRestoreWorkshop(workshop)}
-                aria-label={t('admin.workshops.restoreWorkshopAria', {
-                  title: workshop.title,
-                })}
+                aria-label={t(
+                  isSpecial
+                    ? 'admin.workshops.restoreEditionAria'
+                    : 'admin.workshops.restoreWorkshopAria',
+                  { title: workshop.title }
+                )}
               >
                 <Icon as={RotateCcw} size="sm" tone="accent" />
-                {t('admin.workshops.restoreWorkshop')}
+                {t(isSpecial ? 'admin.workshops.restoreEdition' : 'admin.workshops.restoreWorkshop')}
               </Button>
             )}
             <Button
@@ -224,8 +244,13 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
             <Icon as={Clock} size="sm" tone="muted" />
             <Typography size="xs" tone="subtle">
               {deadline
-                ? t('admin.workshops.deadlineUntil', { date: deadline })
-                : t('admin.workshops.noDeadline')}
+                ? t(
+                    isSpecial
+                      ? 'admin.workshops.deadlineUntilUnits'
+                      : 'admin.workshops.deadlineUntil',
+                    { date: deadline }
+                  )
+                : t(isSpecial ? 'admin.workshops.noDeadlineUnits' : 'admin.workshops.noDeadline')}
             </Typography>
           </Box>
           <Box display="flex" align="center" gap="xs">

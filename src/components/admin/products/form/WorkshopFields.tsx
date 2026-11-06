@@ -79,13 +79,21 @@ export const WorkshopFields: React.FC<WorkshopFieldsProps> = ({
       <Box>
         <Input
           id="prod-registration-deadline"
-          label={t('admin.workshopFields.registrationDeadlineLabel')}
+          label={t(
+            isSpecial
+              ? 'admin.workshopFields.deadlineLabelUnits'
+              : 'admin.workshopFields.registrationDeadlineLabel'
+          )}
           type="datetime-local"
           value={registrationDeadline}
           onChange={(event) => onRegistrationDeadlineChange(event.target.value)}
         />
         <Typography variant="body" tone="subtle" size="xs" marginTop="xs">
-          {t('admin.workshopFields.registrationDeadlineHint')}
+          {t(
+            isSpecial
+              ? 'admin.workshopFields.deadlineHintUnits'
+              : 'admin.workshopFields.registrationDeadlineHint'
+          )}
         </Typography>
       </Box>
     </Box>

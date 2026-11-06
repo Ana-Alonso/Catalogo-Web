@@ -328,6 +328,14 @@ describe('AdminWorkshopsPanel', () => {
     expect(screen.getByText('1 unidad')).toBeInTheDocument();
     expect(screen.queryByText('Sin fecha')).toBeNull();
     expect(screen.queryByText('Sin lugar')).toBeNull();
+    expect(screen.getByText('3 reservas')).toBeInTheDocument();
+    expect(screen.getByText(/^Reservas hasta /)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Cancelar la edición Edición de temporada y todas sus reservas',
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancelar taller' })).toBeNull();
   });
 
   it('muestra el estado vacío y el error de carga', () => {
