@@ -71,6 +71,29 @@ const Footer: React.FC = () => {
     window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS_EVENT));
   };
 
+  const faqs = [
+    {
+      question: t('footer.faq.soul.question'),
+      answer: t('footer.faq.soul.answer'),
+    },
+    {
+      question: t('footer.faq.products.question'),
+      answer: t('footer.faq.products.answer'),
+    },
+    {
+      question: t('footer.faq.shipping.question'),
+      answer: t('footer.faq.shipping.answer'),
+    },
+    {
+      question: t('footer.faq.platforms.question'),
+      answer: t('footer.faq.platforms.answer'),
+    },
+    {
+      question: t('footer.faq.handover.question'),
+      answer: t('footer.faq.handover.answer'),
+    },
+  ];
+
   return (
     <FooterShell aria-labelledby="footer-heading" padding="lg" container={false}>
       <Box as="h2" id="footer-heading" srOnly>
@@ -123,6 +146,40 @@ const Footer: React.FC = () => {
               <SocialLink href={tiktokUrl} label={t('footer.tiktokAria')} as={Tiktok} />
             )}
           </Box>
+        </Box>
+
+        <Box
+          display="flex"
+          direction="column"
+          gap="md"
+          marginTop="xl"
+          paddingTop="xl"
+          divider="top"
+        >
+          <Typography variant="h3">{t('footer.faq.title')}</Typography>
+          {faqs.map(({ question, answer }) => (
+            <details
+              key={question}
+              className="border border-neutral-800/50 rounded-md bg-neutral-800/20"
+            >
+              <summary
+                className="flex items-center justify-between gap-2 py-3 px-4 cursor-pointer list-none outline-none hover:bg-neutral-800/30 rounded-md"
+              >
+                <Typography variant="body" size="sm" as="span">
+                  {question}
+                </Typography>
+              </summary>
+              <Typography
+                variant="body"
+                size="sm"
+                tone="subtle"
+                style={{ whiteSpace: 'pre-line' }}
+                padding="sm"
+              >
+                {answer}
+              </Typography>
+            </details>
+          ))}
         </Box>
 
         <Box
