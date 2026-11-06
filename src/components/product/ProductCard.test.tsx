@@ -211,3 +211,45 @@ describe('ProductCard · plazo de inscripción de talleres', () => {
     }
   });
 });
+
+describe('ProductCard · reservas de productos especiales', () => {
+  const inDays = (days: number) =>
+    new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+  const special = (overrides: Partial<CatalogItem> = {}) =>
+    buildItem({
+      category: 'especiales',
+      title: 'Edición de temporada',
+      etsyLink: 'https://www.etsy.com/listing/1',
+      ...overrides,
+    });
+
+  const signupButton = () =>
+    screen.queryByRole('button', {
+      name: i18n.t('product.signupAria', { title: 'Edición de temporada' }),
+    });
+
+  it('ofrece reservar cuando la edición activa las reservas con cupo y plazo', () => {
+    renderCard(special({ cupo: 10, registrationDeadline: inDays(5) }));
+
+    expect(signupButton()).toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('product.buyEtsy'))).toBeNull();
+  });
+
+  it('muestra el enlace de compra cuando la edición no activa las reservas', () => {
+    renderCard(special());
+
+    expect(signupButton()).toBeNull();
+    expect(screen.getByText(i18n.t('product.buyEtsy'))).toBeInTheDocument();
+  });
+
+  it('anuncia las plazas restantes de una tirada', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard item={special({ cupo: 4 })} spotsCount={1} onRegister={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(i18n.t('product.spotsLeft', { spots: 3, total: 4 }))).toBeInTheDocument();
+  });
+});

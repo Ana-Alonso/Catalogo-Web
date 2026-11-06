@@ -67,6 +67,28 @@ describe('validateProductForm', () => {
       })
     ).toBeNull();
   });
+
+  it('rechaza un plazo posterior a la fecha en productos especiales', () => {
+    expect(
+      validateProductForm({
+        ...baseInput,
+        category: 'especiales',
+        registrationDeadline: '2026-12-10T18:00:00.000Z',
+        eventDate: '2026-12-01T18:00:00.000Z',
+      })
+    ).toBe('registrationDeadlineAfterEvent');
+  });
+
+  it('no exige coherencia de plazos en categorías sin reservas', () => {
+    expect(
+      validateProductForm({
+        ...baseInput,
+        category: 'ilustraciones',
+        registrationDeadline: '2026-12-10T18:00:00.000Z',
+        eventDate: '2026-12-01T18:00:00.000Z',
+      })
+    ).toBeNull();
+  });
 });
 
 describe('normalizeOfferPercent', () => {

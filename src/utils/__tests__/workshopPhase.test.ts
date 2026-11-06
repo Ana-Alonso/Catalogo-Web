@@ -95,6 +95,29 @@ describe('groupWorkshops', () => {
     expect(groups).toEqual({ active: [], finished: [] });
   });
 
+  it('incluye los especiales con campos de reserva y excluye los que no los tienen', () => {
+    const groups = groupWorkshops(
+      [
+        workshop({ id: 'edicion-cupo', category: 'especiales', cupo: 10 }),
+        workshop({ id: 'edicion-sin-reserva', category: 'especiales' }),
+        workshop({
+          id: 'edicion-plazo',
+          category: 'especiales',
+          registrationDeadline: '2026-11-20T00:00:00.000Z',
+        }),
+        workshop({ id: 'edicion-fecha', category: 'especiales', eventDate: '2026-12-01T18:00:00.000Z' }),
+      ],
+      NOW
+    );
+
+    expect(groups.active.map((item) => item.id)).toEqual([
+      'edicion-fecha',
+      'edicion-cupo',
+      'edicion-plazo',
+    ]);
+    expect(groups.finished).toEqual([]);
+  });
+
   it('ordena los finalizados del más reciente al más antiguo', () => {
     const groups = groupWorkshops(
       [

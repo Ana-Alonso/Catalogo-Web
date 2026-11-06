@@ -33,6 +33,7 @@ const CATEGORY_OPTIONS: FormCategory[] = [
   'textiles',
   'talleres',
   'personalizados',
+  'especiales',
 ];
 
 const STATUS_OPTIONS: AvailabilityStatus[] = [

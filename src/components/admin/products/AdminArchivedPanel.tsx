@@ -9,6 +9,7 @@ import { AdminProductTableSkeleton } from './AdminProductTableSkeleton';
 import { AdminWorkshopRegistrations } from '../registrations/AdminWorkshopRegistrations';
 import { formatDate } from '../../../utils/dateFormat';
 import { sortRegistrationsByDate } from '../../../utils/workshopSummary';
+import { usesReservationFlow } from '../../../utils/reservableProduct';
 import type { CatalogItem } from '../../../types/catalog';
 import type { RegistrationStatus, WorkshopRegistration } from '../../../types/registrations';
 
@@ -91,7 +92,7 @@ export const AdminArchivedPanel: React.FC<AdminArchivedPanelProps> = ({
           <Box rounded="lg" border divide="neutral">
             {products.map((item) => {
               const id = String(item.id);
-              const isWorkshop = item.category === 'talleres';
+              const isWorkshop = usesReservationFlow(item);
               const isExpanded = expandedId === id;
               const workshopRegistrations = sortRegistrationsByDate(
                 registrations.filter(

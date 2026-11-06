@@ -5,6 +5,7 @@ import {
   availabilityTranslationKeys,
   categoryTranslationKeys,
 } from '../../../i18n/labels';
+import { usesReservationFlow } from '../../../utils/reservableProduct';
 import type { AvailabilityStatus, CatalogItem } from '../../../types/catalog';
 
 const statusBadgeVariant: Record<
@@ -35,7 +36,7 @@ export const AdminProductCategoryBadge: React.FC<{ item: CatalogItem }> = ({
   return (
     <>
       <Badge variant="outline">{t(categoryTranslationKeys[item.category])}</Badge>
-      {item.category === 'talleres' && (
+      {usesReservationFlow(item) && (
         <Typography size="xs" tone="subtle" marginTop="tight">
           {item.cupo != null
             ? t('admin.productTable.capacity', { count: item.cupo })
