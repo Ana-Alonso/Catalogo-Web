@@ -14,6 +14,7 @@ const tabLabelKeys = {
   productos: 'admin.tabs.products',
   catalogo: 'admin.tabs.catalog',
   talleres: 'admin.tabs.workshops',
+  pagos: 'admin.tabs.payments',
   archivados: 'admin.tabs.archived',
 } as const satisfies Record<AdminTab, string>;
 

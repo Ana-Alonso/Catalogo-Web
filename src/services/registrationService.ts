@@ -3,12 +3,14 @@ import { RegistrationError, mapRegistrationDatabaseError } from '../errors/regis
 import {
   readApiErrorCode,
   readRegistrationRow,
+  withPaymentDefaults,
 } from '../utils/registrationResponse';
 import { MOCK_STORAGE_KEYS } from '../mocks/mockStorage';
 import { createLocalStore } from './localStore';
 import type {
   WorkshopRegistration,
   RegistrationFormData,
+  RegistrationPaymentPatch,
   RegistrationStatus,
 } from '../types/registrations';
 
@@ -36,10 +38,10 @@ export const fetchRegistrations = async (): Promise<WorkshopRegistration[]> => {
       throw error;
     }
 
-    return (data || []) as WorkshopRegistration[];
+    return (data || []).map(withPaymentDefaults);
   }
 
-  return registrationStore.read();
+  return registrationStore.read().map(withPaymentDefaults);
 };
 
 export const hasMarketingConsentRegistrations = (productId: string): boolean =>
@@ -66,12 +68,13 @@ export const fetchMarketingRegistrations = async (): Promise<
       throw error;
     }
 
-    return (data || []) as WorkshopRegistration[];
+    return (data || []).map(withPaymentDefaults);
   }
 
   return registrationStore.read()
     .filter((registration) => registration.marketing_consent)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map(withPaymentDefaults);
 };
 
 export const fetchRegistrationCounts = async (): Promise<Record<string, number>> => {
@@ -164,6 +167,10 @@ export const createRegistration = async (
     privacy_consent_at: privacyConsentAt,
     marketing_consent: formData.marketingConsent,
     quantity: formData.quantity ?? 1,
+    amount: null,
+    paid: false,
+    paid_at: null,
+    fulfilled_at: null,
     created_at: new Date().toISOString(),
   };
 
@@ -261,6 +268,61 @@ export const withdrawMarketingConsent = async (
     ...registration,
     marketing_consent: false,
   };
+
+  registrationStore.write(
+    localRegistrations.map((item) => (item.id === id ? updated : item))
+  );
+
+  return updated;
+};
+
+// Cobros del panel de admin: importe libre, pagado y entregado/asistido.
+export const updateRegistrationPayment = async (
+  id: string,
+  patch: RegistrationPaymentPatch
+): Promise<WorkshopRegistration> => {
+  const now = new Date().toISOString();
+  const update: Record<string, unknown> = {};
+
+  if (patch.amount !== undefined) {
+    update.amount = patch.amount;
+  }
+
+  if (patch.paid !== undefined) {
+    update.paid = patch.paid;
+    update.paid_at = patch.paid ? now : null;
+  }
+
+  if (patch.fulfilled !== undefined) {
+    update.fulfilled_at = patch.fulfilled ? now : null;
+  }
+
+  if (!useMocks && isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('workshop_registrations')
+      .update(update)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw mapRegistrationError(error.code, error.message);
+    }
+
+    return withPaymentDefaults(data as WorkshopRegistration);
+  }
+
+  const localRegistrations = registrationStore.read();
+  const registration = localRegistrations.find((item) => item.id === id);
+
+  if (!registration) {
+    throw new RegistrationError('notFound');
+  }
+
+  const updated = withPaymentDefaults({
+    ...registration,
+    ...update,
+  });
 
   registrationStore.write(
     localRegistrations.map((item) => (item.id === id ? updated : item))

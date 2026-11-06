@@ -684,6 +684,71 @@ BEGIN
   END;
 END $$;
 
+-- Gestion de cobros (migracion 030): columnas, defaults, CHECK de importe
+-- y que marcar el pago no disparar la comprobacion de cupo.
+DO $$
+DECLARE
+  fila RECORD;
+BEGIN
+  IF (
+    SELECT count(*) FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'workshop_registrations'
+      AND column_name IN ('amount', 'paid', 'paid_at', 'fulfilled_at')
+  ) <> 4 THEN
+    RAISE EXCEPTION 'FAIL: faltan columnas de pago en workshop_registrations';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'workshop_registrations_amount_check'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: no existe el CHECK del importe';
+  END IF;
+
+  -- Las filas previas caen a "sin cobrar y sin entregar" por default.
+  SELECT * INTO fila FROM public.workshop_registrations
+   WHERE email = 'zuri@test.com';
+
+  IF fila.paid IS NOT false OR fila.amount IS NOT NULL
+     OR fila.paid_at IS NOT NULL OR fila.fulfilled_at IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: los defaults de pago no dejaron la fila en pendiente';
+  END IF;
+
+  UPDATE public.workshop_registrations
+     SET amount = 12.50, paid = true, paid_at = now(), fulfilled_at = now()
+   WHERE email = 'zuri@test.com';
+
+  SELECT * INTO fila FROM public.workshop_registrations
+   WHERE email = 'zuri@test.com';
+
+  IF fila.amount <> 12.50 OR fila.paid IS NOT true
+     OR fila.paid_at IS NULL OR fila.fulfilled_at IS NULL THEN
+    RAISE EXCEPTION 'FAIL: el alta de cobro no se guardo correctamente';
+  END IF;
+
+  -- Marcar pagada una fila de un especial lleno no debe tocar el cupo.
+  UPDATE public.workshop_registrations
+     SET paid = true
+   WHERE email = 'pilar@test.com';
+
+  BEGIN
+    UPDATE public.workshop_registrations SET amount = -1
+     WHERE email = 'zuri@test.com';
+    RAISE EXCEPTION 'FAIL: el CHECK de importe admitio negativos';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM NOT LIKE '%workshop_registrations_amount_check%' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al poner importe negativo: %', SQLERRM;
+      END IF;
+  END;
+
+  DELETE FROM public.workshop_registrations WHERE email = 'zuri@test.com';
+END $$;
+
 INSERT INTO public.workshop_registrations (product_id, name, email)
 VALUES ('00000000-0000-0000-0000-000000000002', 'Lucía Prevía', 'lucia@test.com');
 

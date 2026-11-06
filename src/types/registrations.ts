@@ -9,7 +9,18 @@ export interface WorkshopRegistration {
   privacy_consent_at: string | null;
   marketing_consent: boolean;
   quantity: number;
+  amount: number | null;
+  paid: boolean;
+  paid_at: string | null;
+  fulfilled_at: string | null;
   created_at: string;
+}
+
+// Parche de la gestion de cobros del panel de admin.
+export interface RegistrationPaymentPatch {
+  amount?: number | null;
+  paid?: boolean;
+  fulfilled?: boolean;
 }
 
 export interface RegistrationFormData {

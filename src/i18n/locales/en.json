@@ -264,6 +264,7 @@
       "products": "Add product",
       "catalog": "Catalog",
       "workshops": "Reservations",
+      "payments": "Payments",
       "archived": "Archived"
     },
     "archived": {
@@ -567,6 +568,32 @@
       "exportEmptyWorkshops": "There are no workshop registrations to export.",
       "exportEmptySpecials": "There are no product reservations to export.",
       "exportError": "Could not generate the alerts CSV. Please try again."
+    },
+    "payments": {
+      "title": "Payments",
+      "subtitle": "Amount, payment and delivery or attendance for every booking.",
+      "loading": "Loading payments...",
+      "errorTitle": "Could not load payments",
+      "filterLabel": "Filter payments",
+      "filterTodas": "All",
+      "filterSinCobrar": "Unpaid",
+      "filterCobradoSinEntregar": "Paid not delivered",
+      "tableLabel": "Booking payments list",
+      "colContact": "Contact",
+      "colReservation": "Booking",
+      "colUnits": "Units",
+      "colAmount": "Amount (€)",
+      "colPaid": "Paid",
+      "colFulfilled": "Delivered / Attendance",
+      "amountAria": "Amount charged to {{name}}, in euros",
+      "markPaid": "Paid",
+      "markDelivered": "Delivered",
+      "markAttended": "Attended",
+      "pendingCount_one": "{{count}} payment pending",
+      "pendingCount_other": "{{count}} payments pending",
+      "totalPaid": "{{amount}} collected in total",
+      "empty": "There are no bookings to charge yet.",
+      "emptyFiltered": "No bookings match this filter."
     },
     "calendarPanel": {
       "published": "Workshop \"{{title}}\" published. Add the event to your calendar:"

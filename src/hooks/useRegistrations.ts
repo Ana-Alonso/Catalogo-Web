@@ -3,18 +3,24 @@ import { useTranslation } from 'react-i18next';
 import {
   fetchRegistrations,
   updateRegistrationStatus,
+  updateRegistrationPayment,
   deleteRegistration,
   withdrawMarketingConsent as withdrawMarketingConsentService,
   cancelWorkshopRegistrations as cancelWorkshopRegistrationsService,
 } from '../services/registrationService';
 import { logError } from '../utils/logger';
-import type { WorkshopRegistration, RegistrationStatus } from '../types/registrations';
+import type {
+  WorkshopRegistration,
+  RegistrationPaymentPatch,
+  RegistrationStatus,
+} from '../types/registrations';
 
 interface UseRegistrationsResult {
   registrations: WorkshopRegistration[];
   isLoading: boolean;
   error: string | null;
   setStatus: (id: string, status: RegistrationStatus) => Promise<boolean>;
+  setPayment: (id: string, patch: RegistrationPaymentPatch) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
   withdrawMarketingConsent: (id: string) => Promise<boolean>;
   cancelWorkshopRegistrations: (productId: string) => Promise<boolean>;
@@ -99,6 +105,25 @@ export const useRegistrations = (): UseRegistrationsResult => {
     }
   };
 
+  const setPayment = async (
+    id: string,
+    patch: RegistrationPaymentPatch
+  ): Promise<boolean> => {
+    try {
+      const updated = await updateRegistrationPayment(id, patch);
+      setRegistrations((prev) =>
+        prev.map((registration) => (registration.id === id ? updated : registration))
+      );
+      await recoverAfterMutation();
+      return true;
+    } catch (err) {
+      logError('useRegistrations.setPayment', err);
+      const msg = err instanceof Error ? err.message : t('admin.errors.updateRegistration');
+      setError(msg);
+      return false;
+    }
+  };
+
   const remove = async (id: string): Promise<boolean> => {
     try {
       await deleteRegistration(id);
@@ -159,6 +184,7 @@ export const useRegistrations = (): UseRegistrationsResult => {
     isLoading,
     error,
     setStatus,
+    setPayment,
     remove,
     withdrawMarketingConsent,
     cancelWorkshopRegistrations,

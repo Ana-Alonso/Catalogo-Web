@@ -7,6 +7,7 @@ import type { AdminTab } from '../../../hooks/useAdminTab';
 const counts: Partial<Record<AdminTab, number>> = {
   catalogo: 4,
   talleres: 2,
+  pagos: 3,
   archivados: 7,
 };
 
@@ -47,6 +48,10 @@ describe('AdminDashboardTabs', () => {
       'href',
       '/admin?tab=talleres'
     );
+    expect(screen.getByRole('link', { name: /Pagos/ })).toHaveAttribute(
+      'href',
+      '/admin?tab=pagos'
+    );
     expect(screen.getByRole('link', { name: /Archivados/ })).toHaveAttribute(
       'href',
       '/admin?tab=archivados'
@@ -62,6 +67,7 @@ describe('AdminDashboardTabs', () => {
     expect(screen.getByRole('link', { name: /Reservas/ })).toHaveTextContent(
       '2'
     );
+    expect(screen.getByRole('link', { name: /Pagos/ })).toHaveTextContent('3');
     expect(screen.getByRole('link', { name: /Archivados/ })).toHaveTextContent(
       '7'
     );
