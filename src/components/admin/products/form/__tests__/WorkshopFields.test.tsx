@@ -28,6 +28,7 @@ describe('WorkshopFields', () => {
     expect(screen.queryByLabelText('Lugar o Modalidad')).toBeNull();
     expect(screen.getByLabelText('Unidades disponibles (opcional)')).toBeInTheDocument();
     expect(screen.getByText('Deja vacío para reservar hasta agotar existencias.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Plazo para inscribirse (opcional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Plazo para reservar (opcional)')).toBeInTheDocument();
+    expect(screen.getByText('Cuando llegue esta fecha/hora, las reservas se cerrarán automáticamente.')).toBeInTheDocument();
   });
 });

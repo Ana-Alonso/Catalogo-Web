@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Download,
   Edit3,
   MapPin,
   RotateCcw,
@@ -15,7 +16,14 @@ import {
 import { Badge, Box, Button, Card, Icon, Typography } from '../../ui';
 import { AdminWorkshopRegistrations } from './AdminWorkshopRegistrations';
 import { useConfirm } from '../../../hooks/useConfirm';
+import { useToast } from '../../../hooks/useToast';
+import { registrationStatusTranslationKeys } from '../../../i18n/labels';
 import { formatDateTime } from '../../../utils/dateFormat';
+import {
+  buildContactRows,
+  buildCsv,
+  downloadCsvFile,
+} from '../../../utils/registrationsCsv';
 import { isWorkshopRegistrationClosed } from '../../../utils/workshopSignupState';
 import {
   getActiveRegistrationCount,
@@ -25,6 +33,16 @@ import {
 import type { WorkshopFinishedReason } from '../../../utils/workshopPhase';
 import type { CatalogItem } from '../../../types/catalog';
 import type { RegistrationStatus, WorkshopRegistration } from '../../../types/registrations';
+
+const CONTACTS_FILENAME_PREFIX = 'contactos';
+
+const slugify = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
 interface AdminWorkshopCardProps {
   workshop: CatalogItem;
@@ -67,6 +85,7 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const confirm = useConfirm();
+  const { success: notifySuccess } = useToast();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const stats = getRegistrationStats(registrations);
   const activeCount = getActiveRegistrationCount(stats);
@@ -86,12 +105,47 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
           active: isSpecial ? activeUnits : activeCount,
           cupo,
         })
-      : t(isSpecial ? 'admin.registrations.noUnitsLimit' : 'admin.workshops.noCapacity');
+      : isSpecial
+        ? t('admin.registrations.requestedUnits', {
+            count: activeUnits,
+            active: activeUnits,
+          })
+        : t('admin.workshops.noCapacity');
+
+  const handleExportContacts = (): void => {
+    const rows = buildContactRows(
+      registrations,
+      (status) => t(registrationStatusTranslationKeys[status]),
+      { withQuantity: isSpecial }
+    );
+
+    const headers = [
+      t('admin.registrations.csv.name'),
+      t('admin.registrations.csv.email'),
+      t('admin.registrations.csv.date'),
+      t('admin.registrations.csv.status'),
+      ...(isSpecial ? [t('admin.registrations.csv.quantity')] : []),
+    ];
+
+    const filename = `${CONTACTS_FILENAME_PREFIX}-${
+      slugify(workshop.title) || String(workshop.id)
+    }-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    downloadCsvFile(filename, buildCsv(headers, rows));
+    notifySuccess(t('admin.registrations.exportDone', { count: rows.length }));
+  };
 
   const handleCancelWorkshop = async (): Promise<void> => {
     const isConfirmed = await confirm({
-      message: t('admin.workshops.cancelConfirm', { title: workshop.title }),
-      confirmLabel: t('admin.workshops.cancelConfirmAction'),
+      message: t(
+        isSpecial ? 'admin.workshops.cancelConfirmEdition' : 'admin.workshops.cancelConfirm',
+        { title: workshop.title }
+      ),
+      confirmLabel: t(
+        isSpecial
+          ? 'admin.workshops.cancelConfirmActionEdition'
+          : 'admin.workshops.cancelConfirmAction'
+      ),
       isDanger: true,
     });
 
@@ -116,6 +170,13 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               >
                 {workshop.title}
               </Typography>
+              <Badge variant="outline" size="micro">
+                {t(
+                  isSpecial
+                    ? 'admin.workshops.kindEspeciales'
+                    : 'admin.workshops.kindTalleres'
+                )}
+              </Badge>
               {finishedReason && (
                 <Badge variant="outline">
                   {t(`admin.workshops.finishedReasons.${finishedReason}`)}
@@ -123,9 +184,10 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               )}
             </Box>
             <Typography size="xs" tone="subtle" marginTop="xs">
-              {t('admin.workshops.registrationCount', {
-                count: registrations.length,
-              })}
+              {t(
+                isSpecial ? 'admin.workshops.reservationCount' : 'admin.workshops.registrationCount',
+                { count: registrations.length }
+              )}
             </Typography>
           </Box>
 
@@ -138,8 +200,12 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 aria-expanded={isExpanded}
                 aria-label={t(
                   isExpanded
-                    ? 'admin.workshops.collapseAria'
-                    : 'admin.workshops.expandAria',
+                    ? isSpecial
+                      ? 'admin.workshops.collapseAriaUnits'
+                      : 'admin.workshops.collapseAria'
+                    : isSpecial
+                      ? 'admin.workshops.expandAriaUnits'
+                      : 'admin.workshops.expandAria',
                   { title: workshop.title }
                 )}
               >
@@ -147,7 +213,9 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 {t(
                   isExpanded
                     ? 'admin.workshops.collapse'
-                    : 'admin.workshops.expand'
+                    : isSpecial
+                      ? 'admin.workshops.expandUnits'
+                      : 'admin.workshops.expand'
                 )}
               </Button>
             )}
@@ -157,12 +225,15 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 size="sm"
                 disabled={isCancellingWorkshop}
                 onClick={() => void handleCancelWorkshop()}
-                aria-label={t('admin.workshops.cancelWorkshopAria', {
-                  title: workshop.title,
-                })}
+                aria-label={t(
+                  isSpecial
+                    ? 'admin.workshops.cancelEditionAria'
+                    : 'admin.workshops.cancelWorkshopAria',
+                  { title: workshop.title }
+                )}
               >
                 <Icon as={Ban} size="sm" tone="danger" />
-                {t('admin.workshops.cancelWorkshop')}
+                {t(isSpecial ? 'admin.workshops.cancelEdition' : 'admin.workshops.cancelWorkshop')}
               </Button>
             )}
             {finishedReason === 'cancelado' && (
@@ -171,14 +242,29 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
                 size="sm"
                 disabled={isRestoringWorkshop || isCancellingWorkshop}
                 onClick={() => void onRestoreWorkshop(workshop)}
-                aria-label={t('admin.workshops.restoreWorkshopAria', {
-                  title: workshop.title,
-                })}
+                aria-label={t(
+                  isSpecial
+                    ? 'admin.workshops.restoreEditionAria'
+                    : 'admin.workshops.restoreWorkshopAria',
+                  { title: workshop.title }
+                )}
               >
                 <Icon as={RotateCcw} size="sm" tone="accent" />
-                {t('admin.workshops.restoreWorkshop')}
+                {t(isSpecial ? 'admin.workshops.restoreEdition' : 'admin.workshops.restoreWorkshop')}
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={registrations.length === 0}
+              onClick={handleExportContacts}
+              aria-label={t('admin.workshops.contactsCsvAria', {
+                title: workshop.title,
+              })}
+            >
+              <Icon as={Download} size="sm" />
+              {t('admin.workshops.contactsCsv')}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -224,8 +310,13 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
             <Icon as={Clock} size="sm" tone="muted" />
             <Typography size="xs" tone="subtle">
               {deadline
-                ? t('admin.workshops.deadlineUntil', { date: deadline })
-                : t('admin.workshops.noDeadline')}
+                ? t(
+                    isSpecial
+                      ? 'admin.workshops.deadlineUntilUnits'
+                      : 'admin.workshops.deadlineUntil',
+                    { date: deadline }
+                  )
+                : t(isSpecial ? 'admin.workshops.noDeadlineUnits' : 'admin.workshops.noDeadline')}
             </Typography>
           </Box>
           <Box display="flex" align="center" gap="xs">

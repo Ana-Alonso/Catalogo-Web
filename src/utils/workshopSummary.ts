@@ -1,3 +1,4 @@
+import type { CatalogItem } from '../types/catalog';
 import type { WorkshopRegistration } from '../types/registrations';
 
 export interface WorkshopRegistrationStats {
@@ -66,6 +67,32 @@ export const groupRegistrationsByWorkshop = (
       return groups;
     },
     {}
+  );
+
+export type ReservationCategoryFilter = 'todas' | 'talleres' | 'especiales';
+
+const RESERVATION_CATEGORY_RANK: Record<string, number> = {
+  talleres: 0,
+  especiales: 1,
+};
+
+export const filterWorkshopsByCategory = (
+  workshops: CatalogItem[],
+  category: ReservationCategoryFilter
+): CatalogItem[] =>
+  category === 'todas'
+    ? workshops
+    : workshops.filter((workshop) => workshop.category === category);
+
+// Talleres primero y especiales después; dentro de cada bloque, por título.
+export const sortWorkshopsByCategory = (
+  workshops: CatalogItem[]
+): CatalogItem[] =>
+  [...workshops].sort(
+    (a, b) =>
+      (RESERVATION_CATEGORY_RANK[a.category ?? ''] ?? 2) -
+        (RESERVATION_CATEGORY_RANK[b.category ?? ''] ?? 2) ||
+      a.title.localeCompare(b.title, 'es')
   );
 
 export const sortRegistrationsByDate = (

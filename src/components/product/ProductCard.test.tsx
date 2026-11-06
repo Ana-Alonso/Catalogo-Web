@@ -282,4 +282,33 @@ describe('ProductCard · reservas de productos especiales', () => {
     expect(screen.queryByText('Madrid')).toBeNull();
     expect(signupButton()).toBeInTheDocument();
   });
+
+  it('anuncia el plazo en términos de reserva, no de inscripción', () => {
+    renderCard(special({ cupo: 10, registrationDeadline: inDays(5) }));
+
+    expect(
+      screen.getByText(i18n.t('product.reserveDaysLeft', { days: 5 }))
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Reservas hasta el/)).toBeInTheDocument();
+    expect(screen.queryByText(/inscripci/i)).toBeNull();
+  });
+
+  it('avisa del cierre del plazo de reserva sin hablar de inscripciones', () => {
+    renderCard(special({ cupo: 5, registrationDeadline: inDays(-2) }));
+
+    expect(screen.getByText(/plazo de reserva finalizó/)).toBeInTheDocument();
+    expect(screen.queryByText(/inscripci/i)).toBeNull();
+    expect(signupButton()).toBeNull();
+  });
+
+  it('muestra un banner de edición cancelada, no de taller cancelado', () => {
+    renderCard(special({ cupo: 4, workshopCancelled: true }));
+
+    expect(
+      screen.getByText(i18n.t('product.editionCancelled'))
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(i18n.t('product.workshopCancelled'))
+    ).toBeNull();
+  });
 });

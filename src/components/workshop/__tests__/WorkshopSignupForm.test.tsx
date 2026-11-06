@@ -160,6 +160,28 @@ describe('WorkshopSignupForm · unidades en especiales', () => {
         i18n.t('workshop.form.successBodyUnits', { title: specialItem.title, quantity: 3 })
       )
     ).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('workshop.form.successTitleUnits'))).toBeInTheDocument();
+  });
+
+  it('usa la terminología de reserva en avisos y consentimiento', async () => {
+    const user = userEvent.setup();
+    const onRegister = vi.fn().mockRejectedValue(new RegistrationError('alreadyRegistered'));
+    renderSpecialForm(onRegister);
+
+    await fillIdentity(user);
+    await user.click(screen.getByRole('checkbox', { name: /política de privacidad/i }));
+    await user.click(
+      screen.getByRole('button', { name: i18n.t('workshop.form.submitUnits') })
+    );
+
+    expect(
+      await screen.findByText(i18n.t('workshop.form.errors.alreadyRegisteredUnits'))
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: i18n.t('workshop.form.marketingLabelUnits') })
+    ).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('workshop.form.consentNoteUnits'))).toBeInTheDocument();
+    expect(screen.queryByText(/inscripci/i)).toBeNull();
   });
 
   it.each([

@@ -4,8 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { AdminWorkshopsPanel } from '../AdminWorkshopsPanel';
 import { ConfirmProvider } from '../../../confirm/ConfirmProvider';
 import ToastProvider from '../../../toast/ToastProvider';
+import { downloadCsvFile } from '../../../../utils/registrationsCsv';
 import type { CatalogItem } from '../../../../types/catalog';
 import type { WorkshopRegistration } from '../../../../types/registrations';
+
+vi.mock('../../../../utils/registrationsCsv', async (importOriginal) => {
+  const module = await importOriginal<
+    typeof import('../../../../utils/registrationsCsv')
+  >();
+
+  return { ...module, downloadCsvFile: vi.fn() };
+});
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const futureDate = () => new Date(Date.now() + 30 * DAY_MS).toISOString();
@@ -81,7 +90,7 @@ describe('AdminWorkshopsPanel', () => {
 
     expect(screen.getByText('Taller de acuarela')).toBeInTheDocument();
     expect(screen.getByText('Taller de cerámica')).toBeInTheDocument();
-    expect(screen.getByText('Talleres activos (2)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas activas (2)')).toBeInTheDocument();
   });
 
   it('pliega las inscripciones cuando hay más de un taller activo', async () => {
@@ -140,7 +149,7 @@ describe('AdminWorkshopsPanel', () => {
       ],
     });
 
-    expect(screen.getByText('Talleres finalizados (2)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas finalizadas (2)')).toBeInTheDocument();
     expect(screen.getByText('Taller pasado')).toBeInTheDocument();
     expect(screen.getByText('Taller vendido')).toBeInTheDocument();
     expect(screen.getByText('Celebrado')).toBeInTheDocument();
@@ -266,7 +275,7 @@ describe('AdminWorkshopsPanel', () => {
       ],
     });
 
-    expect(screen.getByText('Talleres finalizados (1)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas finalizadas (1)')).toBeInTheDocument();
     expect(screen.getByText('Taller cancelado')).toBeInTheDocument();
     expect(screen.getAllByText('Cancelado').length).toBeGreaterThan(0);
     expect(
@@ -328,12 +337,153 @@ describe('AdminWorkshopsPanel', () => {
     expect(screen.getByText('1 unidad')).toBeInTheDocument();
     expect(screen.queryByText('Sin fecha')).toBeNull();
     expect(screen.queryByText('Sin lugar')).toBeNull();
+    expect(screen.getByText('3 reservas')).toBeInTheDocument();
+    expect(screen.getByText(/^Reservas hasta /)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Cancelar la edición Edición de temporada y todas sus reservas',
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancelar taller' })).toBeNull();
+    expect(screen.getByText('Especial')).toBeInTheDocument();
+  });
+
+  it('cuenta las unidades pedidas en un producto sin límite de tirada', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({
+          id: 'e-1',
+          title: 'Marquesapáginas',
+          category: 'especiales',
+          eventDate: undefined,
+          cupo: null,
+          registrationDeadline: futureDate(),
+        }),
+      ],
+      registrations: [
+        registration({ id: 'r-1', product_id: 'e-1', quantity: 3 }),
+        registration({ id: 'r-2', product_id: 'e-1', quantity: 4 }),
+        registration({ id: 'r-3', product_id: 'e-1', quantity: 9, status: 'cancelado' }),
+      ],
+    });
+
+    expect(screen.getByText('7 unidades pedidas')).toBeInTheDocument();
+  });
+
+  it('filtra las reservas por categoría desde la cabecera', async () => {
+    const user = userEvent.setup();
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({ id: 'w-1', title: 'Acuarela' }),
+        workshop({
+          id: 'e-1',
+          title: 'Edición de temporada',
+          category: 'especiales',
+          eventDate: undefined,
+          cupo: 4,
+          registrationDeadline: futureDate(),
+        }),
+      ],
+    });
+
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.getByText('Edición de temporada')).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Talleres', pressed: false })
+    );
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.queryByText('Edición de temporada')).toBeNull();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Especiales', pressed: false })
+    );
+    expect(screen.queryByText('Acuarela')).toBeNull();
+    expect(screen.getByText('Edición de temporada')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Todas' }));
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Todas', pressed: true })).toBeInTheDocument();
+  });
+
+  it('exporta los contactos de una tarjeta, incluidos los cancelados y los de productos finalizados', async () => {
+    const user = userEvent.setup();
+    vi.mocked(downloadCsvFile).mockClear();
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({ id: 'w-1', title: 'Taller de acuarela' }),
+        workshop({
+          id: 'w-9',
+          title: 'Taller cancelado',
+          eventDate: pastDate(),
+        }),
+      ],
+      registrations: [
+        registration({ id: 'r-1', product_id: 'w-1' }),
+        registration({
+          id: 'r-2',
+          product_id: 'w-1',
+          name: 'Luis Pérez',
+          email: 'luis@example.com',
+          status: 'cancelado',
+        }),
+        registration({
+          id: 'r-3',
+          product_id: 'w-9',
+          name: 'Sara Ruiz',
+          email: 'sara@example.com',
+          status: 'confirmado',
+        }),
+      ],
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller de acuarela, incluidos los cancelados',
+      })
+    );
+
+    expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(1);
+    const [filename, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
+    expect(filename).toMatch(/^contactos-taller-de-acuarela-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain('Ana García;ana@example.com');
+    expect(csv).toContain('Luis Pérez;luis@example.com');
+    expect(csv).toContain('Cancelado');
+
+    // El producto ya finalizado también puede exportar a quién avisar.
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller cancelado, incluidos los cancelados',
+      })
+    );
+
+    expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(downloadCsvFile).mock.calls[1][1]).toContain(
+      'Sara Ruiz;sara@example.com'
+    );
+  });
+
+  it('desactiva el CSV de contactos en productos sin inscripciones', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [workshop({ id: 'w-1', title: 'Taller de acuarela' })],
+      registrations: [],
+    });
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller de acuarela, incluidos los cancelados',
+      })
+    ).toBeDisabled();
   });
 
   it('muestra el estado vacío y el error de carga', () => {
     const { rerender } = renderPanel(buildProps());
 
-    expect(screen.getByText('No hay talleres activos.')).toBeInTheDocument();
+    expect(screen.getByText('No hay reservas activas.')).toBeInTheDocument();
 
     rerender(
       <ConfirmProvider>

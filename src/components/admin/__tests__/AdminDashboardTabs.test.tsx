@@ -21,7 +21,7 @@ describe('AdminDashboardTabs', () => {
   it('marca la pestaña activa con aria-current', () => {
     renderTabs('talleres');
 
-    expect(screen.getByRole('link', { name: /Talleres/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Reservas/ })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -43,7 +43,7 @@ describe('AdminDashboardTabs', () => {
       'href',
       '/admin?tab=catalogo'
     );
-    expect(screen.getByRole('link', { name: /Talleres/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Reservas/ })).toHaveAttribute(
       'href',
       '/admin?tab=talleres'
     );
@@ -59,7 +59,7 @@ describe('AdminDashboardTabs', () => {
     expect(screen.getByRole('link', { name: /Catálogo/ })).toHaveTextContent(
       '4'
     );
-    expect(screen.getByRole('link', { name: /Talleres/ })).toHaveTextContent(
+    expect(screen.getByRole('link', { name: /Reservas/ })).toHaveTextContent(
       '2'
     );
     expect(screen.getByRole('link', { name: /Archivados/ })).toHaveTextContent(

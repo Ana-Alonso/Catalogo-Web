@@ -4,6 +4,7 @@ import { LegalLink } from '../legal/LegalLink';
 import { Box, Checkbox, Typography } from '../ui';
 
 interface WorkshopConsentFieldsProps {
+  isSpecial?: boolean;
   privacyConsent: boolean;
   marketingConsent: boolean;
   hasPrivacyError: boolean;
@@ -18,6 +19,7 @@ const SentenceLabel: React.FC<{ children: ReactNode }> = ({ children }) => (
 );
 
 export const WorkshopConsentFields: React.FC<WorkshopConsentFieldsProps> = ({
+  isSpecial = false,
   privacyConsent,
   marketingConsent,
   hasPrivacyError,
@@ -57,11 +59,15 @@ export const WorkshopConsentFields: React.FC<WorkshopConsentFieldsProps> = ({
         id="signup-marketing-consent"
         checked={marketingConsent}
         onChange={onMarketingConsentChange}
-        label={<SentenceLabel>{t('workshop.form.marketingLabel')}</SentenceLabel>}
+        label={
+          <SentenceLabel>
+            {t(isSpecial ? 'workshop.form.marketingLabelUnits' : 'workshop.form.marketingLabel')}
+          </SentenceLabel>
+        }
       />
 
       <Typography as="span" variant="body" size="xs" tone="muted">
-        {t('workshop.form.consentNote')}
+        {t(isSpecial ? 'workshop.form.consentNoteUnits' : 'workshop.form.consentNote')}
       </Typography>
     </Box>
   );

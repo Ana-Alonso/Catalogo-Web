@@ -30,6 +30,25 @@ type WorkshopFormErrorCode =
 const clampUnits = (value: number): number =>
   Math.min(MAX_UNITS, Math.max(MIN_UNITS, value));
 
+const SPECIAL_ERROR_KEYS: Partial<
+  Record<WorkshopFormErrorCode,
+    'rateLimitedUnits' | 'alreadyRegisteredUnits' | 'workshopFullUnits' | 'registrationClosedUnits' | 'unknownUnits'
+  >
+> = {
+  rateLimited: 'rateLimitedUnits',
+  alreadyRegistered: 'alreadyRegisteredUnits',
+  workshopFull: 'workshopFullUnits',
+  registrationClosed: 'registrationClosedUnits',
+  unknown: 'unknownUnits',
+};
+
+const SOCIAL_NOTICE_KEYS = {
+  both: ['workshop.social.both', 'workshop.social.bothUnits'],
+  instagram: ['workshop.social.instagram', 'workshop.social.instagramUnits'],
+  tiktok: ['workshop.social.tiktok', 'workshop.social.tiktokUnits'],
+  none: ['workshop.social.none', 'workshop.social.noneUnits'],
+} as const;
+
 export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
   workshop,
   onRegister,
@@ -107,14 +126,15 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
     }
   };
 
-  const socialNoticeKey =
+  const socialVariant =
     instagramUrl && tiktokUrl
-      ? 'workshop.social.both'
+      ? 'both'
       : instagramUrl
-        ? 'workshop.social.instagram'
+        ? 'instagram'
         : tiktokUrl
-          ? 'workshop.social.tiktok'
-          : 'workshop.social.none';
+          ? 'tiktok'
+          : 'none';
+  const socialNoticeKey = SOCIAL_NOTICE_KEYS[socialVariant][isSpecial ? 1 : 0];
 
   if (isSuccess) {
     return (
@@ -137,7 +157,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
           </Box>
           <Box>
             <Typography variant="body" tone="main" weight="semibold">
-              {t('workshop.form.successTitle')}
+              {t(isSpecial ? 'workshop.form.successTitleUnits' : 'workshop.form.successTitle')}
             </Typography>
             <Typography variant="body" size="sm" tone="muted" marginTop="xs">
               {isSpecial
@@ -177,7 +197,11 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
                     hover="accentSoft"
                     underline
                     weight="medium"
-                    aria-label={t('workshop.social.instagramAria')}
+                    aria-label={t(
+                      isSpecial
+                        ? 'workshop.social.instagramAriaUnits'
+                        : 'workshop.social.instagramAria'
+                    )}
                   />
                 ),
                 tiktok: (
@@ -189,7 +213,11 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
                     hover="accentSoft"
                     underline
                     weight="medium"
-                    aria-label={t('workshop.social.tiktokAria')}
+                    aria-label={t(
+                      isSpecial
+                        ? 'workshop.social.tiktokAriaUnits'
+                        : 'workshop.social.tiktokAria'
+                    )}
                   />
                 ),
               }}
@@ -276,6 +304,7 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
       )}
 
       <WorkshopConsentFields
+        isSpecial={isSpecial}
         privacyConsent={privacyConsent}
         marketingConsent={marketingConsent}
         hasPrivacyError={errorCode === 'privacyRequired'}
@@ -304,7 +333,8 @@ export const WorkshopSignupForm: React.FC<WorkshopSignupFormProps> = ({
           <Typography as="span" variant="body" size="sm" tone="dangerSoft">
             {t(
               `workshop.form.errors.${
-                isSpecial && errorCode === 'workshopFull' ? 'workshopFullUnits' : errorCode
+                (isSpecial && errorCode ? SPECIAL_ERROR_KEYS[errorCode] : undefined) ??
+                errorCode
               }`
             )}
           </Typography>

@@ -198,14 +198,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
                 )}
                 {registrationDeadlineLabel && signupState === 'abierto' && (
                   <Typography variant="caption" tone="muted">
-                    {t('product.registrationDeadline', { date: registrationDeadlineLabel })}
+                    {t(
+                      isSpecial ? 'product.reserveUntil' : 'product.registrationDeadline',
+                      { date: registrationDeadlineLabel }
+                    )}
                   </Typography>
                 )}
                 {signupState === 'abierto' && daysLeft !== null && daysLeft > 0 && (
                   <Typography variant="caption" tone="muted">
                     {daysLeft === 1
-                      ? t('product.registrationDayLeft')
-                      : t('product.registrationDaysLeft', { days: daysLeft })}
+                      ? t(isSpecial ? 'product.reserveDayLeft' : 'product.registrationDayLeft')
+                      : t(
+                          isSpecial ? 'product.reserveDaysLeft' : 'product.registrationDaysLeft',
+                          { days: daysLeft }
+                        )}
                   </Typography>
                 )}
               </Box>
@@ -215,8 +221,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
             <Box textAlign="center" paddingY="sm" background="neutral" border rounded="sm">
               <Typography variant="caption" tone="muted">
                 {registrationDeadlineLabel
-                  ? t('product.registrationClosed', { date: registrationDeadlineLabel })
-                  : t('product.registrationClosedNoDate')}
+                  ? t(
+                      isSpecial ? 'product.reserveClosed' : 'product.registrationClosed',
+                      { date: registrationDeadlineLabel }
+                    )
+                  : t(isSpecial ? 'product.reserveClosedNoDate' : 'product.registrationClosedNoDate')}
               </Typography>
             </Box>
           )}
@@ -227,7 +236,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, spotsCount, onRe
           )}
           {isWorkshop && signupState === 'cancelado' && (
             <Box textAlign="center" paddingY="sm" background="dangerSoft" border borderTone="danger" rounded="sm">
-              <Typography variant="caption" tone="danger">{t('product.workshopCancelled')}</Typography>
+              <Typography variant="caption" tone="danger">
+                {t(isSpecial ? 'product.editionCancelled' : 'product.workshopCancelled')}
+              </Typography>
             </Box>
           )}
           {canSignup && (
