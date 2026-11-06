@@ -36,18 +36,44 @@ export const buildMarketingCsvRows = (
   registrations: WorkshopRegistration[],
   workshopTitleById: Record<string, string>,
   translateStatus: (status: RegistrationStatus) => string
-): MarketingCsvRow[] =>
+): MarketingCsvRow[] => {
+  const contactsByEmail = new Map<string, MarketingCsvRow & { units: number }>();
+
   registrations
     .filter((registration) => registration.marketing_consent)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .map((registration) => ({
-      name: registration.name,
-      email: registration.email,
-      workshop: workshopTitleById[registration.product_id] ?? '',
-      date: registration.created_at.slice(0, 10),
-      status: translateStatus(registration.status),
-      quantity: String(registration.quantity ?? 1),
-    }));
+    .forEach((registration) => {
+      const key = registration.email.toLowerCase();
+      const units = registration.quantity ?? 1;
+      const title = workshopTitleById[registration.product_id] ?? '';
+      const existing = contactsByEmail.get(key);
+
+      if (existing) {
+        // Lista de novedades: una sola fila por correo. La más reciente
+        // aporta nombre, fecha y estado; el resto se acumula.
+        if (title && !existing.workshop.split(', ').includes(title)) {
+          existing.workshop = `${existing.workshop}, ${title}`;
+        }
+        existing.units += units;
+        return;
+      }
+
+      contactsByEmail.set(key, {
+        name: registration.name,
+        email: registration.email,
+        workshop: title,
+        date: registration.created_at.slice(0, 10),
+        status: translateStatus(registration.status),
+        quantity: '0',
+        units,
+      });
+    });
+
+  return Array.from(contactsByEmail.values()).map(({ units, ...row }) => ({
+    ...row,
+    quantity: String(units),
+  }));
+};
 
 export const buildCsv = (
   headers: string[],

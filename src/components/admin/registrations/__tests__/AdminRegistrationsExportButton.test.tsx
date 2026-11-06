@@ -70,6 +70,7 @@ describe('AdminRegistrationsExportButton', () => {
         id: 'r2',
         product_id: 't2',
         name: 'Luis',
+        email: 'luis@mail.com',
         status: 'cancelado',
         created_at: '2026-10-21T10:00:00.000Z',
       }),
@@ -84,8 +85,8 @@ describe('AdminRegistrationsExportButton', () => {
 
     const [nombre, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
 
-    expect(nombre).toMatch(/^avisos-talleres-\d{4}-\d{2}-\d{2}\.csv$/);
-    expect(csv).toContain('Luis;ana@mail.com;;2026-10-21;Cancelado');
+    expect(nombre).toMatch(/^avisos-novedades-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain('Luis;luis@mail.com;;2026-10-21;Cancelado');
     expect(csv).toContain('Ana;ana@mail.com;Taller Creativo de Pintura');
     expect(csv.trim().split('\r\n')).toHaveLength(3);
     expect(

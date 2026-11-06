@@ -123,6 +123,13 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
               >
                 {workshop.title}
               </Typography>
+              <Badge variant="outline" size="micro">
+                {t(
+                  isSpecial
+                    ? 'admin.workshops.kindEspeciales'
+                    : 'admin.workshops.kindTalleres'
+                )}
+              </Badge>
               {finishedReason && (
                 <Badge variant="outline">
                   {t(`admin.workshops.finishedReasons.${finishedReason}`)}

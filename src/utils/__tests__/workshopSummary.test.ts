@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import type { CatalogItem } from '../../types/catalog';
 import type { WorkshopRegistration } from '../../types/registrations';
 import {
+  filterWorkshopsByCategory,
   getActiveRegistrationCount,
   getActiveRegistrationUnits,
   getProtectedWorkshopIds,
   getRegistrationStats,
   groupRegistrationsByWorkshop,
   sortRegistrationsByDate,
+  sortWorkshopsByCategory,
 } from '../workshopSummary';
 
 const registration = (
@@ -128,5 +131,55 @@ describe('getActiveRegistrationUnits', () => {
         registration({ id: 'r-2', quantity: 0 as number }),
       ])
     ).toBe(2);
+  });
+});
+
+describe('filterWorkshopsByCategory y sortWorkshopsByCategory', () => {
+  const item = (
+    overrides: Partial<Omit<CatalogItem, 'id' | 'title' | 'description' | 'image' | 'category' | 'status'>> & {
+      id: string;
+      title: string;
+      category: CatalogItem['category'];
+    }
+  ): CatalogItem => ({
+    description: '',
+    image: '/img.jpg',
+    status: 'disponible',
+    ...overrides,
+  });
+
+  it('deja pasar todos los productos con el filtro «todas»', () => {
+    const items = [
+      item({ id: 'a', title: 'Z zzz', category: 'especiales' }),
+      item({ id: 'b', title: 'A aaa', category: 'talleres' }),
+    ];
+
+    expect(filterWorkshopsByCategory(items, 'todas')).toEqual(items);
+  });
+
+  it('aisla una categoría en el filtro', () => {
+    const items = [
+      item({ id: 'a', title: 'Z zzz', category: 'especiales' }),
+      item({ id: 'b', title: 'A aaa', category: 'talleres' }),
+    ];
+
+    expect(filterWorkshopsByCategory(items, 'talleres').map((i) => i.id)).toEqual(['b']);
+    expect(filterWorkshopsByCategory(items, 'especiales').map((i) => i.id)).toEqual(['a']);
+  });
+
+  it('ordena talleres antes que especiales y por título dentro del bloque', () => {
+    const sorted = sortWorkshopsByCategory([
+      item({ id: 'e2', title: 'Bombona', category: 'especiales' }),
+      item({ id: 't2', title: 'Cerámica', category: 'talleres' }),
+      item({ id: 'e1', title: 'Edición', category: 'especiales' }),
+      item({ id: 't1', title: 'Acuarela', category: 'talleres' }),
+    ]);
+
+    expect(sorted.map((workshop) => workshop.id)).toEqual([
+      't1',
+      't2',
+      'e2',
+      'e1',
+    ]);
   });
 });

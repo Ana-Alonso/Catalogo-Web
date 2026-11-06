@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, ChevronDown, ClipboardList } from 'lucide-react';
-import { Box, Card, ErrorState, Icon, Typography } from '../../ui';
+import { Box, Button, Card, ErrorState, Icon, Typography } from '../../ui';
 import { AdminRegistrationsExportButton } from './AdminRegistrationsExportButton';
 import { AdminRegistrationsSkeleton } from './AdminRegistrationsSkeleton';
 import { AdminWorkshopCard } from './AdminWorkshopCard';
@@ -12,8 +12,11 @@ import {
   type WorkshopFinishedReason,
 } from '../../../utils/workshopPhase';
 import {
+  filterWorkshopsByCategory,
   groupRegistrationsByWorkshop,
   sortRegistrationsByDate,
+  sortWorkshopsByCategory,
+  type ReservationCategoryFilter,
 } from '../../../utils/workshopSummary';
 import type { CatalogItem } from '../../../types/catalog';
 import type { RegistrationStatus, WorkshopRegistration } from '../../../types/registrations';
@@ -56,10 +59,16 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
   const { t } = useTranslation();
   const nowMs = useNow();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] =
+    useState<ReservationCategoryFilter>('todas');
 
   const groups = useMemo(
-    () => groupWorkshops(workshops, nowMs),
-    [workshops, nowMs]
+    () =>
+      groupWorkshops(
+        filterWorkshopsByCategory(workshops, categoryFilter),
+        nowMs
+      ),
+    [workshops, categoryFilter, nowMs]
   );
 
   const registrationsByWorkshop = useMemo(() => {
@@ -131,7 +140,34 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
             </Typography>
           </Box>
         </Box>
-        <AdminRegistrationsExportButton workshops={workshops} />
+        <Box display="flex" wrap align="center" gap="sm">
+          <Box
+            display="flex"
+            wrap
+            gap="xs"
+            role="group"
+            aria-label={t('admin.workshops.filterLabel')}
+          >
+            {(['todas', 'talleres', 'especiales'] as const).map((option) => (
+              <Button
+                key={option}
+                size="sm"
+                variant={categoryFilter === option ? 'primary' : 'outline'}
+                aria-pressed={categoryFilter === option}
+                onClick={() => setCategoryFilter(option)}
+              >
+                {t(
+                  option === 'todas'
+                    ? 'admin.workshops.filterTodas'
+                    : option === 'talleres'
+                      ? 'admin.workshops.filterTalleres'
+                      : 'admin.workshops.filterEspeciales'
+                )}
+              </Button>
+            ))}
+          </Box>
+          <AdminRegistrationsExportButton workshops={workshops} />
+        </Box>
       </Box>
 
       <Box padding="lg" display="flex" direction="column" gap="xl">
@@ -168,7 +204,7 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
                 </Typography>
               ) : (
                 <Box display="grid" columns={1} columnsMd={2} gap="md">
-                  {groups.active.map((workshop) =>
+                  {sortWorkshopsByCategory(groups.active).map((workshop) =>
                     renderWorkshop(
                       workshop,
                       getWorkshopFinishedReason(workshop, nowMs),
@@ -209,7 +245,7 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
                   </Typography>
                 ) : (
                   <Box display="grid" columns={1} columnsMd={2} gap="md">
-                    {groups.finished.map((workshop) =>
+                    {sortWorkshopsByCategory(groups.finished).map((workshop) =>
                       renderWorkshop(
                         workshop,
                         getWorkshopFinishedReason(workshop, nowMs),

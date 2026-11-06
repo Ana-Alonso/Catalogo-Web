@@ -81,7 +81,7 @@ describe('AdminWorkshopsPanel', () => {
 
     expect(screen.getByText('Taller de acuarela')).toBeInTheDocument();
     expect(screen.getByText('Taller de cerámica')).toBeInTheDocument();
-    expect(screen.getByText('Talleres activos (2)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas activas (2)')).toBeInTheDocument();
   });
 
   it('pliega las inscripciones cuando hay más de un taller activo', async () => {
@@ -140,7 +140,7 @@ describe('AdminWorkshopsPanel', () => {
       ],
     });
 
-    expect(screen.getByText('Talleres finalizados (2)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas finalizadas (2)')).toBeInTheDocument();
     expect(screen.getByText('Taller pasado')).toBeInTheDocument();
     expect(screen.getByText('Taller vendido')).toBeInTheDocument();
     expect(screen.getByText('Celebrado')).toBeInTheDocument();
@@ -266,7 +266,7 @@ describe('AdminWorkshopsPanel', () => {
       ],
     });
 
-    expect(screen.getByText('Talleres finalizados (1)')).toBeInTheDocument();
+    expect(screen.getByText('Reservas finalizadas (1)')).toBeInTheDocument();
     expect(screen.getByText('Taller cancelado')).toBeInTheDocument();
     expect(screen.getAllByText('Cancelado').length).toBeGreaterThan(0);
     expect(
@@ -336,12 +336,50 @@ describe('AdminWorkshopsPanel', () => {
       })
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Cancelar taller' })).toBeNull();
+    expect(screen.getByText('Especial')).toBeInTheDocument();
+  });
+
+  it('filtra las reservas por categoría desde la cabecera', async () => {
+    const user = userEvent.setup();
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({ id: 'w-1', title: 'Acuarela' }),
+        workshop({
+          id: 'e-1',
+          title: 'Edición de temporada',
+          category: 'especiales',
+          eventDate: undefined,
+          cupo: 4,
+          registrationDeadline: futureDate(),
+        }),
+      ],
+    });
+
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.getByText('Edición de temporada')).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Talleres', pressed: false })
+    );
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.queryByText('Edición de temporada')).toBeNull();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Especiales', pressed: false })
+    );
+    expect(screen.queryByText('Acuarela')).toBeNull();
+    expect(screen.getByText('Edición de temporada')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Todas' }));
+    expect(screen.getByText('Acuarela')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Todas', pressed: true })).toBeInTheDocument();
   });
 
   it('muestra el estado vacío y el error de carga', () => {
     const { rerender } = renderPanel(buildProps());
 
-    expect(screen.getByText('No hay talleres activos.')).toBeInTheDocument();
+    expect(screen.getByText('No hay reservas activas.')).toBeInTheDocument();
 
     rerender(
       <ConfirmProvider>

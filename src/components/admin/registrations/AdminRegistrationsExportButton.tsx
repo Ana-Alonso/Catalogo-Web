@@ -13,7 +13,7 @@ import {
 } from '../../../utils/registrationsCsv';
 import type { CatalogItem } from '../../../types/catalog';
 
-const EXPORT_FILENAME_PREFIX = 'avisos-talleres';
+const EXPORT_FILENAME_PREFIX = 'avisos-novedades';
 
 interface AdminRegistrationsExportButtonProps {
   workshops: CatalogItem[];

@@ -41,14 +41,53 @@ describe('buildMarketingCsvRows', () => {
   it('ordena por fecha descendente y pasa la fecha a YYYY-MM-DD', () => {
     const rows = buildMarketingCsvRows(
       [
-        buildRegistration({ id: 'vieja', created_at: '2026-09-02T08:00:00.000Z' }),
-        buildRegistration({ id: 'nueva', created_at: '2026-10-18T08:00:00.000Z' }),
+        buildRegistration({
+          id: 'vieja',
+          email: 'luis@mail.com',
+          created_at: '2026-09-02T08:00:00.000Z',
+        }),
+        buildRegistration({
+          id: 'nueva',
+          email: 'ana@mail.com',
+          created_at: '2026-10-18T08:00:00.000Z',
+        }),
       ],
       titles,
       translateStatus
     );
 
     expect(rows.map((row) => row.date)).toEqual(['2026-10-18', '2026-09-02']);
+  });
+
+  it('agrupa por email sin duplicados, aunque cambien las mayúsculas', () => {
+    const rows = buildMarketingCsvRows(
+      [
+        buildRegistration({
+          id: 'nueva',
+          email: 'ANA@mail.com',
+          name: 'Ana López',
+          product_id: 'e1',
+          quantity: 2,
+          created_at: '2026-10-18T08:00:00.000Z',
+        }),
+        buildRegistration({
+          id: 'vieja',
+          email: 'ana@mail.com',
+          name: 'Ana',
+          quantity: 3,
+          created_at: '2026-09-02T08:00:00.000Z',
+        }),
+      ],
+      { ...titles, e1: 'Edición de temporada' },
+      translateStatus
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].name).toBe('Ana López');
+    expect(rows[0].email).toBe('ANA@mail.com');
+    expect(rows[0].workshop).toBe('Edición de temporada, Taller de acuarela');
+    expect(rows[0].date).toBe('2026-10-18');
+    expect(rows[0].quantity).toBe('5');
   });
 
   it('conserva la fila aunque el taller ya no exista y mantiene los cancelados', () => {
