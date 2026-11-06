@@ -15,6 +15,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-6),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-6),
   },
   {
@@ -25,6 +26,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'pendiente',
     privacy_consent_at: consent(-4),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-4),
   },
   {
@@ -35,6 +37,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-2),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-2),
   },
   {
@@ -45,6 +48,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'cancelado',
     privacy_consent_at: consent(-3),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-3),
   },
   {
@@ -55,6 +59,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-5),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-5),
   },
   {
@@ -65,6 +70,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'pendiente',
     privacy_consent_at: consent(-1),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-1),
   },
   {
@@ -75,6 +81,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-8),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-8),
   },
   {
@@ -85,6 +92,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-7),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-7),
   },
   {
@@ -95,6 +103,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-12),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-12),
   },
   {
@@ -105,6 +114,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-9),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-9),
   },
   {
@@ -115,6 +125,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'cancelado',
     privacy_consent_at: consent(-9),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-9),
   },
   {
@@ -125,6 +136,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-45),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-45),
   },
   {
@@ -135,6 +147,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-40),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-40),
   },
   {
@@ -145,6 +158,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'pendiente',
     privacy_consent_at: consent(-38),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-38),
   },
   {
@@ -155,6 +169,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-10),
     marketing_consent: false,
+    quantity: 1,
     created_at: daysFromNow(-10),
   },
   {
@@ -165,6 +180,7 @@ export const mockRegistrations: WorkshopRegistration[] = [
     status: 'confirmado',
     privacy_consent_at: consent(-15),
     marketing_consent: true,
+    quantity: 1,
     created_at: daysFromNow(-15),
   },
 ];

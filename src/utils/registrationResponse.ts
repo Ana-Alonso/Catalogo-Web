@@ -39,5 +39,8 @@ export const readRegistrationRow = (payload: unknown): WorkshopRegistration => {
   if (!isRegistrationRow(payload)) {
     throw new Error('Respuesta de inscripción no válida.');
   }
-  return payload;
+
+  const quantity = (payload as { quantity?: unknown }).quantity;
+
+  return typeof quantity === 'number' ? payload : { ...payload, quantity: 1 };
 };

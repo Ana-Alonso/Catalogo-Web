@@ -94,7 +94,8 @@ export const fetchRegistrationCounts = async (): Promise<Record<string, number>>
 
   return registrations.reduce<Record<string, number>>((counts, registration) => {
     if (registration.status !== 'cancelado') {
-      counts[registration.product_id] = (counts[registration.product_id] || 0) + 1;
+      counts[registration.product_id] =
+        (counts[registration.product_id] || 0) + (registration.quantity || 1);
     }
     return counts;
   }, {});
@@ -119,6 +120,7 @@ export const createRegistration = async (
         email,
         privacyConsent: formData.privacyConsent,
         marketingConsent: formData.marketingConsent,
+        quantity: formData.quantity ?? 1,
       }),
     });
 
@@ -145,7 +147,11 @@ export const createRegistration = async (
     throw new RegistrationError('alreadyRegistered');
   }
 
-  if (cupo !== null && localRegistrations.filter(isActiveForWorkshop).length >= cupo) {
+  const takenUnits = localRegistrations
+    .filter(isActiveForWorkshop)
+    .reduce((sum, registration) => sum + (registration.quantity || 1), 0);
+
+  if (cupo !== null && takenUnits + (formData.quantity ?? 1) > cupo) {
     throw new RegistrationError('workshopFull');
   }
 
@@ -157,6 +163,7 @@ export const createRegistration = async (
     status: 'pendiente',
     privacy_consent_at: privacyConsentAt,
     marketing_consent: formData.marketingConsent,
+    quantity: formData.quantity ?? 1,
     created_at: new Date().toISOString(),
   };
 

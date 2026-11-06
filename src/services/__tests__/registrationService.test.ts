@@ -35,6 +35,7 @@ const registrationRow: WorkshopRegistration = {
   status: 'pendiente',
   privacy_consent_at: '2026-11-01T10:00:00.000Z',
   marketing_consent: false,
+  quantity: 1,
   created_at: '2026-11-01T10:00:00.000Z',
 };
 
@@ -96,6 +97,19 @@ describe('registrationService en modo mock (localStorage)', () => {
     await service.createRegistration('prod-1', formData('Ana', 'ana@example.com'), 1);
     await expect(
       service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), 1)
+    ).rejects.toMatchObject({ code: 'workshopFull' });
+  });
+
+  it('cuenta unidades en la capacidad del mock local', async () => {
+    const service = await loadService();
+    const created = await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { quantity: 2 }),
+      2
+    );
+    expect(created.quantity).toBe(2);
+    await expect(
+      service.createRegistration('prod-1', formData('Luis', 'luis@example.com'), 2)
     ).rejects.toMatchObject({ code: 'workshopFull' });
   });
 
@@ -175,10 +189,25 @@ describe('registrationService contra el backend', () => {
           email: 'ana@example.com',
           privacyConsent: true,
           marketingConsent: false,
+          quantity: 1,
         }),
       })
     );
     expect(created.id).toBe('reg-1');
+  });
+
+  it('repercute la cantidad pedida en el cuerpo de la API', async () => {
+    vi.stubEnv('VITE_USE_MOCKS', 'false');
+    const { requests } = mockApiResponse(201, registrationRow);
+    const service = await loadService();
+    await service.createRegistration(
+      'prod-1',
+      formData('Ana', 'ana@example.com', { quantity: 3 }),
+      null
+    );
+
+    const body = JSON.parse(String(requests[0]?.init.body)) as Record<string, unknown>;
+    expect(body.quantity).toBe(3);
   });
 
   it('no fabrica la marca de consentimiento en el cliente', async () => {

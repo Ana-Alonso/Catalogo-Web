@@ -8,6 +8,7 @@ export interface WorkshopRegistration {
   status: RegistrationStatus;
   privacy_consent_at: string | null;
   marketing_consent: boolean;
+  quantity: number;
   created_at: string;
 }
 
@@ -16,6 +17,7 @@ export interface RegistrationFormData {
   email: string;
   privacyConsent: boolean;
   marketingConsent: boolean;
+  quantity?: number;
 }
 
 export interface WorkshopSpotsSummary {
