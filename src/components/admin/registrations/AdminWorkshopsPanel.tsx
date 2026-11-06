@@ -166,7 +166,10 @@ export const AdminWorkshopsPanel: React.FC<AdminWorkshopsPanelProps> = ({
               </Button>
             ))}
           </Box>
-          <AdminRegistrationsExportButton workshops={workshops} />
+          <AdminRegistrationsExportButton
+            workshops={workshops}
+            registrations={registrations}
+          />
         </Box>
       </Box>
 

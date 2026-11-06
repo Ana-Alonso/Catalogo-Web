@@ -519,7 +519,8 @@
       "emptyWorkshops": "There are no published workshops in the catalog.",
       "spots": "{{active}} / {{cupo}} spots",
       "units": "{{active}} / {{cupo}} units",
-      "noUnitsLimit": "Until stock runs out",
+      "requestedUnits_one": "{{active}} unit requested",
+      "requestedUnits_other": "{{active}} units requested",
       "quantityBadge_one": "{{quantity}} unit",
       "quantityBadge_other": "{{quantity}} units",
       "attendee": "{{count}} registered",
@@ -530,13 +531,19 @@
       "withdrawAria": "Withdraw marketing consent for {{name}}",
       "withdrawConfirm": "Withdraw workshop alerts for \"{{name}}\"? They will stop receiving communications and their data will no longer be protected, so you will be able to delete it afterwards.",
       "withdrawn": "Alerts withdrawn for {{name}}. You can now delete their data if needed.",
-      "export": "Alerts CSV",
-      "exportAria": "Download a CSV of the people who asked to be notified about future workshops",
-      "exportDone": "CSV generated with {{count}} people",
+      "exportGroupLabel": "CSV exports in the reservations panel",
+      "exportNovedades": "News (CSV)",
+      "exportNovedadesAria": "Download the news list: one row per email, no duplicate people",
+      "exportWorkshops": "Workshops (CSV)",
+      "exportWorkshopsAria": "Download the workshop registrations",
+      "exportProducts": "Products (CSV)",
+      "exportProductsAria": "Download the product reservations with the units requested",
+      "exportDone": "CSV generated with {{count}} rows",
       "csv": {
         "name": "Name",
         "email": "Email",
         "workshop": "Workshop",
+        "product": "Product",
         "date": "Date",
         "status": "Status",
         "quantity": "Units"
@@ -554,7 +561,9 @@
         "confirmed": "Confirmed",
         "cancelled": "Cancelled"
       },
-      "exportEmpty": "There are no contacts with workshop alerts consent in the database.",
+      "exportEmpty": "There are no contacts with news alerts consent in the database.",
+      "exportEmptyWorkshops": "There are no workshop registrations to export.",
+      "exportEmptySpecials": "There are no product reservations to export.",
       "exportError": "Could not generate the alerts CSV. Please try again."
     },
     "calendarPanel": {

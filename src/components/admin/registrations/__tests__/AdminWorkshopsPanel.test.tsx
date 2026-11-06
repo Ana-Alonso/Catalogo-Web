@@ -339,6 +339,29 @@ describe('AdminWorkshopsPanel', () => {
     expect(screen.getByText('Especial')).toBeInTheDocument();
   });
 
+  it('cuenta las unidades pedidas en un producto sin límite de tirada', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({
+          id: 'e-1',
+          title: 'Marquesapáginas',
+          category: 'especiales',
+          eventDate: undefined,
+          cupo: null,
+          registrationDeadline: futureDate(),
+        }),
+      ],
+      registrations: [
+        registration({ id: 'r-1', product_id: 'e-1', quantity: 3 }),
+        registration({ id: 'r-2', product_id: 'e-1', quantity: 4 }),
+        registration({ id: 'r-3', product_id: 'e-1', quantity: 9, status: 'cancelado' }),
+      ],
+    });
+
+    expect(screen.getByText('7 unidades pedidas')).toBeInTheDocument();
+  });
+
   it('filtra las reservas por categoría desde la cabecera', async () => {
     const user = userEvent.setup();
     renderPanel({

@@ -86,7 +86,12 @@ export const AdminWorkshopCard: React.FC<AdminWorkshopCardProps> = ({
           active: isSpecial ? activeUnits : activeCount,
           cupo,
         })
-      : t(isSpecial ? 'admin.registrations.noUnitsLimit' : 'admin.workshops.noCapacity');
+      : isSpecial
+        ? t('admin.registrations.requestedUnits', {
+            count: activeUnits,
+            active: activeUnits,
+          })
+        : t('admin.workshops.noCapacity');
 
   const handleCancelWorkshop = async (): Promise<void> => {
     const isConfirmed = await confirm({

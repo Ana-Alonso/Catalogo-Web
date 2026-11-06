@@ -21,13 +21,23 @@ vi.mock('../../../../services/registrationService', () => ({
   fetchMarketingRegistrations: vi.fn(),
 }));
 
-const workshop: CatalogItem = {
+const taller: CatalogItem = {
   id: 't1',
   title: 'Taller Creativo de Pintura',
   description: 'Sesión presencial',
   image: '/img/taller.jpg',
   category: 'talleres',
   status: 'disponible',
+};
+
+const especial: CatalogItem = {
+  id: 'e1',
+  title: 'Edición de temporada',
+  description: 'Tirada limitada',
+  image: '/img/especial.jpg',
+  category: 'especiales',
+  status: 'disponible',
+  cupo: 6,
 };
 
 const registration = (
@@ -45,16 +55,32 @@ const registration = (
   ...overrides,
 });
 
-const renderButton = () =>
+const renderButton = (
+  workshops: CatalogItem[] = [taller, especial],
+  registrations: WorkshopRegistration[] = []
+) =>
   render(
     <ToastProvider>
-      <AdminRegistrationsExportButton workshops={[workshop]} />
+      <AdminRegistrationsExportButton
+        workshops={workshops}
+        registrations={registrations}
+      />
     </ToastProvider>
   );
 
-const exportButton = () =>
+const novedadesButton = () =>
   screen.getByRole('button', {
-    name: i18n.t('admin.registrations.exportAria'),
+    name: i18n.t('admin.registrations.exportNovedadesAria'),
+  });
+
+const talleresButton = () =>
+  screen.getByRole('button', {
+    name: i18n.t('admin.registrations.exportWorkshopsAria'),
+  });
+
+const productosButton = () =>
+  screen.getByRole('button', {
+    name: i18n.t('admin.registrations.exportProductsAria'),
   });
 
 describe('AdminRegistrationsExportButton', () => {
@@ -62,23 +88,30 @@ describe('AdminRegistrationsExportButton', () => {
     vi.clearAllMocks();
   });
 
-  it('descarga el CSV general con los contactos que devuelve la base de datos', async () => {
+  it('descarga la lista de novedades sin duplicar personas ni mezclar productos', async () => {
     const user = userEvent.setup();
     vi.mocked(fetchMarketingRegistrations).mockResolvedValue([
-      registration(),
+      registration({ id: 'r1' }),
       registration({
         id: 'r2',
-        product_id: 't2',
+        product_id: 'e1',
+        name: 'Ana García',
+        email: 'ANA@mail.com',
+        quantity: 2,
+        created_at: '2026-10-22T10:00:00.000Z',
+      }),
+      registration({
+        id: 'r3',
         name: 'Luis',
         email: 'luis@mail.com',
         status: 'cancelado',
         created_at: '2026-10-21T10:00:00.000Z',
       }),
-      registration({ id: 'r3', name: 'Sin avisos', marketing_consent: false }),
+      registration({ id: 'r4', name: 'Sin avisos', marketing_consent: false }),
     ]);
     renderButton();
 
-    await user.click(exportButton());
+    await user.click(novedadesButton());
 
     expect(fetchMarketingRegistrations).toHaveBeenCalledTimes(1);
     expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(1);
@@ -86,11 +119,62 @@ describe('AdminRegistrationsExportButton', () => {
     const [nombre, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
 
     expect(nombre).toMatch(/^avisos-novedades-\d{4}-\d{2}-\d{2}\.csv$/);
-    expect(csv).toContain('Luis;luis@mail.com;;2026-10-21;Cancelado');
-    expect(csv).toContain('Ana;ana@mail.com;Taller Creativo de Pintura');
+    expect(csv).toContain('Nombre;Email;Fecha');
+    expect(csv).toContain('Ana García;ANA@mail.com;2026-10-22');
+    expect(csv).toContain('Luis;luis@mail.com;2026-10-21');
     expect(csv.trim().split('\r\n')).toHaveLength(3);
     expect(
       screen.getByText(i18n.t('admin.registrations.exportDone', { count: 2 }))
+    ).toBeInTheDocument();
+  });
+
+  it('exporta los talleres sin la columna de unidades', async () => {
+    const user = userEvent.setup();
+    renderButton([taller, especial], [
+      registration(),
+      registration({ id: 'r2', product_id: 'e1', quantity: 3 }),
+    ]);
+
+    await user.click(talleresButton());
+
+    const [nombre, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
+
+    expect(nombre).toMatch(/^inscripciones-talleres-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain(
+      'Ana;ana@mail.com;Taller Creativo de Pintura;2026-10-20;Pendiente'
+    );
+    expect(csv).not.toContain('Edición de temporada');
+    expect(csv).not.toContain('Unidades');
+  });
+
+  it('exporta las reservas de producto con las unidades pedidas', async () => {
+    const user = userEvent.setup();
+    renderButton([taller, especial], [
+      registration(),
+      registration({ id: 'r2', product_id: 'e1', name: 'Luis', email: 'luis@mail.com', quantity: 3 }),
+    ]);
+
+    await user.click(productosButton());
+
+    const [nombre, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
+
+    expect(nombre).toMatch(/^reservas-productos-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain('Nombre;Email;Producto;Fecha;Estado;Unidades');
+    expect(csv).toContain('Luis;luis@mail.com;Edición de temporada;2026-10-20;Pendiente;3');
+    expect(csv).not.toContain('Taller Creativo de Pintura');
+  });
+
+  it('avisa cuando una lista de gestión está vacía', async () => {
+    const user = userEvent.setup();
+    renderButton([taller, especial], [
+      registration({ id: 'r2', product_id: 'e1' }),
+    ]);
+
+    await user.click(talleresButton());
+
+    expect(vi.mocked(downloadCsvFile)).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(i18n.t('admin.registrations.exportEmptyWorkshops'))
     ).toBeInTheDocument();
   });
 
@@ -99,7 +183,7 @@ describe('AdminRegistrationsExportButton', () => {
     vi.mocked(fetchMarketingRegistrations).mockResolvedValue([]);
     renderButton();
 
-    await user.click(exportButton());
+    await user.click(novedadesButton());
 
     expect(vi.mocked(downloadCsvFile)).not.toHaveBeenCalled();
     expect(
@@ -114,7 +198,7 @@ describe('AdminRegistrationsExportButton', () => {
     );
     renderButton();
 
-    await user.click(exportButton());
+    await user.click(novedadesButton());
 
     expect(vi.mocked(downloadCsvFile)).not.toHaveBeenCalled();
     expect(
