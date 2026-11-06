@@ -1411,3 +1411,81 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000015';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000016';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000017';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000099';
+
+-- Endurecimiento (migracion 031): CHECK validados, sin CREATE de esquema,
+-- sin privilegios heredados en tablas nuevas y sin EXECUTE de PUBLIC sobre
+-- las funciones existentes.
+DO $hardening$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN pg_namespace n ON n.oid = c.connamespace
+    WHERE n.nspname = 'public'
+      AND c.contype = 'c'
+      AND NOT c.convalidated
+  ) THEN
+    RAISE EXCEPTION 'FAIL: quedan CHECK NOT VALID en el esquema public';
+  END IF;
+
+  -- La 031 retiro CREATE sobre el esquema a anon/authenticated.
+  IF has_schema_privilege('anon', 'public', 'CREATE')
+     OR has_schema_privilege('authenticated', 'public', 'CREATE') THEN
+    RAISE EXCEPTION 'FAIL: anon o authenticated conservan CREATE en public';
+  END IF;
+
+  -- La 031 desmontó la cesión implícita de EXECUTE a PUBLIC sobre las
+  -- funciones existentes; lo que cada rol necesitaba quedó re-concedido de
+  -- forma explícita (assertions de anon sobre workshop_spots arriba).
+  -- PUBLIC es un pseudo-rol: se comprueba el ACL crudo (grantee = 0), no
+  -- has_function_privilege.
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p
+    CROSS JOIN LATERAL aclexplode(p.proacl) AS a
+    WHERE p.oid = 'public.workshop_spots()'::regprocedure
+      AND a.privilege_type = 'EXECUTE'
+      AND a.grantee = 0
+  ) THEN
+    RAISE EXCEPTION 'FAIL: PUBLIC conserva EXECUTE sobre workshop_spots tras la 031';
+  END IF;
+
+  -- Una tabla nueva no nace accesible para anon/authenticated.
+  CREATE TABLE public.probe_default_privs_031 (id integer);
+  IF has_table_privilege('anon', 'public.probe_default_privs_031', 'SELECT')
+     OR has_table_privilege('authenticated', 'public.probe_default_privs_031', 'INSERT') THEN
+    DROP TABLE public.probe_default_privs_031;
+    RAISE EXCEPTION 'FAIL: una tabla nueva hereda privilegios para anon/authenticated';
+  END IF;
+
+  -- PostgreSQL concede EXECUTE a PUBLIC por valor por defecto y no se puede
+  -- suprimir con ALTER DEFAULT PRIVILEGES (comprobado sobre postgres:15). La
+  -- sonda documenta el límite: las migraciones futuras deben revocar por
+  -- funcion, como hacen 025 y 031, y no confiar en los privilegios por defecto.
+  CREATE FUNCTION public.probe_fn_031() RETURNS integer
+  LANGUAGE sql AS $fn$ SELECT 1; $fn$;
+  IF NOT (
+    (SELECT proacl FROM pg_proc WHERE oid = 'public.probe_fn_031()'::regprocedure) IS NULL
+    OR EXISTS (
+      SELECT 1 FROM pg_proc p
+      CROSS JOIN LATERAL aclexplode(p.proacl) AS a
+      WHERE p.oid = 'public.probe_fn_031()'::regprocedure
+        AND a.privilege_type = 'EXECUTE'
+        AND a.grantee = 0
+    )
+  ) THEN
+    DROP TABLE public.probe_default_privs_031;
+    DROP FUNCTION public.probe_fn_031();
+    RAISE EXCEPTION 'FAIL: cambia el modelo de EXECUTE heredado; revisa el patron de revoco por funcion de 031';
+  END IF;
+  DROP FUNCTION public.probe_fn_031();
+  DROP TABLE public.probe_default_privs_031;
+
+  -- Solo los duenos de la base (roles con BYPASSRLS o superusuario) pueden
+  -- saltarse RLS: las roles de la API no lo tienen.
+  IF EXISTS (
+    SELECT 1 FROM pg_roles
+    WHERE rolname IN ('anon', 'authenticated') AND rolbypassrls
+  ) THEN
+    RAISE EXCEPTION 'FAIL: anon o authenticated tienen BYPASSRLS';
+  END IF;
+END $hardening$;
