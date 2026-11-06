@@ -56,6 +56,7 @@ export const AdminRegistrationsExportButton: React.FC<
         t('admin.registrations.csv.workshop'),
         t('admin.registrations.csv.date'),
         t('admin.registrations.csv.status'),
+        t('admin.registrations.csv.quantity'),
       ];
       const date = new Date().toISOString().slice(0, 10);
 

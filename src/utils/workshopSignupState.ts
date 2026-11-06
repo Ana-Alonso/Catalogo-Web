@@ -51,7 +51,8 @@ export const getWorkshopSignupState = (
     return 'terminado';
   }
 
-  if (hasWorkshopHappened(item.eventDate, nowMs)) {
+  // La fecha de evento solo cierra talleres; «especiales» no tiene evento.
+  if (item.category === 'talleres' && hasWorkshopHappened(item.eventDate, nowMs)) {
     return 'terminado';
   }
 

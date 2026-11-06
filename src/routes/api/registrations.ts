@@ -73,6 +73,7 @@ export const action = async ({
       p_email: claim.email,
       p_privacy_consent_at: claim.privacyConsentAt,
       p_marketing_consent: claim.marketingConsent,
+      p_quantity: claim.quantity,
     });
 
     if (error) {

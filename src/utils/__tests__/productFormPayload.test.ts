@@ -32,10 +32,8 @@ describe('resolveWorkshopPayload', () => {
     });
   });
 
-  it('incluye los campos de reserva en especiales', () => {
+  it('incluye solo cupo y plazo en especiales', () => {
     expect(resolveWorkshopPayload(form({ category: 'especiales', cupo: '25' }))).toEqual({
-      eventDate: null,
-      eventLocation: null,
       cupo: 25,
       registrationDeadline: null,
     });

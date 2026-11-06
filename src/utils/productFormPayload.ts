@@ -34,6 +34,14 @@ export const resolveWorkshopPayload = (
 
   const fields = resolveWorkshopFields(formData);
 
+  if (formData.category === 'especiales') {
+    // Sin evento: no se tocan las columnas de fecha y lugar.
+    return {
+      cupo: fields.cupo,
+      registrationDeadline: fields.registrationDeadline,
+    };
+  }
+
   return {
     eventDate: fields.eventDate ?? null,
     eventLocation: fields.eventLocation ?? null,

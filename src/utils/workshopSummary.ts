@@ -40,6 +40,13 @@ export const getActiveRegistrationCount = (
   stats: WorkshopRegistrationStats
 ): number => stats.pending + stats.confirmed;
 
+export const getActiveRegistrationUnits = (
+  registrations: WorkshopRegistration[]
+): number =>
+  registrations
+    .filter((registration) => registration.status !== 'cancelado')
+    .reduce((sum, registration) => sum + (registration.quantity || 1), 0);
+
 export const getProtectedWorkshopIds = (
   registrations: WorkshopRegistration[]
 ): Set<string> =>

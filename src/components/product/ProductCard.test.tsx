@@ -226,7 +226,7 @@ describe('ProductCard · reservas de productos especiales', () => {
 
   const signupButton = () =>
     screen.queryByRole('button', {
-      name: i18n.t('product.signupAria', { title: 'Edición de temporada' }),
+      name: i18n.t('product.reserveAria', { title: 'Edición de temporada' }),
     });
 
   it('ofrece reservar cuando la edición activa las reservas con cupo y plazo', () => {
@@ -243,13 +243,43 @@ describe('ProductCard · reservas de productos especiales', () => {
     expect(screen.getByText(i18n.t('product.buyEtsy'))).toBeInTheDocument();
   });
 
-  it('anuncia las plazas restantes de una tirada', () => {
+  it('anuncia las unidades restantes de una tirada', () => {
     render(
       <MemoryRouter>
         <ProductCard item={special({ cupo: 4 })} spotsCount={1} onRegister={vi.fn()} />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(i18n.t('product.spotsLeft', { spots: 3, total: 4 }))).toBeInTheDocument();
+    expect(
+      screen.getByText(i18n.t('product.spotsLeftUnits', { spots: 3, total: 4 }))
+    ).toBeInTheDocument();
+  });
+
+  it('anuncia «hasta agotar existencias» cuando el cupo está vacío', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard
+          item={special({ cupo: null, registrationDeadline: inDays(5) })}
+          onRegister={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(i18n.t('product.unitsOpen'))).toBeInTheDocument();
+  });
+
+  it('ignora la fecha de evento heredada en una edición especial', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard
+          item={special({ cupo: 4, eventDate: inDays(10), eventLocation: 'Madrid' })}
+          spotsCount={0}
+          onRegister={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText('Madrid')).toBeNull();
+    expect(signupButton()).toBeInTheDocument();
   });
 });

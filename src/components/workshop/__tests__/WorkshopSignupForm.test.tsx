@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import i18n from '../../../i18n';
 import { WorkshopSignupForm } from '../WorkshopSignupForm';
+import { RegistrationError } from '../../../errors/registrationError';
 import type { CatalogItem } from '../../../types/catalog';
 import type { RegistrationFormData } from '../../../types/registrations';
 
@@ -112,6 +113,109 @@ describe('WorkshopSignupForm', () => {
     expect(onRegister).not.toHaveBeenCalled();
     expect(
       await screen.findByText(i18n.t('workshop.form.errors.invalidEmail'))
+    ).toBeInTheDocument();
+  });
+});
+
+const specialItem: CatalogItem = {
+  ...workshop,
+  id: 'especial-1',
+  title: 'Edición especial',
+  category: 'especiales',
+  cupo: 5,
+};
+
+const renderSpecialForm = (onRegister: (data: RegistrationFormData) => Promise<void>) =>
+  render(
+    <MemoryRouter initialEntries={['/es']}>
+      <WorkshopSignupForm workshop={specialItem} onRegister={onRegister} onClose={vi.fn()} />
+    </MemoryRouter>
+  );
+
+describe('WorkshopSignupForm · unidades en especiales', () => {
+  it('no muestra el selector de unidades en un taller', () => {
+    renderForm(vi.fn().mockResolvedValue(undefined));
+
+    expect(screen.queryByLabelText(i18n.t('workshop.form.quantityLabel'))).toBeNull();
+  });
+
+  it('envía la cantidad elegida en una edición especial', async () => {
+    const user = userEvent.setup();
+    const onRegister = vi.fn().mockResolvedValue(undefined);
+    renderSpecialForm(onRegister);
+
+    await fillIdentity(user);
+    await user.clear(screen.getByLabelText(i18n.t('workshop.form.quantityLabel')));
+    await user.type(screen.getByLabelText(i18n.t('workshop.form.quantityLabel')), '3');
+    await user.click(screen.getByRole('checkbox', { name: /política de privacidad/i }));
+    await user.click(
+      screen.getByRole('button', { name: i18n.t('workshop.form.submitUnits') })
+    );
+
+    await waitFor(() =>
+      expect(onRegister).toHaveBeenCalledWith(expect.objectContaining({ quantity: 3 }))
+    );
+    expect(
+      await screen.findByText(
+        i18n.t('workshop.form.successBodyUnits', { title: specialItem.title, quantity: 3 })
+      )
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    ['once', '11'],
+    ['cero', '0'],
+  ])('bloquea una cantidad de %s unidades', async (_label, value) => {
+    const user = userEvent.setup();
+    const onRegister = vi.fn().mockResolvedValue(undefined);
+    renderSpecialForm(onRegister);
+
+    await fillIdentity(user);
+    await user.clear(screen.getByLabelText(i18n.t('workshop.form.quantityLabel')));
+    await user.type(screen.getByLabelText(i18n.t('workshop.form.quantityLabel')), value);
+    await user.click(screen.getByRole('checkbox', { name: /política de privacidad/i }));
+    await user.click(
+      screen.getByRole('button', { name: i18n.t('workshop.form.submitUnits') })
+    );
+
+    expect(onRegister).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText(i18n.t('workshop.form.errors.invalidQuantity'))
+    ).toBeInTheDocument();
+  });
+
+  it('suma y resta unidades con los botones', async () => {
+    const user = userEvent.setup();
+    renderSpecialForm(vi.fn().mockResolvedValue(undefined));
+
+    const input = screen.getByLabelText(
+      i18n.t('workshop.form.quantityLabel')
+    ) as HTMLInputElement;
+
+    expect(input.value).toBe('1');
+    expect(
+      screen.getByRole('button', { name: i18n.t('workshop.form.quantityMinus') })
+    ).toBeDisabled();
+
+    await user.click(
+      screen.getByRole('button', { name: i18n.t('workshop.form.quantityPlus') })
+    );
+    expect(input.value).toBe('2');
+  });
+
+  it('muestra el aviso de unidades agotadas cuando la API devuelve workshopFull', async () => {
+    const user = userEvent.setup();
+    const onRegister = vi.fn().mockRejectedValue(new RegistrationError('workshopFull'));
+    renderSpecialForm(onRegister);
+
+    await fillIdentity(user);
+    await user.click(screen.getByRole('checkbox', { name: /política de privacidad/i }));
+    await user.click(
+      screen.getByRole('button', { name: i18n.t('workshop.form.submitUnits') })
+    );
+
+    expect(
+      await screen.findByText(i18n.t('workshop.form.errors.workshopFullUnits'))
     ).toBeInTheDocument();
   });
 });

@@ -40,6 +40,7 @@ const registration = (
   status: 'pendiente',
   privacy_consent_at: '2026-10-20T10:00:00.000Z',
   marketing_consent: true,
+  quantity: 1,
   created_at: '2026-10-20T10:00:00.000Z',
   ...overrides,
 });

@@ -1,5 +1,4 @@
 import { parsePriceToCents } from './price';
-import { isReservationCategory } from './reservableProduct';
 
 export interface ProductFormValidationInput {
   isEditing: boolean;
@@ -75,7 +74,7 @@ export const validateProductForm = (
     return 'price';
   }
 
-  if (isReservationCategory(input.category) && input.registrationDeadline && input.eventDate) {
+  if (input.category === 'talleres' && input.registrationDeadline && input.eventDate) {
     const deadlineTime = new Date(input.registrationDeadline).getTime();
     const eventTime = new Date(input.eventDate).getTime();
     if (!Number.isNaN(deadlineTime) && !Number.isNaN(eventTime) && deadlineTime > eventTime) {

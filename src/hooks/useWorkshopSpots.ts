@@ -71,8 +71,11 @@ export const useWorkshopSpots = (): UseWorkshopSpotsResult => {
     data: RegistrationFormData,
     cupo: number | null
   ): Promise<void> => {
-    await createRegistration(productId, data, cupo);
-    setCounts((prev) => ({ ...prev, [productId]: (prev[productId] || 0) + 1 }));
+    const created = await createRegistration(productId, data, cupo);
+    setCounts((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + (created.quantity || 1),
+    }));
   };
 
   return {

@@ -24,6 +24,7 @@ const registro: WorkshopRegistration = {
   status: 'pendiente',
   privacy_consent_at: null,
   marketing_consent: false,
+  quantity: 1,
   created_at: '2026-10-01T10:00:00.000Z',
 };
 

@@ -42,8 +42,12 @@ BEGIN
     RAISE EXCEPTION 'FAIL: CHECK de taller cancelado ausente';
   END IF;
 
-  IF to_regprocedure('public.register_for_workshop(uuid,text,text,timestamptz,boolean)') IS NULL THEN
+  IF to_regprocedure('public.register_for_workshop(uuid,text,text,timestamptz,boolean,integer)') IS NULL THEN
     RAISE EXCEPTION 'FAIL: función register_for_workshop ausente';
+  END IF;
+
+  IF to_regprocedure('public.register_for_workshop(uuid,text,text,timestamptz,boolean)') IS NOT NULL THEN
+    RAISE EXCEPTION 'FAIL: la firma antigua de 5 parametros de register_for_workshop sigue viva';
   END IF;
 
   IF to_regprocedure('public.workshop_spots()') IS NULL THEN
@@ -68,7 +72,7 @@ BEGIN
     RAISE EXCEPTION 'FAIL: anon no puede ejecutar workshop_spots';
   END IF;
 
-  IF has_function_privilege('anon', 'public.register_for_workshop(uuid,text,text,timestamptz,boolean)', 'EXECUTE') THEN
+  IF has_function_privilege('anon', 'public.register_for_workshop(uuid,text,text,timestamptz,boolean,integer)', 'EXECUTE') THEN
     RAISE EXCEPTION 'FAIL: anon todavía puede ejecutar register_for_workshop';
   END IF;
 
@@ -165,12 +169,12 @@ BEGIN
     RAISE EXCEPTION 'FAIL: authenticated perdio SELECT/UPDATE/DELETE en workshop_registrations';
   END IF;
 
-  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean,integer)'::regprocedure)
      NOT LIKE '%now()%' THEN
     RAISE EXCEPTION 'FAIL: register_for_workshop no usa hora del servidor para el consentimiento';
   END IF;
 
-  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean,integer)'::regprocedure)
      NOT LIKE '%not_a_workshop%' THEN
     RAISE EXCEPTION 'FAIL: register_for_workshop no valida la categoria de taller';
   END IF;
@@ -193,7 +197,7 @@ BEGIN
     RAISE EXCEPTION 'FAIL: CHECK de formato de email ausente';
   END IF;
 
-  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean)'::regprocedure)
+  IF pg_get_functiondef('public.register_for_workshop(uuid,text,text,timestamptz,boolean,integer)'::regprocedure)
      NOT LIKE '%pg_advisory_xact_lock%' THEN
     RAISE EXCEPTION 'FAIL: register_for_workshop no serializa las inscripciones';
   END IF;
@@ -234,7 +238,7 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_roles WHERE rolname = 'service_role'
   ) AND has_function_privilege(
-    'authenticated', 'public.register_for_workshop(uuid,text,text,timestamp with time zone,boolean)', 'EXECUTE'
+    'authenticated', 'public.register_for_workshop(uuid,text,text,timestamp with time zone,boolean,integer)', 'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'FAIL: authenticated puede ejecutar register_for_workshop';
   END IF;
@@ -475,7 +479,7 @@ VALUES (
 DO $$
 BEGIN
   PERFORM public.register_for_workshop(
-    '00000000-0000-0000-0000-000000000015', 'Pilar Reserva', 'pilar@test.com', now(), false
+    '00000000-0000-0000-0000-000000000015', 'Pilar Reserva', 'pilar@test.com', now(), false, 1
   );
 EXCEPTION WHEN others THEN
   RAISE EXCEPTION 'FAIL: register_for_workshop rechazó una reserva de especiales: %', SQLERRM;
@@ -509,6 +513,175 @@ BEGIN
   WHERE id = '00000000-0000-0000-0000-000000000015';
 EXCEPTION WHEN others THEN
   RAISE EXCEPTION 'FAIL: no se permitió cancelar una reserva de especiales: %', SQLERRM;
+END $$;
+
+-- Reservas por unidades en 'especiales' (migracion 029).
+INSERT INTO public.products (
+    id, title, description, image, category, status, featured, cupo
+)
+VALUES (
+    '00000000-0000-0000-0000-000000000016', 'Edicion especial por unidades', 'Descripción',
+    'img.png', 'especiales', 'disponible', false, 2
+), (
+    '00000000-0000-0000-0000-000000000017', 'Hasta agotar existencias', 'Descripción',
+    'img.png', 'especiales', 'disponible', false, NULL
+);
+
+DO $$
+DECLARE
+  creada public.workshop_registrations;
+  ocupadas BIGINT;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'workshop_registrations'
+      AND column_name = 'quantity'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: columna workshop_registrations.quantity ausente';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'workshop_registrations_quantity_check'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: CHECK de cantidad ausente';
+  END IF;
+
+  IF pg_get_functiondef('public.check_workshop_capacity()'::regprocedure)
+     NOT LIKE '%SUM(quantity)%' THEN
+    RAISE EXCEPTION 'FAIL: check_workshop_capacity no cuenta unidades';
+  END IF;
+
+  IF pg_get_functiondef('public.workshop_spots()'::regprocedure)
+     NOT LIKE '%SUM(r.quantity)%' THEN
+    RAISE EXCEPTION 'FAIL: workshop_spots no suma unidades';
+  END IF;
+
+  creada := public.register_for_workshop(
+    '00000000-0000-0000-0000-000000000016', 'Uma Unidades', 'uma@test.com', now(), false, 2
+  );
+
+  IF creada.quantity <> 2 THEN
+    RAISE EXCEPTION 'FAIL: register_for_workshop no guardo la cantidad pedida (% en vez de 2)', creada.quantity;
+  END IF;
+
+  SELECT taken INTO ocupadas
+  FROM public.workshop_spots()
+  WHERE product_id = '00000000-0000-0000-0000-000000000016';
+
+  IF ocupadas <> 2 THEN
+    RAISE EXCEPTION 'FAIL: workshop_spots devuelve % en vez de 2 unidades', ocupadas;
+  END IF;
+
+  -- Cupo 2 agotado por la reserva de 2 unidades: la siguiente bloqueada.
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000016', 'Carlos Uno', 'carlos@test.com', now(), false, 1
+    );
+    RAISE EXCEPTION 'FAIL: se permitio superar el cupo por unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'workshop_full' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al agotar unidades: %', SQLERRM;
+      END IF;
+  END;
+
+  -- cantidad 11 o 0 -> invalid_quantity en especiales
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000017', 'Noa Once', 'noa@test.com', now(), false, 11
+    );
+    RAISE EXCEPTION 'FAIL: se acepto una cantidad de 11 unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'invalid_quantity' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado con cantidad 11: %', SQLERRM;
+      END IF;
+  END;
+
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000017', 'Bera Cero', 'bera@test.com', now(), false, 0
+    );
+    RAISE EXCEPTION 'FAIL: se acepto una cantidad de 0 unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'invalid_quantity' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado con cantidad 0: %', SQLERRM;
+      END IF;
+  END;
+
+  -- un taller no admite cantidades
+  BEGIN
+    PERFORM public.register_for_workshop(
+      '00000000-0000-0000-0000-000000000002', 'Iñaki Tres', 'inaki@test.com', now(), false, 3
+    );
+    RAISE EXCEPTION 'FAIL: un taller admitio una reserva de 3 unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM <> 'invalid_quantity' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado con cantidad en taller: %', SQLERRM;
+      END IF;
+  END;
+
+  -- cantidad NULL en especiales -> 1 unidad
+  creada := public.register_for_workshop(
+    '00000000-0000-0000-0000-000000000017', 'Zuri Nada', 'zuri@test.com', now(), false, NULL
+  );
+
+  IF creada.quantity <> 1 THEN
+    RAISE EXCEPTION 'FAIL: cantidad NULL no cayo a 1 unidad (% en vez de 1)', creada.quantity;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.workshop_registrations (product_id, name, email, quantity)
+    VALUES ('00000000-0000-0000-0000-000000000017', 'Muga Once', 'muga@test.com', 11);
+    RAISE EXCEPTION 'FAIL: el CHECK de cantidad admitio 11 unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM NOT LIKE '%workshop_registrations_quantity_check%' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al insertar cantidad 11: %', SQLERRM;
+      END IF;
+  END;
+
+  BEGIN
+    INSERT INTO public.workshop_registrations (product_id, name, email, quantity)
+    VALUES ('00000000-0000-0000-0000-000000000017', 'Uga Cero', 'uga@test.com', 0);
+    RAISE EXCEPTION 'FAIL: el CHECK de cantidad admitio 0 unidades';
+  EXCEPTION
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+    WHEN others THEN
+      IF SQLERRM NOT LIKE '%workshop_registrations_quantity_check%' THEN
+        RAISE EXCEPTION 'FAIL: error inesperado al insertar cantidad 0: %', SQLERRM;
+      END IF;
+  END;
 END $$;
 
 INSERT INTO public.workshop_registrations (product_id, name, email)
@@ -928,7 +1101,8 @@ BEGIN
       'Elena Rpc',
       'elena@test.com',
       now(),
-      false
+      false,
+      1
     );
     RAISE EXCEPTION 'FAIL: anon puede ejecutar register_for_workshop';
   EXCEPTION
@@ -952,11 +1126,16 @@ BEGIN
     'Elena Rpc',
     'elena@test.com',
     now(),
-    false
+    false,
+    1
   );
 
   IF creada.id IS NULL OR creada.status <> 'pendiente' THEN
     RAISE EXCEPTION 'FAIL: register_for_workshop no devolvió una inscripción pendiente';
+  END IF;
+
+  IF creada.quantity <> 1 THEN
+    RAISE EXCEPTION 'FAIL: un taller registrado via RPC no vale 1 unidad';
   END IF;
 END $$;
 
@@ -968,7 +1147,8 @@ BEGIN
       'Tarde Rpc',
       'tarde@test.com',
       now(),
-      false
+      false,
+      1
     );
     RAISE EXCEPTION 'FAIL: register_for_workshop ignoró el plazo cerrado';
   EXCEPTION
@@ -991,7 +1171,8 @@ BEGIN
       'Obra Falsa',
       'obra@test.com',
       now(),
-      false
+      false,
+      1
     );
     RAISE EXCEPTION 'FAIL: register_for_workshop permitio inscribirse a una obra';
   EXCEPTION
@@ -1014,7 +1195,8 @@ BEGIN
       'Pedro Lleno',
       'pedro@test.com',
       now(),
-      false
+      false,
+      1
     );
     RAISE EXCEPTION 'FAIL: register_for_workshop permitio superar el cupo';
   EXCEPTION
@@ -1161,4 +1343,6 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000012';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000013';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000014';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000015';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000016';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000017';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000099';

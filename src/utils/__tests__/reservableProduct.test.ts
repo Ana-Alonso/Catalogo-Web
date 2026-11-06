@@ -30,16 +30,19 @@ describe('usesReservationFlow', () => {
     expect(usesReservationFlow(item({ category: 'talleres' }))).toBe(true);
   });
 
-  it('activa el flujo en especiales por cupo, plazo o fecha', () => {
+  it('activa el flujo en especiales por cupo o plazo', () => {
     expect(usesReservationFlow(item({ category: 'especiales', cupo: 8 }))).toBe(true);
     expect(
       usesReservationFlow(
         item({ category: 'especiales', registrationDeadline: '2026-12-01T00:00:00.000Z' })
       )
     ).toBe(true);
+  });
+
+  it('la fecha ya no activa el flujo en especiales', () => {
     expect(
       usesReservationFlow(item({ category: 'especiales', eventDate: '2026-12-01T00:00:00.000Z' }))
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('no activa el flujo en especiales sin campos de reserva', () => {

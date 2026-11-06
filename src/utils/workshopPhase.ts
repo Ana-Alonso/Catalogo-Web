@@ -26,7 +26,7 @@ export const getWorkshopFinishedReason = (
     return 'vendido';
   }
 
-  if (hasWorkshopHappened(workshop.eventDate, nowMs)) {
+  if (workshop.category === 'talleres' && hasWorkshopHappened(workshop.eventDate, nowMs)) {
     return 'celebrado';
   }
 
