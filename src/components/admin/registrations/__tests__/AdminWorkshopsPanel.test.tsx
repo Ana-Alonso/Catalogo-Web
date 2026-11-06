@@ -4,8 +4,17 @@ import userEvent from '@testing-library/user-event';
 import { AdminWorkshopsPanel } from '../AdminWorkshopsPanel';
 import { ConfirmProvider } from '../../../confirm/ConfirmProvider';
 import ToastProvider from '../../../toast/ToastProvider';
+import { downloadCsvFile } from '../../../../utils/registrationsCsv';
 import type { CatalogItem } from '../../../../types/catalog';
 import type { WorkshopRegistration } from '../../../../types/registrations';
+
+vi.mock('../../../../utils/registrationsCsv', async (importOriginal) => {
+  const module = await importOriginal<
+    typeof import('../../../../utils/registrationsCsv')
+  >();
+
+  return { ...module, downloadCsvFile: vi.fn() };
+});
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const futureDate = () => new Date(Date.now() + 30 * DAY_MS).toISOString();
@@ -397,6 +406,78 @@ describe('AdminWorkshopsPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Todas' }));
     expect(screen.getByText('Acuarela')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Todas', pressed: true })).toBeInTheDocument();
+  });
+
+  it('exporta los contactos de una tarjeta, incluidos los cancelados y los de productos finalizados', async () => {
+    const user = userEvent.setup();
+    vi.mocked(downloadCsvFile).mockClear();
+    renderPanel({
+      ...buildProps(),
+      workshops: [
+        workshop({ id: 'w-1', title: 'Taller de acuarela' }),
+        workshop({
+          id: 'w-9',
+          title: 'Taller cancelado',
+          eventDate: pastDate(),
+        }),
+      ],
+      registrations: [
+        registration({ id: 'r-1', product_id: 'w-1' }),
+        registration({
+          id: 'r-2',
+          product_id: 'w-1',
+          name: 'Luis Pérez',
+          email: 'luis@example.com',
+          status: 'cancelado',
+        }),
+        registration({
+          id: 'r-3',
+          product_id: 'w-9',
+          name: 'Sara Ruiz',
+          email: 'sara@example.com',
+          status: 'confirmado',
+        }),
+      ],
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller de acuarela, incluidos los cancelados',
+      })
+    );
+
+    expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(1);
+    const [filename, csv] = vi.mocked(downloadCsvFile).mock.calls[0];
+    expect(filename).toMatch(/^contactos-taller-de-acuarela-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(csv).toContain('Ana García;ana@example.com');
+    expect(csv).toContain('Luis Pérez;luis@example.com');
+    expect(csv).toContain('Cancelado');
+
+    // El producto ya finalizado también puede exportar a quién avisar.
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller cancelado, incluidos los cancelados',
+      })
+    );
+
+    expect(vi.mocked(downloadCsvFile)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(downloadCsvFile).mock.calls[1][1]).toContain(
+      'Sara Ruiz;sara@example.com'
+    );
+  });
+
+  it('desactiva el CSV de contactos en productos sin inscripciones', () => {
+    renderPanel({
+      ...buildProps(),
+      workshops: [workshop({ id: 'w-1', title: 'Taller de acuarela' })],
+      registrations: [],
+    });
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Descargar el CSV de los contactos de Taller de acuarela, incluidos los cancelados',
+      })
+    ).toBeDisabled();
   });
 
   it('muestra el estado vacío y el error de carga', () => {

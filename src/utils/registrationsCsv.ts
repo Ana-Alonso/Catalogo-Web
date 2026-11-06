@@ -85,6 +85,24 @@ export const buildRegistrationRows = (
       ...(options.withQuantity ? [String(registration.quantity ?? 1)] : []),
     ]);
 
+// Contacto a contacto de un solo producto, incluidos los cancelados:
+// para avisar de una cancelación o de un cambio aunque el producto ya
+// haya salido de las listas de gestión.
+export const buildContactRows = (
+  registrations: WorkshopRegistration[],
+  translateStatus: (status: RegistrationStatus) => string,
+  options: { withQuantity: boolean }
+): string[][] =>
+  [...registrations]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((registration) => [
+      registration.name,
+      registration.email,
+      registration.created_at.slice(0, 10),
+      translateStatus(registration.status),
+      ...(options.withQuantity ? [String(registration.quantity ?? 1)] : []),
+    ]);
+
 export const downloadCsvFile = (filename: string, csv: string): void => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);

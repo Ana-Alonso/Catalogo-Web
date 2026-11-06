@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildCsv,
+  buildContactRows,
   buildMarketingContacts,
   buildRegistrationRows,
 } from '../registrationsCsv';
@@ -143,6 +144,42 @@ describe('buildRegistrationRows', () => {
     );
 
     expect(rows.map((row) => row[0])).toEqual(['Ana']);
+  });
+});
+
+describe('buildContactRows', () => {
+  it('incluye todas las filas del producto, también las canceladas', () => {
+    const rows = buildContactRows(
+      [
+        buildRegistration(),
+        buildRegistration({
+          id: 'r2',
+          name: 'Luis',
+          email: 'luis@mail.com',
+          status: 'cancelado',
+          created_at: '2026-10-22T10:00:00.000Z',
+        }),
+      ],
+      (status) => `tr-${status}`,
+      { withQuantity: false }
+    );
+
+    expect(rows).toEqual([
+      ['Luis', 'luis@mail.com', '2026-10-22', 'tr-cancelado'],
+      ['Ana', 'ana@mail.com', '2026-10-20', 'tr-pendiente'],
+    ]);
+  });
+
+  it('añade las unidades cuando el producto es especial', () => {
+    const rows = buildContactRows(
+      [buildRegistration({ product_id: 'e1', quantity: 4 })],
+      translateStatus,
+      { withQuantity: true }
+    );
+
+    expect(rows).toEqual([
+      ['Ana', 'ana@mail.com', '2026-10-20', 'pendiente', '4'],
+    ]);
   });
 });
 

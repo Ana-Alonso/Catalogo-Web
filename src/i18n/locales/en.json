@@ -291,6 +291,8 @@
       "filterTodas": "All",
       "filterTalleres": "Workshops",
       "filterEspeciales": "Special editions",
+      "contactsCsv": "Contacts (CSV)",
+      "contactsCsvAria": "Download the CSV of contacts for {{title}}, including cancelled ones",
       "kindTalleres": "Workshop",
       "kindEspeciales": "Special edition",
       "registrationCount_one": "{{count}} registration",

@@ -291,6 +291,8 @@
       "filterTodas": "Todas",
       "filterTalleres": "Talleres",
       "filterEspeciales": "Especiales",
+      "contactsCsv": "Contactos (CSV)",
+      "contactsCsvAria": "Descargar el CSV de los contactos de {{title}}, incluidos los cancelados",
       "kindTalleres": "Taller",
       "kindEspeciales": "Especial",
       "registrationCount_one": "{{count}} inscripción",
