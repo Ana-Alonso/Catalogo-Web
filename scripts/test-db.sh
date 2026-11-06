@@ -80,6 +80,14 @@ run_latest_migrations() {
     if [[ "$name" =~ ^00[234] ]]; then
       run_file "$db" "$migration"
     fi
+    # Datos heredados antes del renombrado de categorias (issue #80):
+    # una fila 'camisetas' debe sobrevivir a la 026 convertida en 'textiles'.
+    if [[ "$name" == 025_* ]]; then
+      docker exec -i "$CONTAINER" psql -U "$PSQL_USER" -d "$db" -v ON_ERROR_STOP=1 -q <<'SQL'
+INSERT INTO public.products (id, title, description, image, category, status, featured)
+VALUES ('00000000-0000-0000-0000-000000000099', 'Camiseta antigua', 'Descripcion', 'img.png', 'camisetas', 'disponible', false);
+SQL
+    fi
   done
 }
 

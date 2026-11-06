@@ -1058,6 +1058,48 @@ RESET ROLE;
 
 RESET request.jwt.claims;
 
+-- Renombrado camisetas -> textiles con datos preventes (issue #80):
+-- la fila semilla 'camisetas' debe haber sobrevivido la cadena de migraciones.
+DO $$
+DECLARE
+  remaining INTEGER;
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'products_category_check'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: constraint products_category_check ausente tras la 026';
+  END IF;
+
+  SELECT count(*) INTO remaining
+  FROM public.products
+  WHERE category = 'camisetas';
+
+  IF remaining <> 0 THEN
+    RAISE EXCEPTION 'FAIL: quedan % filas con la categoria antigua camisetas', remaining;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.products
+    WHERE id = '00000000-0000-0000-0000-000000000099' AND category = 'textiles'
+  ) THEN
+    RAISE EXCEPTION 'FAIL: el producto camisetas previo a la 026 no quedo renombrado a textiles';
+  END IF;
+
+  BEGIN
+    INSERT INTO public.products (id, title, description, image, category, status, featured)
+    VALUES ('00000000-0000-0000-0000-000000000098', 'Reincidente', 'Descripcion', 'img.png', 'camisetas', 'disponible', false);
+    RAISE EXCEPTION 'FAIL: el CHECK de categorias todavia admite camisetas';
+  EXCEPTION
+    WHEN check_violation THEN
+      NULL;
+    WHEN raise_exception THEN
+      IF SQLERRM LIKE 'FAIL:%' THEN
+        RAISE;
+      END IF;
+  END;
+END $$;
+
 UPDATE public.workshop_registrations SET marketing_consent = false WHERE marketing_consent;
 
 DELETE FROM public.workshop_registrations WHERE email = 'ana@test.com';
@@ -1069,3 +1111,4 @@ DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000011';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000012';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000013';
 DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000014';
+DELETE FROM public.products WHERE id = '00000000-0000-0000-0000-000000000099';
